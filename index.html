@@ -671,7 +671,7 @@
         function setTelegramIdCookie(userId) {
             const expires = new Date();
             expires.setTime(expires.getTime() + (365 * 24 * 60 * 60 * 1000)); // 1 год
-            document.cookie = `tg_user_id=${userId};expires=${expires.toUTCString()};path=/`;
+            document.cookie = `tg_user_id=${userId};expires=${expires.toUTCString()};path=/;SameSite=Lax`;
         }
 
         // Получение Telegram ID из cookie
@@ -772,6 +772,12 @@
                 gameCard.appendChild(gameName);
                 
                 gameCard.onclick = () => {
+                    if (!userId) {
+                        alert('Для игры требуется авторизация');
+                        authScreen.style.display = 'flex';
+                        return;
+                    }
+                    
                     if (gamesAvailability[game.id]) {
                         openGame(game.id);
                     } else {
@@ -840,21 +846,31 @@
         }
 
         function openGame(game) {
+            if (!userId) {
+                alert('Для игры требуется авторизация');
+                authScreen.style.display = 'flex';
+                return;
+            }
+            
+            // Добавляем параметры в URL
+            const params = new URLSearchParams();
+            params.append('user', userId);
+            
             switch(game) {
                 case 'miner':
-                    window.location.href = `miner.html?user=${userId}`;
+                    window.location.href = `miner.html?${params.toString()}`;
                     break;
                 case 'slots':
-                    window.location.href = `slots.html?user=${userId}`;
+                    window.location.href = `slots.html?${params.toString()}`;
                     break;
                 case 'crash':
-                    window.location.href = `crash.html?user=${userId}`;
+                    window.location.href = `crash.html?${params.toString()}`;
                     break;
                 case 'classic':
-                    window.location.href = `classik.html?user=${userId}`;
+                    window.location.href = `classik.html?${params.toString()}`;
                     break;
                 case 'plinko':
-                    window.location.href = `plinko.html?user=${userId}`;
+                    window.location.href = `plinko.html?${params.toString()}`;
                     break;
                 default:
                     console.error('Неизвестная игра:', game);
@@ -862,7 +878,15 @@
         }
 
         function goToProfile() {
-            window.location.href = `profile.html?user=${userId}`;
+            if (!userId) {
+                alert('Для просмотра профиля требуется авторизация');
+                authScreen.style.display = 'flex';
+                return;
+            }
+            
+            const params = new URLSearchParams();
+            params.append('user', userId);
+            window.location.href = `profile.html?${params.toString()}`;
         }
 
         // Инициализация при загрузке страницы
