@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VROT-X Casino</title>
+    <title>VROT-X Game Demo</title>
+    <meta name="description" content="Демонстрационная платформа игр - учебный проект">
     <style>
         * {
             margin: 0;
@@ -27,6 +28,14 @@
             font-size: 24px;
             font-weight: bold;
             letter-spacing: 1px;
+        }
+        .disclaimer {
+            background-color: #f8f9fa;
+            padding: 10px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            border-bottom: 1px solid #ddd;
         }
         .account-button {
             background: white;
@@ -137,7 +146,7 @@
         .locked-game .game-icon {
             opacity: 0.6;
         }
-        .telegram-auth {
+        .auth-modal {
             display: none;
             position: fixed;
             top: 0;
@@ -151,8 +160,9 @@
             flex-direction: column;
             color: white;
             text-align: center;
+            padding: 20px;
         }
-        .telegram-auth button {
+        .auth-modal button {
             margin-top: 20px;
             padding: 10px 20px;
             background: #0088cc;
@@ -162,26 +172,37 @@
             font-size: 16px;
             cursor: pointer;
         }
+        .auth-modal p {
+            margin-bottom: 15px;
+            max-width: 400px;
+            line-height: 1.5;
+        }
     </style>
 </head>
 <body>
-    <div class="loading" id="loading">Инициализация...</div>
+    <div class="loading" id="loading">Загрузка демонстрации...</div>
     
-    <div class="telegram-auth" id="telegramAuth">
-        <h2>Для игры требуется авторизация через Telegram</h2>
-        <p>Пожалуйста, войдите через Telegram, чтобы продолжить</p>
-        <button onclick="initTelegramAuth()">Войти через Telegram</button>
+    <div class="auth-modal" id="authModal">
+        <h2>Демонстрационный доступ</h2>
+        <p>Это учебный демонстрационный проект. Для тестирования функционала требуется авторизация через Telegram.</p>
+        <p>Мы не храним ваши персональные данные и не проводим реальные денежные операции.</p>
+        <button onclick="initTelegramAuth()">Продолжить с Telegram</button>
+        <button onclick="useDemoMode()" style="background: #34A853; margin-top: 10px;">Попробовать без авторизации</button>
+    </div>
+
+    <div class="disclaimer">
+        Это демонстрационная версия игровой платформы. Все данные фиктивны, реальные денежные операции отсутствуют.
     </div>
 
     <div class="header">
-        <div class="logo">VROT-X</div>
+        <div class="logo">VROT-X DEMO</div>
     </div>
     <div class="account-button" id="accountButton" onclick="goToProfile()">
-        👤 Мой аккаунт
+        👤 Мой профиль
     </div>
     <div class="games-container">
         <div class="games-title-container">
-            <div class="games-title">Наши игры</div>
+            <div class="games-title">Демо-игры</div>
             <div class="title-gradient-line"></div>
         </div>
         <div class="games-grid">
@@ -189,15 +210,15 @@
                 <div class="game-icon">💣</div>
                 <div class="game-name">Минер</div>
             </div>
-            <div class="game-card" onclick="goToSlots()">
+            <div class="game-card" onclick="openGame('slots')">
                 <div class="game-icon">🎰</div>
                 <div class="game-name">Слоты</div>
             </div>
-            <div class="game-card" onclick="goToCrash()">
+            <div class="game-card" onclick="openGame('crash')">
                 <div class="game-icon">📉</div>
                 <div class="game-name">Краш</div>
             </div>
-            <div class="game-card" onclick="goToClassic()">
+            <div class="game-card" onclick="openGame('classic')">
                 <div class="game-icon">🃏</div>
                 <div class="game-name">Классик</div>
             </div>
@@ -219,8 +240,8 @@
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
+        // Конфигурация Firebase (демонстрационная)
         const firebaseConfig = {
             apiKey: "AIzaSyCMos6Y7C-krTLuKCI4VJG-TFLo6QI--k8",
             authDomain: "vrot-x-7a48f.firebaseapp.com",
@@ -231,144 +252,157 @@
             appId: "1:622297225288:web:5df6a5b02ffddedd96e07d"
         };
         
+        // Инициализация Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         
         let userId = null;
-        let dbRef = null;
+        let isDemoMode = false;
         let loadingElement = document.getElementById('loading');
-        let telegramAuthElement = document.getElementById('telegramAuth');
-        let tg = null;
+        let authModalElement = document.getElementById('authModal');
 
-        // Получение Telegram ID из cookie
-        function getTelegramIdFromCookie() {
-            const cookies = document.cookie.split(';');
-            for (let cookie of cookies) {
-                const [name, value] = cookie.trim().split('=');
-                if (name === 'tg_user_id') {
-                    return value;
-                }
-            }
-            return null;
-        }
-
-        // Установка cookie с Telegram ID
-        function setTelegramIdCookie(userId) {
-            const expires = new Date();
-            expires.setTime(expires.getTime() + (365 * 24 * 60 * 60 * 1000)); // 1 год
-            document.cookie = `tg_user_id=${userId};expires=${expires.toUTCString()};path=/`;
-        }
-
-        // Инициализация Telegram WebApp
-        function initTelegramAuth() {
-            tg = window.Telegram.WebApp;
-            tg.expand();
+        // Инициализация приложения
+        function initApp() {
+            // Проверяем, есть ли сохраненный ID пользователя
+            const savedUserId = localStorage.getItem('demo_user_id');
             
-            if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-                const tgUser = tg.initDataUnsafe.user;
-                userId = tgUser.id.toString();
-                
-                // Сохраняем ID в cookie
-                setTelegramIdCookie(userId);
-                
-                // Инициализируем пользователя
-                initUser();
-                
-                // Скрываем окно авторизации
-                telegramAuthElement.style.display = 'none';
-            } else {
-                alert('Ошибка авторизации через Telegram');
-            }
-        }
-
-        // Инициализация пользователя
-        async function initUser() {
-            // Проверяем Telegram ID из cookie
-            const tgUserId = getTelegramIdFromCookie();
-            
-            if (!tgUserId) {
-                // Показываем окно авторизации
-                telegramAuthElement.style.display = 'flex';
-                loadingElement.style.display = 'none';
+            if (savedUserId) {
+                userId = savedUserId;
+                hideLoading();
                 return;
             }
             
-            userId = tgUserId;
-            dbRef = database.ref('users/' + userId);
+            // Проверяем параметры URL для демо-режима
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('demo') === '1') {
+                useDemoMode();
+                return;
+            }
             
-            try {
-                const snapshot = await dbRef.once('value');
-                
-                if (!snapshot.exists()) {
-                    await dbRef.set({
-                        balance: 0,
-                        created_at: new Date().toISOString(),
-                        last_active: new Date().toISOString(),
-                        is_telegram_user: true
-                    });
-                } else {
-                    await dbRef.update({
-                        last_active: new Date().toISOString()
-                    });
-                }
-                
+            // Показываем модальное окно авторизации
+            setTimeout(() => {
                 loadingElement.style.display = 'none';
-            } catch (error) {
-                console.error("Ошибка подключения:", error);
-                loadingElement.textContent = "Ошибка подключения";
-                setTimeout(() => {
-                    loadingElement.style.display = 'none';
-                }, 2000);
+                authModalElement.style.display = 'flex';
+            }, 1000);
+        }
+
+        // Инициализация Telegram авторизации
+        function initTelegramAuth() {
+            // Проверяем, доступен ли Telegram WebApp
+            if (window.Telegram && window.Telegram.WebApp) {
+                const tg = window.Telegram.WebApp;
+                tg.expand();
+                
+                if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                    const tgUser = tg.initDataUnsafe.user;
+                    userId = 'tg_' + tgUser.id.toString();
+                    localStorage.setItem('demo_user_id', userId);
+                    authModalElement.style.display = 'none';
+                    initializeUser();
+                } else {
+                    alert('Не удалось получить данные пользователя Telegram');
+                    useDemoMode();
+                }
+            } else {
+                alert('Telegram WebApp не доступен. Включен демо-режим.');
+                useDemoMode();
             }
         }
 
+        // Демо-режим без авторизации
+        function useDemoMode() {
+            isDemoMode = true;
+            userId = 'demo_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('demo_user_id', userId);
+            authModalElement.style.display = 'none';
+            initializeUser();
+        }
+
+        // Инициализация пользователя
+        function initializeUser() {
+            if (!userId) return;
+            
+            // В демо-режиме не используем базу данных
+            if (isDemoMode) {
+                hideLoading();
+                return;
+            }
+            
+            // Для реальных пользователей сохраняем данные
+            const dbRef = database.ref('demo_users/' + userId);
+            
+            dbRef.once('value').then(snapshot => {
+                if (!snapshot.exists()) {
+                    return dbRef.set({
+                        balance: 1000,
+                        created_at: new Date().toISOString(),
+                        last_active: new Date().toISOString(),
+                        is_demo: false
+                    });
+                }
+                return dbRef.update({
+                    last_active: new Date().toISOString()
+                });
+            }).catch(error => {
+                console.error("Ошибка базы данных:", error);
+            }).finally(() => {
+                hideLoading();
+            });
+        }
+
+        function hideLoading() {
+            loadingElement.style.display = 'none';
+        }
+
         function openGame(game) {
+            // В демо-режиме показываем предупреждение
+            if (isDemoMode) {
+                alert(`Демо-режим: игра "${game}" не будет сохранять данные`);
+            }
+            
+            // Перенаправляем на соответствующую страницу
             switch(game) {
                 case 'miner':
-                    window.location.href = "miner.html";
+                    window.location.href = `miner.html?user=${userId}`;
+                    break;
+                case 'slots':
+                    window.location.href = `slots.html?user=${userId}`;
+                    break;
+                case 'crash':
+                    window.location.href = `crash.html?user=${userId}`;
+                    break;
+                case 'classic':
+                    window.location.href = `classik.html?user=${userId}`;
                     break;
                 default:
-                    console.error('Unknown game:', game);
+                    console.error('Неизвестная игра:', game);
             }
         }
 
         function goToProfile() {
-            window.location.href = "profile.html";
-        }
-
-        function goToSlots() {
-            window.location.href = "slots.html";
-        }
-
-        function goToClassic() {
-            window.location.href = "classik.html";
-        }
-
-        function goToCrash() {
-            window.location.href = "crash.html";
+            window.location.href = `profile.html?user=${userId}`;
         }
 
         function showLockedMessage() {
-            alert('Эта игра пока недоступна. Следите за обновлениями!');
+            alert('Эта игра находится в разработке. Следите за обновлениями!');
         }
 
+        // Загружаем Telegram WebApp API асинхронно
+        function loadTelegramScript() {
+            const script = document.createElement('script');
+            script.src = 'https://telegram.org/js/telegram-web-app.js';
+            script.async = true;
+            document.body.appendChild(script);
+        }
+
+        // Инициализация при загрузке страницы
         document.addEventListener('DOMContentLoaded', () => {
-            // Проверяем авторизацию при загрузке
-            initUser();
+            loadTelegramScript();
+            initApp();
             
-            setTimeout(() => {
-                if (loadingElement.style.display !== 'none') {
-                    loadingElement.style.display = 'none';
-                }
-            }, 5000);
+            // Скрываем загрузку через 5 секунд на всякий случай
+            setTimeout(hideLoading, 5000);
         });
-
-        // Функция для получения текущего Telegram ID (доступна на других страницах)
-        function getCurrentUserId() {
-            return getTelegramIdFromCookie();
-        }
     </script>
 </body>
 </html>
-
-Вот код главного менюm сделай здесь игру plinko доступной и подключи переход на кнопку к plinko.html
