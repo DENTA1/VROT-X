@@ -95,17 +95,20 @@
             border-radius: 8px;
             padding: 10px;
             position: relative;
+            height: 300px;
         }
         .slots-reel {
             width: 60px;
-            height: 300px;
+            height: 100%;
             overflow: hidden;
             position: relative;
             background: #12121a;
             border-radius: 5px;
-            display: flex;
-            flex-direction: column;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+        .slots-reel-inner {
+            position: absolute;
+            width: 100%;
+            transition: transform 0.1s linear;
         }
         .slots-symbol {
             width: 60px;
@@ -124,7 +127,7 @@
             from { transform: scale(1); }
             to { transform: scale(1.2); }
         }
-        .reel-shadow {
+        .reel-mask {
             position: absolute;
             top: 0;
             left: 0;
@@ -255,12 +258,26 @@
             <div class="slots-frame">
                 <div class="slots-reels-container" id="reelsContainer">
                     <!-- 5 барабанов -->
-                    <div class="slots-reel" id="reel1"></div>
-                    <div class="slots-reel" id="reel2"></div>
-                    <div class="slots-reel" id="reel3"></div>
-                    <div class="slots-reel" id="reel4"></div>
-                    <div class="slots-reel" id="reel5"></div>
-                    <div class="reel-shadow"></div>
+                    <div class="slots-reel" id="reel1">
+                        <div class="slots-reel-inner"></div>
+                        <div class="reel-mask"></div>
+                    </div>
+                    <div class="slots-reel" id="reel2">
+                        <div class="slots-reel-inner"></div>
+                        <div class="reel-mask"></div>
+                    </div>
+                    <div class="slots-reel" id="reel3">
+                        <div class="slots-reel-inner"></div>
+                        <div class="reel-mask"></div>
+                    </div>
+                    <div class="slots-reel" id="reel4">
+                        <div class="slots-reel-inner"></div>
+                        <div class="reel-mask"></div>
+                    </div>
+                    <div class="slots-reel" id="reel5">
+                        <div class="slots-reel-inner"></div>
+                        <div class="reel-mask"></div>
+                    </div>
                 </div>
             </div>
             <div class="win-message" id="winMessage"></div>
@@ -340,8 +357,8 @@
         let userRef;
         let reels = [];
         let reelElements = [];
-        let spinTimeout;
-        
+        let reelInnerElements = [];
+        let spinAnimationFrames = [];
         // Взвешенный случайный выбор символа
         function getRandomSymbol() {
             const totalWeight = symbolWeights.reduce((a, b) => a + b, 0);
@@ -384,6 +401,9 @@
                 document.getElementById('reel5')
             ];
             
+            // Получаем внутренние элементы барабанов
+            reelInnerElements = reelElements.map(reel => reel.querySelector('.slots-reel-inner'));
+            
             // Инициализируем барабаны
             initReels();
             
@@ -415,24 +435,27 @@
             reels = [];
             
             // Заполняем каждый барабан символами
-            reelElements.forEach((reel, reelIndex) => {
-                reel.innerHTML = '';
+            reelInnerElements.forEach((reelInner, reelIndex) => {
+                reelInner.innerHTML = '';
                 reels[reelIndex] = [];
                 
-                // Добавляем символы (5 видимых + 10 дополнительных для анимации)
-                for (let i = 0; i < 15; i++) {
+                // Добавляем 20 символов (виртуальное "бесконечное" колесо)
+                for (let i = 0; i < 20; i++) {
                     const symbol = getRandomSymbol();
-                    
                     const symbolElement = document.createElement('div');
                     symbolElement.className = 'slots-symbol';
                     symbolElement.textContent = symbol;
                     symbolElement.dataset.symbol = symbol;
                     
-                    reel.appendChild(symbolElement);
+                    reelInner.appendChild(symbolElement);
                     reels[reelIndex].push(symbol);
                 }
+                
+                // Устанавливаем начальную позицию (показываем 3 центральных символа)
+                reelInner.style.transform = `translateY(-${60}px)`;
             });
         }
+        
         // Вращение барабанов
         function spin() {
             if (isSpinning || currentBalance < currentBet) return;
@@ -452,6 +475,10 @@
             currentBalance -= currentBet;
             updateBalance();
             
+            // Останавливаем все предыдущие анимации
+            spinAnimationFrames.forEach(id => cancelAnimationFrame(id));
+            spinAnimationFrames = [];
+            
             // Генерируем конечные позиции для каждого барабана
             const finalPositions = [];
             for (let i = 0; i < reelElements.length; i++) {
@@ -470,55 +497,45 @@
                 return;
             }
             
-            const reel = reelElements[reelIndex];
-            const symbolsInReel = reel.querySelectorAll('.slots-symbol');
-            const spinDuration = 2500;
-            const startTime = Date.now();
+            const reelInner = reelInnerElements[reelIndex];
+            const startPosition = parseInt(reelInner.style.transform.replace('translateY(', '').replace('px)', '')) || 0;
+            const targetPosition = -((finalPositions[reelIndex] + 1) * 60); // +1 чтобы символ был по центру
             
-            // Анимация вращения
-            function animate() {
-                const elapsed = Date.now() - startTime;
+            const spinDuration = 1500 + reelIndex * 300; // Увеличиваем длительность для следующих барабанов
+            const startTime = performance.now();
+            
+            function animate(currentTime) {
+                const elapsed = currentTime - startTime;
                 const progress = Math.min(elapsed / spinDuration, 1);
-                const easeProgress = easeOutCubic(progress);
                 
-                // Позиционируем символы
-                symbolsInReel.forEach((symbol, i) => {
-                    const pos = (i * 60 - easeProgress * 1000) % (symbolsInReel.length * 60);
-                    symbol.style.transform = `translateY(${pos}px)`;
-                });
+                // Плавное замедление в конце
+                let easing;
+                if (progress < 0.7) {
+                    // Быстрое вращение в начале
+                    easing = easeInQuad(progress / 0.7) * 0.7;
+                } else {
+                    // Медленное подведение к финальной позиции
+                    easing = 0.7 + easeOutQuad((progress - 0.7) / 0.3) * 0.3;
+                }
+                
+                // Позиция с учетом замедления
+                const position = startPosition + (targetPosition - startPosition) * easing;
+                reelInner.style.transform = `translateY(${position}px)`;
                 
                 if (progress < 1) {
-                    requestAnimationFrame(animate);
+                    spinAnimationFrames.push(requestAnimationFrame(animate));
                 } else {
-                    // Устанавливаем финальную позицию
-                    setFinalPosition(reel, finalPositions[reelIndex]);
+                    // Корректируем позицию для точного совпадения
+                    reelInner.style.transform = `translateY(${targetPosition}px)`;
                     
                     // Запускаем следующий барабан через небольшой интервал
                     setTimeout(() => {
                         spinReel(reelIndex + 1, finalPositions);
-                    }, 300);
+                    }, 200);
                 }
             }
             
-            animate();
-        }
-        
-        // Установка финальной позиции барабана
-        function setFinalPosition(reel, symbolIndex) {
-            const symbolsInReel = reel.querySelectorAll('.slots-symbol');
-            
-            // Оставляем 5 видимых символов
-            for (let i = 0; i < 5; i++) {
-                const index = (symbolIndex + i) % symbols.length;
-                symbolsInReel[i].textContent = symbols[index];
-                symbolsInReel[i].dataset.symbol = symbols[index];
-                symbolsInReel[i].style.transform = `translateY(${i * 60}px)`;
-            }
-            
-            // Удаляем лишние символы
-            for (let i = symbolsInReel.length - 1; i >= 5; i--) {
-                symbolsInReel[i].remove();
-            }
+            spinAnimationFrames.push(requestAnimationFrame(animate));
         }
         
         // Завершение вращения и проверка выигрыша
@@ -535,11 +552,15 @@
             
             // Получаем символы на всех линиях
             const visibleSymbols = [];
-            reelElements.forEach((reel, reelIndex) => {
+            reelInnerElements.forEach((reelInner, reelIndex) => {
                 const symbols = [];
-                const symbolElements = reel.querySelectorAll('.slots-symbol');
-                for (let i = 0; i < 3; i++) { // Берем 3 центральных символа
-                    symbols.push(symbolElements[i+1].dataset.symbol); // +1 потому что оставляем 5 символов
+                const symbolElements = reelInner.querySelectorAll('.slots-symbol');
+                const currentPosition = Math.abs(parseInt(reelInner.style.transform.replace('translateY(', '').replace('px)', '')) / 60;
+                
+                // Получаем 3 центральных символа
+                for (let i = 0; i < 3; i++) {
+                    const symbolIndex = (currentPosition + i) % reels[reelIndex].length;
+                    symbols.push(reels[reelIndex][symbolIndex]);
                 }
                 visibleSymbols.push(symbols);
             });
@@ -561,12 +582,16 @@
                 // Подсвечиваем выигрышные символы
                 winResults.winningSymbols.forEach(pos => {
                     const [reelIndex, symbolIndex] = pos;
-                    const symbol = reelElements[reelIndex].querySelectorAll('.slots-symbol')[symbolIndex+1]; // +1 из-за 5 символов
-                    symbol.classList.add('win');
+                    const reelInner = reelInnerElements[reelIndex];
+                    const symbolElements = reelInner.querySelectorAll('.slots-symbol');
+                    const currentPosition = Math.abs(parseInt(reelInner.style.transform.replace('translateY(', '').replace('px)', '')) / 60;
+                    const visibleIndex = (currentPosition + symbolIndex) % symbolElements.length;
+                    
+                    symbolElements[visibleIndex].classList.add('win');
                     
                     // Убираем анимацию через 2 секунды
                     setTimeout(() => {
-                        symbol.classList.remove('win');
+                        symbolElements[visibleIndex].classList.remove('win');
                     }, 2000);
                 });
                 
@@ -576,8 +601,7 @@
                     winMessage.textContent = `ДЖЕКПОТ: ${winResults.totalWin}!`;
                 }
             }
-        }
-        
+            }
         // Проверка выигрышных линий
         function checkWinLines(visibleSymbols) {
             let totalWin = 0;
@@ -666,9 +690,13 @@
             userRef.update({ balance: currentBalance });
         }
         
-        // Функция для плавного замедления
-        function easeOutCubic(t) {
-            return 1 - Math.pow(1 - t, 3);
+        // Функции для плавного ускорения/замедления
+        function easeInQuad(t) {
+            return t * t;
+        }
+        
+        function easeOutQuad(t) {
+            return t * (2 - t);
         }
         
         // Запускаем игру при загрузке страницы
