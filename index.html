@@ -458,11 +458,11 @@
     <div class="auth-screen" id="authScreen">
         <h2>Добро пожаловать в VROT-X</h2>
         <p>Для доступа к платформе требуется авторизация через Telegram</p>
-        <button onclick="initTelegramAuth()">Войти через Telegram</button>
+        <button id="telegramAuthButton">Войти через Telegram</button>
     </div>
 
     <div id="appContent" style="display: none;">
-        <div class="account-button" id="accountButton" onclick="goToProfile()">
+        <div class="account-button" id="accountButton">
             <div style="display: flex; align-items: center;">
                 <div class="account-icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -494,7 +494,7 @@
             authDomain: "vrot-x-7a48f.firebaseapp.com",
             databaseURL: "https://vrot-x-7a48f-default-rtdb.firebaseio.com",
             projectId: "vrot-x-7a48f",
-            storageBucket: "vrot-x-7a48f.firebasestorage.app",
+            storageBucket: "vrot-x-7a48f.appspot.com",
             messagingSenderId: "622297225288",
             appId: "1:622297225288:web:5df6a5b02ffddedd96e07d"
         };
@@ -515,129 +515,50 @@
         };
         
         let userId = null;
-        let transitionScreen = document.getElementById('transitionScreen');
-        let loader = document.getElementById('loader');
-        let checkmark = document.getElementById('checkmark');
-        let statusText = document.getElementById('statusText');
-        let userIdText = document.getElementById('userIdText');
-        let authScreen = document.getElementById('authScreen');
-        let appContentElement = document.getElementById('appContent');
-        let gamesGrid = document.getElementById('gamesGrid');
+        const transitionScreen = document.getElementById('transitionScreen');
+        const loader = document.getElementById('loader');
+        const checkmark = document.getElementById('checkmark');
+        const statusText = document.getElementById('statusText');
+        const userIdText = document.getElementById('userIdText');
+        const authScreen = document.getElementById('authScreen');
+        const appContentElement = document.getElementById('appContent');
+        const gamesGrid = document.getElementById('gamesGrid');
+        const telegramAuthButton = document.getElementById('telegramAuthButton');
+        const accountButton = document.getElementById('accountButton');
 
-        // Создание паттерна для игры Минер
-        function createMinerPattern() {
-            const pattern = document.createElement('div');
-            pattern.className = 'game-pattern miner-pattern';
-            
-            const grid = document.createElement('div');
-            grid.className = 'miner-grid';
-            
-            const bombPositions = [3, 7, 12, 19, 23];
-            const crystalPositions = [1, 9, 11, 15, 21];
-            
-            for (let i = 0; i < 25; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'miner-cell';
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Пытаемся загрузить Telegram WebApp
+            try {
+                await loadTelegramScript();
                 
-                if (bombPositions.includes(i)) cell.classList.add('miner-bomb');
-                else if (crystalPositions.includes(i)) cell.classList.add('miner-crystal');
-                
-                grid.appendChild(cell);
+                // Проверяем, есть ли уже авторизованный пользователь
+                if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
+                    const tgUser = window.Telegram.WebApp.initDataUnsafe.user;
+                    userId = tgUser.id.toString();
+                    setTelegramIdCookie(userId);
+                    await checkUserInDatabase();
+                } else {
+                    // Проверяем cookie на наличие сохраненного ID
+                    const savedUserId = getTelegramIdFromCookie();
+                    if (savedUserId) {
+                        userId = savedUserId;
+                        await checkUserInDatabase();
+                    } else {
+                        showAuthScreen();
+                    }
+                }
+            } catch (error) {
+                console.error('Ошибка инициализации:', error);
+                showAuthScreen();
             }
             
-            pattern.appendChild(grid);
-            return pattern;
-        }
-
-        // Создание паттерна для игры Слоты
-        function createSlotsPattern() {
-            const pattern = document.createElement('div');
-            pattern.className = 'game-pattern slots-pattern';
+            // Назначаем обработчик для кнопки авторизации
+            telegramAuthButton.addEventListener('click', initTelegramAuth);
             
-            const machine = document.createElement('div');
-            machine.className = 'slots-machine';
-            
-            for (let i = 0; i < 3; i++) {
-                const reel = document.createElement('div');
-                reel.className = 'slots-reel';
-                machine.appendChild(reel);
-            }
-            
-            pattern.appendChild(machine);
-            return pattern;
-        }
-
-        // Создание паттерна для игры Краш
-        function createCrashPattern() {
-            const pattern = document.createElement('div');
-            pattern.className = 'game-pattern crash-pattern';
-            
-            const graph = document.createElement('div');
-            graph.className = 'crash-graph';
-            
-            const line = document.createElement('div');
-            line.className = 'crash-line';
-            
-            const multiplier = document.createElement('div');
-            multiplier.className = 'crash-multiplier';
-            multiplier.textContent = 'x2.45';
-            
-            graph.appendChild(line);
-            pattern.appendChild(graph);
-            pattern.appendChild(multiplier);
-            
-            return pattern;
-        }
-
-        // Создание паттерна для игры Классик
-        function createClassicPattern() {
-            const pattern = document.createElement('div');
-            pattern.className = 'game-pattern classic-pattern';
-            
-            const cards = document.createElement('div');
-            cards.className = 'classic-cards';
-            
-            const symbols = ['♥', '♦', '♣'];
-            for (let i = 0; i < 3; i++) {
-                const card = document.createElement('div');
-                card.className = 'classic-card';
-                card.textContent = symbols[i];
-                cards.appendChild(card);
-            }
-            
-            pattern.appendChild(cards);
-            return pattern;
-        }
-
-        // Создание паттерна для игры Плинко
-        function createPlinkoPattern() {
-            const pattern = document.createElement('div');
-            pattern.className = 'game-pattern plinko-pattern';
-            
-            const board = document.createElement('div');
-            board.className = 'plinko-board';
-            
-            const pinPositions = [
-                [60, 20], [50, 35], [70, 35], [40, 50], [60, 50], 
-                [80, 50], [30, 65], [50, 65], [70, 65], [90, 65],
-                [20, 80], [40, 80], [60, 80], [80, 80], [100, 80]
-            ];
-            
-            pinPositions.forEach(pos => {
-                const pin = document.createElement('div');
-                pin.className = 'plinko-pin';
-                pin.style.left = `${pos[0]}px`;
-                pin.style.top = `${pos[1]}px`;
-                board.appendChild(pin);
-            });
-            
-            const ball = document.createElement('div');
-            ball.className = 'plinko-ball';
-            
-            pattern.appendChild(board);
-            pattern.appendChild(ball);
-            return pattern;
-        }
+            // Назначаем обработчик для кнопки профиля
+            accountButton.addEventListener('click', goToProfile);
+        });
 
         // Загрузка Telegram WebApp API
         function loadTelegramScript() {
@@ -650,41 +571,40 @@
                 const script = document.createElement('script');
                 script.src = 'https://telegram.org/js/telegram-web-app.js';
                 script.async = true;
-                script.onload = () => resolve(window.Telegram.WebApp);
+                script.onload = () => {
+                    if (window.Telegram?.WebApp) {
+                        window.Telegram.WebApp.ready();
+                        resolve(window.Telegram.WebApp);
+                    } else {
+                        reject(new Error('Telegram WebApp не загрузился'));
+                    }
+                };
                 script.onerror = reject;
                 document.body.appendChild(script);
             });
         }
 
-        // Установка cookie с Telegram ID
-        function setTelegramIdCookie(userId) {
-            const expires = new Date();
-            expires.setTime(expires.getTime() + (365 * 24 * 60 * 60 * 1000));
-            document.cookie = `tg_user_id=${userId};expires=${expires.toUTCString()};path=/;SameSite=Lax`;
-        }
-
-        // Получение Telegram ID из cookie
-        function getTelegramIdFromCookie() {
-            const cookies = document.cookie.split(';');
-            for (let cookie of cookies) {
-                const [name, value] = cookie.trim().split('=');
-                if (name === 'tg_user_id') return value;
-            }
-            return null;
-        }
-
         // Инициализация Telegram авторизации
         async function initTelegramAuth() {
             try {
-                const tg = await loadTelegramScript();
+                const tg = window.Telegram.WebApp;
+                
+                if (!tg) {
+                    throw new Error('Telegram WebApp не доступен');
+                }
+                
                 tg.expand();
                 
                 if (tg.initDataUnsafe?.user) {
-                    userId = tg.initDataUnsafe.user.id.toString();
+                    const tgUser = tg.initDataUnsafe.user;
+                    userId = tgUser.id.toString();
                     setTelegramIdCookie(userId);
                     await checkUserInDatabase();
                 } else {
-                    throw new Error('Данные пользователя не доступны');
+                    // Если данных пользователя нет, попробуем инициализировать авторизацию
+                    tg.showAlert('Пожалуйста, авторизуйтесь в Telegram', () => {
+                        tg.openTelegramLink('https://t.me/your_bot_username');
+                    });
                 }
             } catch (error) {
                 console.error('Ошибка авторизации:', error);
@@ -697,163 +617,4 @@
             if (!userId) {
                 showAuthScreen();
                 return;
-            }
-            
-            try {
-                const snapshot = await database.ref('users/' + userId).once('value');
-                
-                if (snapshot.exists()) {
-                    showSuccessTransition();
-                } else {
-                    showAuthScreen();
-                }
-            } catch (error) {
-                console.error('Ошибка проверки пользователя:', error);
-                showAuthScreen();
-            }
-        }
-
-        // Показать экран авторизации
-        function showAuthScreen() {
-            transitionScreen.style.display = 'none';
-            authScreen.style.display = 'flex';
-        }
-
-        // Создание карточек игр
-        function createGameCards() {
-            const games = [
-                { id: 'miner', name: 'Минер' },
-                { id: 'slots', name: 'Слоты' },
-                { id: 'crash', name: 'Краш' },
-                { id: 'classic', name: 'Классик' },
-                { id: 'plinko', name: 'Плинко' },
-                { id: 'dice', name: 'Кости' },
-                { id: 'roulette', name: 'Рулетка' }
-            ];
-            
-            gamesGrid.innerHTML = '';
-            
-            games.forEach(game => {
-                const gameCard = document.createElement('div');
-                gameCard.className = `game-card ${gamesAvailability[game.id] ? '' : 'locked-game'}`;
-                
-                let pattern;
-                switch(game.id) {
-                    case 'miner': pattern = createMinerPattern(); break;
-                    case 'slots': pattern = createSlotsPattern(); break;
-                    case 'crash': pattern = createCrashPattern(); break;
-                    case 'classic': pattern = createClassicPattern(); break;
-                    case 'plinko': pattern = createPlinkoPattern(); break;
-                    default: 
-                        pattern = document.createElement('div');
-                        pattern.className = 'game-pattern';
-                        pattern.style.background = '#333';
-                }
-                
-                gameCard.appendChild(pattern);
-                
-                const gameName = document.createElement('div');
-                gameName.className = 'game-name';
-                gameName.textContent = game.name;
-                gameCard.appendChild(gameName);
-                
-                gameCard.onclick = () => {
-                    if (!userId) {
-                        showAuthScreen();
-                        return;
-                    }
-                    
-                    if (gamesAvailability[game.id]) {
-                        openGame(game.id);
-                    } else {
-                        alert('Эта игра временно недоступна');
-                    }
-                };
-                
-                gamesGrid.appendChild(gameCard);
-            });
-        }
-
-        // Плавный переход от лоадера к галочке
-        function showSuccessTransition() {
-            loader.style.display = 'none';
-            checkmark.style.display = 'block';
-            statusText.textContent = 'Успешная авторизация';
-            userIdText.textContent = `ID: ${userId}`;
-            
-            setTimeout(() => {
-                transitionScreen.style.display = 'none';
-                appContentElement.style.display = 'block';
-                createGameCards();
-            }, 1500);
-        }
-
-        // Открытие игры
-        function openGame(game) {
-            if (!userId) {
-                showAuthScreen();
-                return;
-            }
-            
-            const params = new URLSearchParams();
-            params.append('user', userId);
-            
-            switch(game) {
-                case 'miner': window.location.href = `miner.html?${params.toString()}`; break;
-                case 'slots': window.location.href = `slots.html?${params.toString()}`; break;
-                case 'crash': window.location.href = `crash.html?${params.toString()}`; break;
-                case 'classic': window.location.href = `classik.html?${params.toString()}`; break;
-                case 'plinko': window.location.href = `plinko.html?${params.toString()}`; break;
-                default: console.error('Неизвестная игра:', game);
-            }
-        }
-
-        // Переход в профиль
-        function goToProfile() {
-            if (!userId) {
-                showAuthScreen();
-                return;
-            }
-            
-            const params = new URLSearchParams();
-            params.append('user', userId);
-            window.location.href = `profile.html?${params.toString()}`;
-        }
-
-        // Инициализация при загрузке страницы
-        document.addEventListener('DOMContentLoaded', async () => {
-            // 1. Проверяем cookie на наличие сохраненного ID
-            const savedUserId = getTelegramIdFromCookie();
-            
-            if (savedUserId) {
-                userId = savedUserId;
-                await checkUserInDatabase();
-                return;
-            }
-            
-            // 2. Пытаемся загрузить Telegram WebApp
-            try {
-                const tg = await loadTelegramScript();
-                
-                if (tg.initDataUnsafe?.user) {
-                    userId = tg.initDataUnsafe.user.id.toString();
-                    setTelegramIdCookie(userId);
-                    await checkUserInDatabase();
-                } else {
-                    setTimeout(() => showAuthScreen(), 1000);
-                }
-            } catch (error) {
-                console.error('Telegram WebApp не доступен:', error);
-                setTimeout(() => showAuthScreen(), 1000);
-            }
-            
-            // На всякий случай - если что-то пошло не так
-            setTimeout(() => {
-                if (transitionScreen.style.display !== 'none' && authScreen.style.display !== 'flex') {
-                    showAuthScreen();
-                }
-            }, 5000);
-        });
-    </script>
-</body>
-</html>
+     
