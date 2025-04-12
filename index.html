@@ -771,13 +771,23 @@
                 gameName.textContent = game.name;
                 gameCard.appendChild(gameName);
                 
-                gameCard.onclick = () => {
-                    if (gamesAvailability[game.id]) {
-                        openGame(game.id);
-                    } else {
-                        alert('Эта игра временно недоступна');
+                // Обработчик клика для карточки игры
+                gameCard.addEventListener('click', function(e) {
+                    // Проверяем, не был ли клик по дочерним элементам
+                    if (e.target === gameCard || e.target.classList.contains('game-name') || 
+                        e.target.classList.contains('game-pattern')) {
+                        if (gamesAvailability[game.id]) {
+                            // Для игры Минер используем стандартное поведение
+                            if (game.id === 'miner') {
+                                window.location.href = 'miner.html' + (userId ? `?user=${userId}` : '');
+                            } else {
+                                openGame(game.id);
+                            }
+                        } else {
+                            alert('Эта игра временно недоступна');
+                        }
                     }
-                };
+                });
                 
                 gamesGrid.appendChild(gameCard);
             });
@@ -842,7 +852,7 @@
         function openGame(game) {
             switch(game) {
                 case 'miner':
-                    window.location.href = `miner.html?user=${userId}`;
+                    // Теперь перенаправление на miner.html происходит в обработчике клика
                     break;
                 case 'slots':
                     window.location.href = `slots.html?user=${userId}`;
