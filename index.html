@@ -321,6 +321,109 @@
         .slots-reel:nth-child(2)::after { content: '7'; color: white; }
         .slots-reel:nth-child(3)::after { content: '💰'; }
 
+        .crash-pattern {
+            background: linear-gradient(135deg, #0d47a1, #1976d2);
+        }
+        .crash-graph {
+            width: 140px;
+            height: 80px;
+            position: relative;
+        }
+        .crash-line {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: white;
+        }
+        .crash-line::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            transform-origin: left bottom;
+            transform: scaleY(0.7);
+        }
+        .crash-multiplier {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .classic-pattern {
+            background: linear-gradient(135deg, #1565c0, #42a5f5);
+        }
+        .classic-cards {
+            width: 140px;
+            height: 100px;
+            position: relative;
+        }
+        .classic-card {
+            position: absolute;
+            width: 40px;
+            height: 60px;
+            background: white;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+        }
+        .classic-card:nth-child(1) {
+            left: 0;
+            transform: rotate(-5deg);
+            z-index: 3;
+            background: linear-gradient(white, #f5f5f5);
+        }
+        .classic-card:nth-child(2) {
+            left: 50px;
+            transform: rotate(0deg);
+            z-index: 2;
+            background: linear-gradient(white, #f5f5f5);
+        }
+        .classic-card:nth-child(3) {
+            left: 100px;
+            transform: rotate(5deg);
+            z-index: 1;
+            background: linear-gradient(white, #f5f5f5);
+        }
+
+        .plinko-pattern {
+            background: linear-gradient(135deg, #2e7d32, #66bb6a);
+        }
+        .plinko-board {
+            width: 120px;
+            height: 100px;
+            position: relative;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .plinko-pin {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: white;
+            border-radius: 50%;
+        }
+        .plinko-ball {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: white;
+            border-radius: 50%;
+            top: 20px;
+            left: 60px;
+        }
+
         @keyframes rotation {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -423,48 +526,39 @@
         const telegramAuthButton = document.getElementById('telegramAuthButton');
         const accountButton = document.getElementById('accountButton');
 
-        // Создание паттерна для игры Минер
-        function createMinerPattern() {
-            const pattern = document.createElement('div');
-            pattern.className = 'game-pattern miner-pattern';
-            
-            const grid = document.createElement('div');
-            grid.className = 'miner-grid';
-            
-            const bombPositions = [3, 7, 12, 19, 23];
-            const crystalPositions = [1, 9, 11, 15, 21];
-            
-            for (let i = 0; i < 25; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'miner-cell';
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Пытаемся загрузить Telegram WebApp
+            try {
+                await loadTelegramScript();
                 
-                if (bombPositions.includes(i)) cell.classList.add('miner-bomb');
-                else if (crystalPositions.includes(i)) cell.classList.add('miner-crystal');
-                
-                grid.appendChild(cell);
+                // Проверяем, есть ли уже авторизованный пользователь
+                if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
+                    const tgUser = window.Telegram.WebApp.initDataUnsafe.user;
+                    userId = tgUser.id.toString();
+                    setTelegramIdCookie(userId);
+                    await checkUserInDatabase();
+                } else {
+                    // Проверяем cookie на наличие сохраненного ID
+                    const savedUserId = getTelegramIdFromCookie();
+                    if (savedUserId) {
+                        userId = savedUserId;
+                        await checkUserInDatabase();
+                    } else {
+                        showAuthScreen();
+                    }
+                }
+            } catch (error) {
+                console.error('Ошибка инициализации:', error);
+                showAuthScreen();
             }
             
-            pattern.appendChild(grid);
-            return pattern;
-        }
-
-        // Создание паттерна для игры Слоты
-        function createSlotsPattern() {
-            const pattern = document.createElement('div');
-            pattern.className = 'game-pattern slots-pattern';
+            // Назначаем обработчик для кнопки авторизации
+            telegramAuthButton.addEventListener('click', initTelegramAuth);
             
-            const machine = document.createElement('div');
-            machine.className = 'slots-machine';
-            
-            for (let i = 0; i < 3; i++) {
-                const reel = document.createElement('div');
-                reel.className = 'slots-reel';
-                machine.appendChild(reel);
-            }
-            
-            pattern.appendChild(machine);
-            return pattern;
-        }
+            // Назначаем обработчик для кнопки профиля
+            accountButton.addEventListener('click', goToProfile);
+        });
 
         // Загрузка Telegram WebApp API
         function loadTelegramScript() {
@@ -507,6 +601,7 @@
                     setTelegramIdCookie(userId);
                     await checkUserInDatabase();
                 } else {
+                    // Если данных пользователя нет, попробуем инициализировать авторизацию
                     tg.showAlert('Пожалуйста, авторизуйтесь в Telegram', () => {
                         tg.openTelegramLink('https://t.me/your_bot_username');
                     });
@@ -528,8 +623,10 @@
                 const snapshot = await database.ref('users/' + userId).once('value');
                 
                 if (snapshot.exists()) {
+                    // Пользователь найден - показываем успешную авторизацию
                     showSuccessTransition();
                 } else {
+                    // Пользователь не найден - создаем новую запись
                     await database.ref('users/' + userId).set({
                         created_at: new Date().toISOString(),
                         balance: 0
@@ -594,6 +691,9 @@
                 switch(game.id) {
                     case 'miner': pattern = createMinerPattern(); break;
                     case 'slots': pattern = createSlotsPattern(); break;
+                    case 'crash': pattern = createCrashPattern(); break;
+                    case 'classic': pattern = createClassicPattern(); break;
+                    case 'plinko': pattern = createPlinkoPattern(); break;
                     default: 
                         pattern = document.createElement('div');
                         pattern.className = 'game-pattern';
@@ -624,17 +724,24 @@
             });
         }
 
-        // Открытие игры (одинаковый формат для всех игр)
+        // Открытие игры
         function openGame(game) {
             if (!userId) {
                 showAuthScreen();
                 return;
             }
             
-            // Единый формат ссылки как для "Слотов"
             const params = new URLSearchParams();
             params.append('user', userId);
-            window.location.href = `${game}.html?${params.toString()}`;
+            
+            switch(game) {
+                case 'miner': window.location.href = `miner.html?${params.toString()}`; break;
+                case 'slots': window.location.href = `slots.html?${params.toString()}`; break;
+                case 'crash': window.location.href = `crash.html?${params.toString()}`; break;
+                case 'classic': window.location.href = `classik.html?${params.toString()}`; break;
+                case 'plinko': window.location.href = `plinko.html?${params.toString()}`; break;
+                default: console.error('Неизвестная игра:', game);
+            }
         }
 
         // Переход в профиль
@@ -666,39 +773,116 @@
             return null;
         }
 
-        // Инициализация при загрузке страницы
-        document.addEventListener('DOMContentLoaded', async () => {
-            // Пытаемся загрузить Telegram WebApp
-            try {
-                await loadTelegramScript();
+        // Функции создания паттернов для игр (остаются без изменений)
+        function createMinerPattern() {
+            const pattern = document.createElement('div');
+            pattern.className = 'game-pattern miner-pattern';
+            
+            const grid = document.createElement('div');
+            grid.className = 'miner-grid';
+            
+            const bombPositions = [3, 7, 12, 19, 23];
+            const crystalPositions = [1, 9, 11, 15, 21];
+            
+            for (let i = 0; i < 25; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'miner-cell';
                 
-                // Проверяем, есть ли уже авторизованный пользователь
-                if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
-                    const tgUser = window.Telegram.WebApp.initDataUnsafe.user;
-                    userId = tgUser.id.toString();
-                    setTelegramIdCookie(userId);
-                    await checkUserInDatabase();
-                } else {
-                    // Проверяем cookie на наличие сохраненного ID
-                    const savedUserId = getTelegramIdFromCookie();
-                    if (savedUserId) {
-                        userId = savedUserId;
-                        await checkUserInDatabase();
-                    } else {
-                        showAuthScreen();
-                    }
-                }
-            } catch (error) {
-                console.error('Ошибка инициализации:', error);
-                showAuthScreen();
+                if (bombPositions.includes(i)) cell.classList.add('miner-bomb');
+                else if (crystalPositions.includes(i)) cell.classList.add('miner-crystal');
+                
+                grid.appendChild(cell);
             }
             
-            // Назначаем обработчик для кнопки авторизации
-            telegramAuthButton.addEventListener('click', initTelegramAuth);
+            pattern.appendChild(grid);
+            return pattern;
+        }
+
+        function createSlotsPattern() {
+            const pattern = document.createElement('div');
+            pattern.className = 'game-pattern slots-pattern';
             
-            // Назначаем обработчик для кнопки профиля
-            accountButton.addEventListener('click', goToProfile);
-        });
+            const machine = document.createElement('div');
+            machine.className = 'slots-machine';
+            
+            for (let i = 0; i < 3; i++) {
+                const reel = document.createElement('div');
+                reel.className = 'slots-reel';
+                machine.appendChild(reel);
+            }
+            
+            pattern.appendChild(machine);
+            return pattern;
+        }
+
+        function createCrashPattern() {
+            const pattern = document.createElement('div');
+            pattern.className = 'game-pattern crash-pattern';
+            
+            const graph = document.createElement('div');
+            graph.className = 'crash-graph';
+            
+            const line = document.createElement('div');
+            line.className = 'crash-line';
+            
+            const multiplier = document.createElement('div');
+            multiplier.className = 'crash-multiplier';
+            multiplier.textContent = 'x2.45';
+            
+            graph.appendChild(line);
+            pattern.appendChild(graph);
+            pattern.appendChild(multiplier);
+            
+            return pattern;
+        }
+
+        function createClassicPattern() {
+            const pattern = document.createElement('div');
+            pattern.className = 'game-pattern classic-pattern';
+            
+            const cards = document.createElement('div');
+            cards.className = 'classic-cards';
+            
+            const symbols = ['♥', '♦', '♣'];
+            for (let i = 0; i < 3; i++) {
+                const card = document.createElement('div');
+                card.className = 'classic-card';
+                card.textContent = symbols[i];
+                cards.appendChild(card);
+            }
+            
+            pattern.appendChild(cards);
+            return pattern;
+        }
+
+        function createPlinkoPattern() {
+            const pattern = document.createElement('div');
+            pattern.className = 'game-pattern plinko-pattern';
+            
+            const board = document.createElement('div');
+            board.className = 'plinko-board';
+            
+            const pinPositions = [
+                [60, 20], [50, 35], [70, 35], [40, 50], [60, 50], 
+                [80, 50], [30, 65], [50, 65], [70, 65], [90, 65],
+                [20, 80], [40, 80], [60, 80], [80, 80], [100, 80]
+            ];
+            
+            pinPositions.forEach(pos => {
+                const pin = document.createElement('div');
+                pin.className = 'plinko-pin';
+                pin.style.left = `${pos[0]}px`;
+                pin.style.top = `${pos[1]}px`;
+                board.appendChild(pin);
+            });
+            
+            const ball = document.createElement('div');
+            ball.className = 'plinko-ball';
+            
+            pattern.appendChild(board);
+            pattern.appendChild(ball);
+            return pattern;
+        }
     </script>
 </body>
 </html>
