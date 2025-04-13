@@ -506,7 +506,7 @@
         // Настройки доступности игр
         const gamesAvailability = {
             miner: true,
-            slots: false,
+            slots: true,
             crash: false,
             classic: false,
             plinko: false,
@@ -736,7 +736,7 @@
             
             switch(game) {
                 case 'miner': window.location.href = `miner.html?${params.toString()}`; break;
-                case 'slots': window.location.href = `slots.html?${params.toString()}`; break;
+                case 'slots': window.location.href = `lecenka.html?${params.toString()}`; break;
                 case 'crash': window.location.href = `crash.html?${params.toString()}`; break;
                 case 'classic': window.location.href = `classik.html?${params.toString()}`; break;
                 case 'plinko': window.location.href = `plinko.html?${params.toString()}`; break;
