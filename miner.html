@@ -17,6 +17,7 @@
         body {
             background-color: #121212;
             color: #e0e0e0;
+            overflow-x: hidden;
         }
         
         .loading-screen {
@@ -57,6 +58,7 @@
             display: none;
             opacity: 0;
             transition: opacity 0.3s;
+            padding-bottom: 20px;
         }
         
         .header {
@@ -146,57 +148,68 @@
             background: #4CAF50;
         }
         
-        .controls-row {
+        .multipliers-container {
             display: flex;
-            gap: 15px;
+            overflow-x: auto;
+            gap: 8px;
             margin-bottom: 15px;
+            padding-bottom: 5px;
         }
         
-        .control-card {
-            flex: 1;
+        .multiplier-item {
+            min-width: 70px;
+            background: #252525;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        
+        .multiplier-value {
+            font-weight: bold;
+            color: #FFD700;
+            margin-bottom: 5px;
+        }
+        
+        .multiplier-step {
+            font-size: 12px;
+            color: #aaa;
+        }
+        
+        .bet-controls {
             background: #252525;
             border-radius: 12px;
             padding: 15px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
         }
         
-        .control-title {
+        .bet-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .bet-label {
             font-size: 14px;
-            margin-bottom: 10px;
             color: #aaa;
-            text-align: center;
         }
         
-        .bet-input-container {
-            margin-bottom: 10px;
-        }
-        
-        .bet-input {
-            width: 100%;
-            background: #333;
-            border: none;
-            border-radius: 8px;
-            padding: 10px;
-            color: #e0e0e0;
+        .bet-amount {
+            font-weight: bold;
+            color: #4CAF50;
             font-size: 16px;
-            text-align: center;
-            margin-bottom: 10px;
         }
         
         .bet-buttons {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-bottom: 8px;
-        }
-        
-        .bet-buttons-row2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-columns: repeat(5, 1fr);
             gap: 8px;
         }
         
-        .bet-button, .mines-button {
+        .bet-button {
             background: #333;
             border: none;
             border-radius: 6px;
@@ -205,25 +218,57 @@
             font-size: 14px;
             cursor: pointer;
             transition: all 0.2s;
+            text-align: center;
         }
         
-        .bet-button:hover, .mines-button:hover {
+        .bet-button:hover {
             background: #444;
         }
         
+        .mines-controls {
+            background: #252525;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .mines-title {
+            font-size: 14px;
+            color: #aaa;
+            margin-bottom: 10px;
+        }
+        
         .mines-buttons {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            display: flex;
             gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 5px;
         }
         
         .mines-button {
-            font-size: 16px;
-            font-weight: bold;
-            padding: 12px 5px;
+            background: #333;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 15px;
+            color: #e0e0e0;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
         
-        .play-button {
+        .mines-button:hover {
+            background: #444;
+        }
+        
+        .mines-button.active {
+            background: #4285F4;
+            color: white;
+            box-shadow: 0 0 8px rgba(66, 133, 244, 0.5);
+        }
+        
+        .action-button {
             width: 100%;
             background: #4CAF50;
             color: white;
@@ -237,13 +282,13 @@
             box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
         }
         
-        .play-button:hover {
+        .action-button:hover {
             background: #66BB6A;
             transform: translateY(-2px);
             box-shadow: 0 7px 20px rgba(102, 187, 106, 0.6);
         }
         
-        .play-button:disabled {
+        .action-button:disabled {
             background: #666;
             cursor: not-allowed;
             transform: none;
@@ -335,54 +380,43 @@
         <div class="game-container">
             <div class="game-board" id="gameBoard"></div>
             
-            <div class="controls-row">
-                <div class="control-card">
-                    <div class="control-title">Ваша ставка</div>
-                    <div class="bet-input-container">
-                        <input type="number" class="bet-input" id="betInput" value="1.00" step="0.01" min="0.01">
-                    </div>
-                    <div class="bet-buttons">
-                        <button class="bet-button" data-bet="1">+1</button>
-                        <button class="bet-button" data-bet="5">+5</button>
-                        <button class="bet-button" data-bet="10">+10</button>
-                    </div>
-                    <div class="bet-buttons-row2">
-                        <button class="bet-button" data-bet="min">MIN</button>
-                        <button class="bet-button" data-bet="25">+25</button>
-                        <button class="bet-button" data-bet="max">MAX</button>
-                    </div>
+            <div class="multipliers-container" id="multipliersContainer"></div>
+            
+            <div class="bet-controls">
+                <div class="bet-title">
+                    <span class="bet-label">Ставка:</span>
+                    <span class="bet-amount" id="currentBetAmount">1.00</span>
                 </div>
-                
-                <div class="control-card">
-                    <div class="control-title">Количество мин</div>
-                    <div class="mines-buttons">
-                        <button class="mines-button active" data-mines="2">2</button>
-                        <button class="mines-button" data-mines="3">3</button>
-                        <button class="mines-button" data-mines="5">5</button>
-                        <button class="mines-button" data-mines="8">8</button>
-                        <button class="mines-button" data-mines="10">10</button>
-                        <button class="mines-button" data-mines="24">24</button>
-                    </div>
+                <div class="bet-buttons">
+                    <button class="bet-button" data-bet="0.1">+0.10</button>
+                    <button class="bet-button" data-bet="0.5">+0.50</button>
+                    <button class="bet-button" data-bet="1">+1</button>
+                    <button class="bet-button" data-bet="5">+5</button>
+                    <button class="bet-button" data-bet="10">+10</button>
                 </div>
             </div>
             
-            <button class="play-button" id="playButton">Играть</button>
+            <div class="mines-controls">
+                <div class="mines-title">Мины:</div>
+                <div class="mines-buttons">
+                    <button class="mines-button active" data-mines="2">2</button>
+                    <button class="mines-button" data-mines="3">3</button>
+                    <button class="mines-button" data-mines="5">5</button>
+                    <button class="mines-button" data-mines="8">8</button>
+                    <button class="mines-button" data-mines="10">10</button>
+                    <button class="mines-button" data-mines="24">24</button>
+                </div>
+            </div>
+            
+            <button class="action-button" id="actionButton">Играть</button>
         </div>
 
         <div class="modal" id="winModal">
             <div class="modal-content">
                 <div class="modal-title">Победа!</div>
-                <div class="modal-message">Вы нашли все алмазы!</div>
+                <div class="modal-message" id="winMessage"></div>
                 <div class="modal-amount" id="winAmount">+0.00 ₽</div>
                 <button class="modal-button" id="winButton">OK</button>
-            </div>
-        </div>
-
-        <div class="modal" id="errorModal">
-            <div class="modal-content">
-                <div class="modal-title">Ошибка</div>
-                <div class="modal-message" id="errorMessage"></div>
-                <button class="modal-button" id="errorButton">Понятно</button>
             </div>
         </div>
     </div>
@@ -403,6 +437,16 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
+        // Коэффициенты для разных количеств мин
+        const MULTIPLIERS = {
+            2: [1.03, 1.12, 1.23, 1.35, 1.49, 1.66, 1.86, 2.09, 2.37, 2.71, 3.13, 3.65, 4.3, 5.18, 6.33, 7.91, 10.17, 13.57, 18.98, 28.49, 47.49, 94.99, 284.99],
+            3: [1.07, 1.23, 1.41, 1.64, 1.91, 2.25, 2.67, 3.21, 3.9, 4.8, 6, 7.63, 9.93, 13.24, 18.2, 26.01, 38.01, 62.42, 109.24, 218.49, 546.24, 2018],
+            5: [1.18, 1.49, 1.91, 2.48, 3.25, 4.34, 5.89, 8.15, 11.55, 16.8, 25.21, 39.21, 63.72, 109.24, 200.29, 400.58, 901.31, 2400, 8041, 50470],
+            8: [1.33, 1.82, 2.56, 3.69, 5.45, 8.25, 12.8, 20.48, 34.13, 60.44, 114.84, 241.16, 573.44, 1560, 5200, 21840, 124800, 1040000],
+            10: [1.58, 2.71, 4.8, 8.8, 16.8, 33.61, 70.95, 159.66, 387.77, 1030, 3100, 10850, 47050, 282300, 3100000],
+            24: [23.74]
+        };
+
         // Получаем ID пользователя из cookie
         function getTelegramIdFromCookie() {
             const cookies = document.cookie.split(';');
@@ -418,24 +462,25 @@
         const gameInterface = document.getElementById('gameInterface');
         const userBalanceElement = document.getElementById('userBalance');
         const gameBoardElement = document.getElementById('gameBoard');
-        const betInput = document.getElementById('betInput');
-        const playButton = document.getElementById('playButton');
+        const multipliersContainer = document.getElementById('multipliersContainer');
+        const currentBetAmount = document.getElementById('currentBetAmount');
+        const actionButton = document.getElementById('actionButton');
         const winModal = document.getElementById('winModal');
         const winAmountElement = document.getElementById('winAmount');
+        const winMessage = document.getElementById('winMessage');
         const winButton = document.getElementById('winButton');
-        const errorModal = document.getElementById('errorModal');
-        const errorMessage = document.getElementById('errorMessage');
-        const errorButton = document.getElementById('errorButton');
 
         // Игровые переменные
         let userId = null;
         let currentBalance = 0;
         let currentBet = 1.00;
-        let minesCount = 2;
+        let minesCount = 5;
         let gameStarted = false;
         let minesPositions = [];
         let revealedCells = 0;
+        let currentMultiplierIndex = 0;
         let userRef = null;
+        let balanceLoaded = false;
 
         // Инициализация игры
         function initGame() {
@@ -463,10 +508,16 @@
                 if (userData && userData.balance !== undefined) {
                     currentBalance = parseFloat(userData.balance.toFixed(2));
                     userBalanceElement.textContent = currentBalance.toFixed(2);
+                    balanceLoaded = true;
+                    
+                    // Обновляем мультипликаторы
+                    updateMultipliers();
+                    
+                    // Если баланс загружен, скрываем экран загрузки
+                    if (balanceLoaded) {
+                        setTimeout(hideLoadingScreen, 1000);
+                    }
                 }
-                
-                // Независимо от результата скрываем загрузку через 1 секунду
-                setTimeout(hideLoadingScreen, 1000);
             });
         }
 
@@ -496,72 +547,104 @@
             }
         }
 
+        // Обновление отображения мультипликаторов
+        function updateMultipliers() {
+            multipliersContainer.innerHTML = '';
+            const multipliers = MULTIPLIERS[minesCount];
+            
+            multipliers.forEach((multiplier, index) => {
+                const item = document.createElement('div');
+                item.className = 'multiplier-item';
+                
+                const value = document.createElement('div');
+                value.className = 'multiplier-value';
+                value.textContent = multiplier.toFixed(2) + 'x';
+                
+                const step = document.createElement('div');
+                step.className = 'multiplier-step';
+                step.textContent = `Шаг ${index + 1}`;
+                
+                item.appendChild(value);
+                item.appendChild(step);
+                multipliersContainer.appendChild(item);
+            });
+        }
+
         // Установка обработчиков событий
         function setupEventListeners() {
             // Кнопки изменения ставки
             document.querySelectorAll('.bet-button').forEach(button => {
                 button.addEventListener('click', () => {
-                    const bet = button.dataset.bet;
-                    let newBet = currentBet;
+                    if (gameStarted) return;
                     
-                    if (bet === 'min') {
-                        newBet = 1.00;
-                    } else if (bet === 'max') {
-                        newBet = Math.max(1.00, parseFloat((currentBalance / 2).toFixed(2)));
+                    const bet = parseFloat(button.dataset.bet);
+                    const newBet = parseFloat((currentBet + bet).toFixed(2));
+                    
+                    if (newBet < 0.01) {
+                        currentBet = 0.01;
                     } else {
-                        newBet = parseFloat(currentBet) + parseFloat(bet);
+                        currentBet = newBet;
                     }
                     
-                    if (newBet < 0.01) newBet = 0.01;
-                    currentBet = parseFloat(newBet.toFixed(2));
-                    betInput.value = currentBet.toFixed(2);
+                    currentBetAmount.textContent = currentBet.toFixed(2);
                 });
             });
 
             // Поле ввода ставки
-            betInput.addEventListener('change', () => {
-                let value = parseFloat(betInput.value);
-                if (isNaN(value)) value = 1.00;
-                if (value < 0.01) value = 0.01;
-                currentBet = parseFloat(value.toFixed(2));
-                betInput.value = currentBet.toFixed(2);
+            currentBetAmount.addEventListener('click', () => {
+                if (gameStarted) return;
+                
+                const newBet = prompt('Введите ставку:', currentBet.toFixed(2));
+                if (newBet !== null) {
+                    const betValue = parseFloat(newBet);
+                    if (!isNaN(betValue) && betValue > 0) {
+                        currentBet = parseFloat(betValue.toFixed(2));
+                        currentBetAmount.textContent = currentBet.toFixed(2);
+                    }
+                }
             });
 
             // Кнопки выбора количества мин
             document.querySelectorAll('.mines-button').forEach(button => {
                 button.addEventListener('click', () => {
+                    if (gameStarted) return;
+                    
                     minesCount = parseInt(button.dataset.mines);
                     document.querySelectorAll('.mines-button').forEach(btn => 
                         btn.classList.remove('active'));
                     button.classList.add('active');
+                    
+                    updateMultipliers();
                 });
             });
 
-            // Кнопка "Играть"
-            playButton.addEventListener('click', startGame);
+            // Кнопка действия (Играть/Забрать)
+            actionButton.addEventListener('click', () => {
+                if (gameStarted) {
+                    // Забрать выигрыш
+                    endGame(true);
+                } else {
+                    // Начать игру
+                    startGame();
+                }
+            });
 
-            // Кнопки модальных окон
+            // Кнопка модального окна победы
             winButton.addEventListener('click', () => {
                 winModal.style.display = 'none';
                 resetGame();
-            });
-
-            errorButton.addEventListener('click', () => {
-                errorModal.style.display = 'none';
             });
         }
 
         // Начало игры
         function startGame() {
-            if (gameStarted) return;
-            
             if (currentBet <= 0) {
-                showError('Ставка должна быть больше 0');
+                alert('Ставка должна быть больше 0');
                 return;
             }
 
             if (currentBalance < currentBet) {
-                showError('Недостаточно средств на балансе');
+                alert('Недостаточно средств на балансе');
                 return;
             }
 
@@ -574,7 +657,8 @@
             
             gameStarted = true;
             revealedCells = 0;
-            playButton.disabled = true;
+            currentMultiplierIndex = 0;
+            actionButton.textContent = `Забрать ${(currentBet * MULTIPLIERS[minesCount][0]).toFixed(2)}`;
             
             // Блокируем кнопки
             document.querySelectorAll('.bet-button, .mines-button').forEach(btn => {
@@ -613,62 +697,68 @@
                 // Найдена мина
                 cell.classList.add('mine');
                 cell.textContent = '💣';
-                
-                // Показываем все мины
-                minesPositions.forEach(pos => {
-                    const mineCell = document.querySelector(`.cell[data-index="${pos}"]`);
-                    if (!mineCell.classList.contains('revealed')) {
-                        mineCell.classList.add('revealed', 'mine');
-                        mineCell.textContent = '💣';
-                    }
-                });
-                
-                gameStarted = false;
-                setTimeout(() => resetGame(), 1000);
+                endGame(false);
             } else {
                 // Найден алмаз
                 cell.classList.add('diamond');
                 cell.textContent = '💎';
                 
+                // Обновляем текущий множитель
+                currentMultiplierIndex = Math.min(revealedCells, MULTIPLIERS[minesCount].length - 1);
+                actionButton.textContent = `Забрать ${(currentBet * MULTIPLIERS[minesCount][currentMultiplierIndex]).toFixed(2)}`;
+                
                 // Проверяем победу
                 if (revealedCells === (25 - minesCount)) {
-                    endGame();
+                    endGame(true);
                 }
             }
         }
 
-        // Завершение игры (победа)
-        function endGame() {
+        // Завершение игры
+        function endGame(winByChoice) {
             gameStarted = false;
             
+            // Показываем все мины и алмазы
+            for (let i = 0; i < 25; i++) {
+                const cell = document.querySelector(`.cell[data-index="${i}"]`);
+                if (!cell.classList.contains('revealed')) {
+                    cell.classList.add('revealed');
+                    if (minesPositions.includes(i)) {
+                        cell.classList.add('mine');
+                        cell.textContent = '💣';
+                    } else {
+                        cell.classList.add('diamond');
+                        cell.textContent = '💎';
+                    }
+                }
+            }
+            
             // Рассчитываем выигрыш
-            const multiplier = 1 + (minesCount / 5);
-            const winAmount = parseFloat((currentBet * multiplier).toFixed(2));
-            
-            // Обновляем баланс
-            currentBalance = parseFloat((currentBalance + winAmount).toFixed(2));
-            updateBalance();
-            
-            // Показываем экран победы
-            showWin(winAmount);
+            let winAmount = 0;
+            if (winByChoice || revealedCells === (25 - minesCount)) {
+                const multiplier = MULTIPLIERS[minesCount][currentMultiplierIndex];
+                winAmount = parseFloat((currentBet * multiplier).toFixed(2));
+                
+                // Обновляем баланс
+                currentBalance = parseFloat((currentBalance + winAmount).toFixed(2));
+                updateBalance();
+                
+                // Показываем экран победы
+                showWin(winAmount, winByChoice);
+            }
         }
 
         // Показать экран победы
-        function showWin(amount) {
+        function showWin(amount, winByChoice) {
             winAmountElement.textContent = `+${amount.toFixed(2)} ₽`;
+            winMessage.textContent = winByChoice 
+                ? 'Вы успешно забрали выигрыш!' 
+                : 'Вы нашли все алмазы!';
             winModal.style.display = 'flex';
-        }
-
-        // Показать ошибку
-        function showError(message) {
-            errorMessage.textContent = message;
-            errorModal.style.display = 'flex';
         }
 
         // Сброс игры
         function resetGame() {
-            gameStarted = false;
-            
             // Очищаем поле
             document.querySelectorAll('.cell').forEach(cell => {
                 cell.className = 'cell';
@@ -676,7 +766,7 @@
             });
             
             // Включаем кнопки
-            playButton.disabled = false;
+            actionButton.textContent = 'Играть';
             document.querySelectorAll('.bet-button, .mines-button').forEach(btn => {
                 btn.disabled = false;
             });
