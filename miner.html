@@ -154,7 +154,7 @@
             gap: 6px;
             margin-bottom: 12px;
             padding-bottom: 5px;
-            height: 60px;
+            height: 50px;
             align-items: center;
         }
         
@@ -162,16 +162,29 @@
             min-width: 60px;
             background: #252525;
             border-radius: 6px;
-            padding: 8px;
+            padding: 6px 8px;
             text-align: center;
             flex-shrink: 0;
         }
         
         .multiplier-value {
             font-weight: bold;
-            color: #FFD700;
+            color: #e0e0e0;
             font-size: 14px;
             margin-bottom: 3px;
+        }
+        
+        .multiplier-value.past {
+            color: #777;
+        }
+        
+        .multiplier-value.current {
+            animation: pulse 1s infinite alternate;
+        }
+        
+        @keyframes pulse {
+            from { color: #e0e0e0; }
+            to { color: #aaa; }
         }
         
         .multiplier-step {
@@ -206,9 +219,11 @@
         .bet-buttons {
             display: flex;
             gap: 6px;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
             justify-content: flex-end;
             flex-grow: 1;
+            overflow-x: auto;
+            padding-bottom: 2px;
         }
         
         .bet-button {
@@ -221,6 +236,7 @@
             cursor: pointer;
             transition: all 0.2s;
             white-space: nowrap;
+            flex-shrink: 0;
         }
         
         .bet-button:hover {
@@ -378,7 +394,7 @@
             <a href="index.html" class="back-button">← Назад</a>
             <div class="balance-container">
                 <span>Баланс:</span>
-                <span class="balance-amount" id="userBalance">0.00</span>
+                <span class="balance-amount" id="userBalance">0.00 р</span>
             </div>
         </div>
 
@@ -478,24 +494,20 @@
         let userId = null;
         let currentBalance = 0;
         let currentBet = 1.00;
-        let minesCount = 5;
+        let minesCount = 2;
         let gameStarted = false;
         let minesPositions = [];
         let revealedCells = 0;
-        let currentMultiplierIndex = -1; // Начинаем с -1, так как первый ход еще не сделан
+        let currentMultiplierIndex = -1;
         let userRef = null;
         let balanceLoaded = false;
         let multiplierScrollInterval = null;
 
         // Инициализация игры
         function initGame() {
-            // Создаем игровое поле сразу
             createGameBoard();
-            
-            // Устанавливаем обработчики событий
             setupEventListeners();
             
-            // Получаем ID пользователя
             userId = getTelegramIdFromCookie();
             
             if (!userId) {
@@ -504,21 +516,17 @@
                 return;
             }
 
-            // Ссылка на данные пользователя
             userRef = database.ref('users/' + userId);
             
-            // Загружаем баланс
             userRef.on('value', (snapshot) => {
                 const userData = snapshot.val();
                 if (userData && userData.balance !== undefined) {
                     currentBalance = parseFloat(userData.balance.toFixed(2));
-                    userBalanceElement.textContent = currentBalance.toFixed(2);
+                    userBalanceElement.textContent = currentBalance.toFixed(2) + ' р';
                     balanceLoaded = true;
                     
-                    // Обновляем мультипликаторы
                     updateMultipliers();
                     
-                    // Если баланс загружен, скрываем экран загрузки
                     if (balanceLoaded) {
                         setTimeout(hideLoadingScreen, 1000);
                     }
@@ -542,7 +550,6 @@
         function createGameBoard() {
             gameBoardElement.innerHTML = '';
             
-            // Создаем 5x5 сетку
             for (let i = 0; i < 25; i++) {
                 const cell = document.createElement('div');
                 cell.className = 'cell';
@@ -564,6 +571,14 @@
                 
                 const value = document.createElement('div');
                 value.className = 'multiplier-value';
+                
+                // Устанавливаем классы для цветов
+                if (index < currentMultiplierIndex) {
+                    value.classList.add('past');
+                } else if (index === currentMultiplierIndex) {
+                    value.classList.add('current');
+                }
+                
                 value.textContent = multiplier.toFixed(2) + 'x';
                 
                 const step = document.createElement('div');
@@ -575,7 +590,6 @@
                 multipliersContainer.appendChild(item);
             });
             
-            // Автопрокрутка к текущему множителю
             scrollToCurrentMultiplier();
         }
 
@@ -583,7 +597,6 @@
         function scrollToCurrentMultiplier() {
             if (multiplierScrollInterval) clearInterval(multiplierScrollInterval);
             
-            // Прокручиваем только если есть текущий множитель (не -1)
             if (currentMultiplierIndex >= 0) {
                 multiplierScrollInterval = setInterval(() => {
                     const currentMultiplier = document.querySelector(`.multiplier-item[data-step="${currentMultiplierIndex}"]`);
@@ -656,12 +669,10 @@
             // Кнопка действия (Играть/Забрать)
             actionButton.addEventListener('click', () => {
                 if (gameStarted) {
-                    // Забрать выигрыш (только если сделан хотя бы один ход)
                     if (currentMultiplierIndex >= 0) {
                         endGame(true);
                     }
                 } else {
-                    // Начать игру
                     startGame();
                 }
             });
@@ -669,7 +680,14 @@
             // Кнопка модального окна победы
             winButton.addEventListener('click', () => {
                 winModal.style.display = 'none';
-                resetGame();
+                // Не сбрасываем игру, оставляем поле как есть
+                // Только восстанавливаем кнопку "Играть"
+                actionButton.textContent = 'Играть';
+                actionButton.disabled = false;
+                document.querySelectorAll('.bet-button, .mines-button').forEach(btn => {
+                    btn.disabled = false;
+                });
+                gameStarted = false;
             });
         }
 
@@ -689,19 +707,25 @@
             currentBalance = parseFloat((currentBalance - currentBet).toFixed(2));
             updateBalance();
             
-            // Генерируем позиции мин
             generateMines();
             
             gameStarted = true;
             revealedCells = 0;
-            currentMultiplierIndex = -1; // Сбрасываем индекс множителя
+            currentMultiplierIndex = -1;
             actionButton.textContent = 'Забрать';
-            actionButton.disabled = true; // Блокируем кнопку "Забрать" до первого хода
+            actionButton.disabled = true;
             
-            // Блокируем кнопки
             document.querySelectorAll('.bet-button, .mines-button').forEach(btn => {
                 btn.disabled = true;
             });
+            
+            // Очищаем поле (но только если это не продолжение игры)
+            document.querySelectorAll('.cell').forEach(cell => {
+                cell.className = 'cell';
+                cell.textContent = '';
+            });
+            
+            updateMultipliers();
         }
 
         // Генерация позиций мин
@@ -711,13 +735,11 @@
             
             for (let i = 0; i < 25; i++) positions.push(i);
             
-            // Перемешиваем массив
             for (let i = positions.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [positions[i], positions[j]] = [positions[j], positions[i]];
             }
             
-            // Выбираем нужное количество мин
             minesPositions = positions.slice(0, minesCount);
         }
 
@@ -732,30 +754,25 @@
             revealedCells++;
             
             if (minesPositions.includes(index)) {
-                // Найдена мина
                 cell.classList.add('mine');
                 cell.textContent = '💣';
                 endGame(false);
             } else {
-                // Найден алмаз
                 cell.classList.add('diamond');
                 cell.textContent = '💎';
                 
-                // Обновляем текущий множитель (первый ход становится шагом 0)
                 currentMultiplierIndex = Math.min(revealedCells - 1, MULTIPLIERS[minesCount].length - 1);
                 
-                // Разблокируем кнопку "Забрать" после первого хода
                 if (currentMultiplierIndex >= 0) {
                     actionButton.disabled = false;
                     actionButton.textContent = `Забрать ${(currentBet * MULTIPLIERS[minesCount][currentMultiplierIndex]).toFixed(2)}`;
                 }
                 
-                // Проверяем победу (только если открыты все алмазы)
                 if (revealedCells === (25 - minesCount)) {
                     endGame(true);
                 }
                 
-                // Прокручиваем к текущему множителю
+                updateMultipliers();
                 scrollToCurrentMultiplier();
             }
         }
@@ -779,20 +796,25 @@
                 }
             }
             
-            // Блокируем кнопку "Забрать"
             actionButton.disabled = true;
             
-            // Рассчитываем выигрыш только если игрок не подорвался на мине
             if (winByChoice || revealedCells === (25 - minesCount)) {
                 const multiplier = MULTIPLIERS[minesCount][currentMultiplierIndex];
                 const winAmount = parseFloat((currentBet * multiplier).toFixed(2));
                 
-                // Обновляем баланс
                 currentBalance = parseFloat((currentBalance + winAmount).toFixed(2));
                 updateBalance();
                 
-                // Показываем экран победы
                 showWin(winAmount, winByChoice);
+            } else {
+                // При проигрыше просто разблокируем кнопку "Играть"
+                setTimeout(() => {
+                    actionButton.textContent = 'Играть';
+                    actionButton.disabled = false;
+                    document.querySelectorAll('.bet-button, .mines-button').forEach(btn => {
+                        btn.disabled = false;
+                    });
+                }, 500);
             }
         }
 
@@ -805,30 +827,9 @@
             winModal.style.display = 'flex';
         }
 
-        // Сброс игры
-        function resetGame() {
-            // Очищаем поле
-            document.querySelectorAll('.cell').forEach(cell => {
-                cell.className = 'cell';
-                cell.textContent = '';
-            });
-            
-            // Восстанавливаем кнопки
-            actionButton.textContent = 'Играть';
-            actionButton.disabled = false;
-            document.querySelectorAll('.bet-button, .mines-button').forEach(btn => {
-                btn.disabled = false;
-            });
-            
-            // Сбрасываем игровые переменные
-            gameStarted = false;
-            revealedCells = 0;
-            currentMultiplierIndex = -1;
-        }
-
         // Обновление баланса в Firebase
         function updateBalance() {
-            userBalanceElement.textContent = currentBalance.toFixed(2);
+            userBalanceElement.textContent = currentBalance.toFixed(2) + ' р';
             userRef.update({ balance: currentBalance });
         }
 
