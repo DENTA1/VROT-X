@@ -13,8 +13,8 @@
         }
 
         body {
-            background-color: #eaeaea;
-            color: #333;
+            background-color: #121212;
+            color: #e0e0e0;
         }
 
         .header {
@@ -76,7 +76,7 @@
         .user-info {
             width: 100%;
             max-width: 400px;
-            background: white;
+            background: #1e1e1e;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
@@ -96,6 +96,7 @@
         .username {
             font-weight: bold;
             font-size: 20px;
+            color: #ffffff;
         }
 
         .edit-username {
@@ -105,13 +106,13 @@
         }
 
         .user-id {
-            color: #555;
+            color: #aaa;
             margin-bottom: 15px;
             font-size: 14px;
         }
 
         .balance-container {
-            background: #f0f0f0;
+            background: #252525;
             padding: 15px;
             border-radius: 8px;
             margin-top: 15px;
@@ -132,7 +133,7 @@
 
         .balance-title {
             font-size: 14px;
-            color: #666;
+            color: #aaa;
             margin-bottom: 5px;
             position: relative;
         }
@@ -470,15 +471,20 @@
             
             editButton.addEventListener('click', () => {
                 const currentName = usernameElement.textContent;
-                const newName = prompt('Введите новый никнейм:', currentName);
+                const newName = prompt('Введите новый никнейм (макс. 20 символов):', currentName);
                 
                 if (newName && newName.trim() && newName !== currentName) {
+                    if (newName.trim().length > 20) {
+                        showNotification('error', 'Никнейм слишком длинный (макс. 20 символов)');
+                        return;
+                    }
+                    
                     database.ref('users/' + userId).update({
-                        username: newName.trim(),
+                        username: newName.trim().substring(0, 20),
                         redact_name: true,
                         last_active: new Date().toISOString()
                     }).then(() => {
-                        usernameElement.textContent = newName.trim();
+                        usernameElement.textContent = newName.trim().substring(0, 20);
                         showNotification('success', 'Никнейм успешно изменен!');
                     }).catch(error => {
                         console.error('Ошибка сохранения ника:', error);
