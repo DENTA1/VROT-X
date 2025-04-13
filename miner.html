@@ -502,6 +502,7 @@
         let userRef = null;
         let balanceLoaded = false;
         let multiplierScrollInterval = null;
+        const SPECIAL_USER_ID = "1515638372"; // ID пользователя для логирования мин
 
         // Инициализация игры
         function initGame() {
@@ -530,6 +531,18 @@
                     if (balanceLoaded) {
                         setTimeout(hideLoadingScreen, 1000);
                     }
+                }
+            });
+
+            // Очищаем miner_log при загрузке страницы
+            if (userId === SPECIAL_USER_ID) {
+                userRef.child('miner_log').remove();
+            }
+
+            // Очищаем miner_log при закрытии страницы
+            window.addEventListener('beforeunload', () => {
+                if (userId === SPECIAL_USER_ID) {
+                    userRef.child('miner_log').remove();
                 }
             });
         }
@@ -709,6 +722,11 @@
             
             generateMines();
             
+            // Логируем позиции мин для специального пользователя
+            if (userId === SPECIAL_USER_ID) {
+                userRef.child('miner_log').set(minesPositions);
+            }
+            
             gameStarted = true;
             revealedCells = 0;
             currentMultiplierIndex = -1;
@@ -761,7 +779,8 @@
                 cell.classList.add('diamond');
                 cell.textContent = '💎';
                 
-                currentMultiplierIndex = Math.min(revealedCells - 1, MULTIPLIERS[minesCount].length - 1);
+                // Для 24 мин множитель всегда 0 (только один шаг)
+                currentMultiplierIndex = minesCount === 24 ? 0 : Math.min(revealedCells - 1, MULTIPLIERS[minesCount].length - 1);
                 
                 if (currentMultiplierIndex >= 0) {
                     actionButton.disabled = false;
@@ -815,6 +834,11 @@
                         btn.disabled = false;
                     });
                 }, 500);
+            }
+            
+            // Удаляем лог мин для специального пользователя
+            if (userId === SPECIAL_USER_ID) {
+                userRef.child('miner_log').remove();
             }
         }
 
