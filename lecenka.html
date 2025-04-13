@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Лесенка - Казино</title>
+    <title>Лесенка</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
@@ -63,58 +63,42 @@
             padding: 20px;
         }
         
-        .game-title {
-            margin-bottom: 20px;
-            font-size: 28px;
-            color: #e94560;
-        }
-        
         .ladder {
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-bottom: 30px;
-            width: 80%;
-            max-width: 600px;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 500px;
         }
         
         .floor {
             display: flex;
             justify-content: center;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             width: 100%;
-            position: relative;
-        }
-        
-        .floor-label {
-            position: absolute;
-            left: -50px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-weight: bold;
-            color: #e94560;
         }
         
         .btn {
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             margin: 0 5px;
             background-color: #4a4a6a;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 18px;
+            font-size: 16px;
             color: white;
             position: relative;
             overflow: hidden;
         }
         
-        .btn:hover:not(.selected):not(.mine):not(.wrong) {
+        .btn:hover:not(.selected):not(.mine):not(.safe) {
             background-color: #5a5a7a;
         }
         
@@ -125,28 +109,28 @@
         
         .mine {
             background-color: #e94560;
+            opacity: 0.5;
         }
         
-        .wrong {
-            background-color: #e94560;
-            animation: shake 0.5s;
+        .safe {
+            background-color: #4CAF50;
         }
         
-        .footprint {
-            position: absolute;
-            width: 40px;
-            height: 40px;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M19 11h-4V7h-2v4H9v2h4v4h2v-4h4v-2z"/></svg>');
-            background-size: contain;
-            background-repeat: no-repeat;
-            opacity: 0.8;
+        @keyframes crack {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 0.5; }
+        }
+        
+        .crack {
+            animation: crack 0.5s forwards;
         }
         
         .controls {
             display: flex;
             flex-direction: column;
-            width: 80%;
-            max-width: 600px;
+            width: 100%;
+            max-width: 500px;
             background-color: #16213e;
             padding: 20px;
             border-radius: 10px;
@@ -155,17 +139,18 @@
         
         .bet-controls {
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
             margin-bottom: 20px;
         }
         
         .bet-amount {
             display: flex;
             align-items: center;
+            margin-bottom: 10px;
         }
         
         .bet-input {
-            width: 120px;
+            width: 100px;
             padding: 10px;
             border-radius: 5px;
             border: none;
@@ -174,13 +159,14 @@
         }
         
         .bet-btn {
-            padding: 10px 15px;
+            padding: 8px 12px;
             border-radius: 5px;
             border: none;
             background-color: #0f3460;
             color: white;
             cursor: pointer;
             font-size: 14px;
+            margin-right: 5px;
             transition: background-color 0.3s;
         }
         
@@ -203,6 +189,8 @@
             cursor: pointer;
             font-size: 14px;
             transition: all 0.3s;
+            flex: 1;
+            margin: 0 5px;
         }
         
         .difficulty-btn:hover {
@@ -214,19 +202,24 @@
             font-weight: bold;
         }
         
-        .game-btns {
-            display: flex;
-            justify-content: space-between;
-        }
-        
         .action-btn {
-            padding: 12px 25px;
+            padding: 12px;
             border-radius: 5px;
             border: none;
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s;
+            width: 100%;
+        }
+        
+        .start-btn {
+            background-color: #e94560;
+            color: white;
+        }
+        
+        .start-btn:hover {
+            background-color: #d83550;
         }
         
         .take-btn {
@@ -238,27 +231,8 @@
             background-color: #45a049;
         }
         
-        .continue-btn {
-            background-color: #3a7bd5;
-            color: white;
-        }
-        
-        .continue-btn:hover {
-            background-color: #2a6bc5;
-        }
-        
-        .start-btn {
-            background-color: #e94560;
-            color: white;
-            width: 100%;
-        }
-        
-        .start-btn:hover {
-            background-color: #d83550;
-        }
-        
         .message {
-            margin-top: 20px;
+            margin-top: 15px;
             padding: 10px;
             border-radius: 5px;
             text-align: center;
@@ -277,23 +251,6 @@
             color: #e94560;
             display: block;
         }
-        
-        @keyframes shake {
-            0% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            50% { transform: translateX(5px); }
-            75% { transform: translateX(-5px); }
-            100% { transform: translateX(0); }
-        }
-        
-        @keyframes explode {
-            0% { transform: scale(1); opacity: 1; }
-            100% { transform: scale(1.5); opacity: 0; }
-        }
-        
-        .exploded {
-            animation: explode 0.5s forwards;
-        }
     </style>
 </head>
 <body>
@@ -303,8 +260,6 @@
     </header>
     
     <div class="game-container">
-        <h1 class="game-title">Лесенка</h1>
-        
         <div class="ladder" id="ladder">
             <!-- Этажи будут созданы динамически -->
         </div>
@@ -312,10 +267,9 @@
         <div class="controls">
             <div class="bet-controls">
                 <div class="bet-amount">
-                    <input type="number" class="bet-input" id="betAmount" placeholder="Сумма ставки" min="10" value="100">
-                    <button class="bet-btn" id="betHalf">½</button>
-                    <button class="bet-btn" id="betDouble">2×</button>
-                    <button class="bet-btn" id="betMax">Макс</button>
+                    <input type="number" class="bet-input" id="betAmount" placeholder="Сумма ставки" min="1" value="1">
+                    <button class="bet-btn" id="betPlus1">+1</button>
+                    <button class="bet-btn" id="betPlus5">+5</button>
                 </div>
             </div>
             
@@ -326,12 +280,7 @@
                 <button class="difficulty-btn" data-level="expert">Эксперт</button>
             </div>
             
-            <div class="game-btns">
-                <button class="action-btn take-btn" id="takeBtn" disabled>Забрать</button>
-                <button class="action-btn continue-btn" id="continueBtn" disabled>Продолжить</button>
-            </div>
-            
-            <button class="action-btn start-btn" id="startBtn">Начать игру</button>
+            <button class="action-btn start-btn" id="actionBtn">Начать</button>
             
             <div class="message" id="message"></div>
         </div>
@@ -349,7 +298,6 @@
             appId: "1:622297225288:web:5df6a5b02ffddedd96e07d"
         };
         
-        // Инициализируем Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         
@@ -368,40 +316,32 @@
         function loadBalance() {
             if (!userId) {
                 console.error('User ID not found in cookies');
-                return;
+                return Promise.reject('User ID not found');
             }
             
-            return new Promise((resolve, reject) => {
-                database.ref('users/' + userId).once('value')
-                    .then((snapshot) => {
-                        const userData = snapshot.val();
-                        if (userData && userData.balance !== undefined) {
-                            userBalance = userData.balance;
-                            document.getElementById('balance').textContent = userBalance + ' ₽';
-                            resolve(userBalance);
-                        } else {
-                            reject('Balance data not found');
-                        }
-                    })
-                    .catch((error) => {
-                        reject(error);
-                    });
-            });
+            return database.ref('users/' + userId).once('value')
+                .then((snapshot) => {
+                    const userData = snapshot.val();
+                    if (userData && userData.balance !== undefined) {
+                        userBalance = userData.balance;
+                        document.getElementById('balance').textContent = userBalance + ' ₽';
+                        return userBalance;
+                    } else {
+                        throw new Error('Balance data not found');
+                    }
+                });
         }
         
         // Функция для периодического обновления баланса
         function startBalanceUpdates() {
-            // Останавливаем предыдущий интервал, если он был
             if (balanceUpdateInterval) {
                 clearInterval(balanceUpdateInterval);
             }
             
-            // Загружаем баланс сразу
             loadBalance().catch(error => {
                 console.error('Error loading balance:', error);
             });
             
-            // Устанавливаем интервал для обновления каждую секунду
             balanceUpdateInterval = setInterval(() => {
                 loadBalance().catch(error => {
                     console.error('Error loading balance:', error);
@@ -430,7 +370,7 @@
         // Игровые переменные
         let currentFloor = 0;
         let currentWin = 0;
-        let betAmount = 100;
+        let betAmount = 1;
         let difficulty = 'easy';
         let gameActive = false;
         let safeButtons = [];
@@ -447,9 +387,7 @@
         // Элементы DOM
         const ladderElement = document.getElementById('ladder');
         const betAmountInput = document.getElementById('betAmount');
-        const takeBtn = document.getElementById('takeBtn');
-        const continueBtn = document.getElementById('continueBtn');
-        const startBtn = document.getElementById('startBtn');
+        const actionBtn = document.getElementById('actionBtn');
         const messageElement = document.getElementById('message');
         const difficultyButtons = document.querySelectorAll('.difficulty-btn');
         
@@ -460,11 +398,6 @@
             for (let i = 5; i >= 0; i--) {
                 const floor = document.createElement('div');
                 floor.className = 'floor';
-                
-                const floorLabel = document.createElement('div');
-                floorLabel.className = 'floor-label';
-                floorLabel.textContent = i + 1;
-                floor.appendChild(floorLabel);
                 
                 const buttonsCount = difficultySettings[difficulty].buttons;
                 
@@ -485,8 +418,8 @@
         function startGame() {
             const bet = parseInt(betAmountInput.value);
             
-            if (isNaN(bet) || bet < 10) {
-                showMessage('Минимальная ставка - 10 ₽', 'error');
+            if (isNaN(bet) || bet < 1) {
+                showMessage('Минимальная ставка - 1 ₽', 'error');
                 return;
             }
             
@@ -502,9 +435,9 @@
             
             updateBalance(-betAmount)
                 .then(() => {
-                    startBtn.disabled = true;
-                    takeBtn.disabled = true;
-                    continueBtn.disabled = true;
+                    actionBtn.textContent = 'Забрать: 0 ₽';
+                    actionBtn.className = 'action-btn take-btn';
+                    actionBtn.disabled = true;
                     
                     messageElement.textContent = '';
                     messageElement.className = 'message';
@@ -526,12 +459,9 @@
             const buttonsCount = settings.buttons;
             const minesCount = settings.mines;
             
-            // Сброс предыдущих состояний
             safeButtons = [];
             mineButtons = [];
             
-            // Выбор безопасных кнопок
-            const safeCount = buttonsCount - minesCount;
             const allPositions = Array.from({ length: buttonsCount }, (_, i) => i);
             
             // Перемешиваем позиции
@@ -540,16 +470,14 @@
                 [allPositions[i], allPositions[j]] = [allPositions[j], allPositions[i]];
             }
             
-            // Безопасные кнопки - первые safeCount в перемешанном массиве
-            safeButtons = allPositions.slice(0, safeCount);
-            // Мины - оставшиеся
-            mineButtons = allPositions.slice(safeCount);
+            safeButtons = allPositions.slice(0, buttonsCount - minesCount);
+            mineButtons = allPositions.slice(buttonsCount - minesCount);
             
             // Активируем кнопки на текущем этаже
             const currentFloorButtons = document.querySelectorAll(`.btn[data-floor="${currentFloor}"]`);
             currentFloorButtons.forEach(btn => {
                 btn.disabled = false;
-                btn.classList.remove('selected', 'mine', 'wrong', 'exploded');
+                btn.classList.remove('selected', 'mine', 'safe', 'crack');
             });
         }
         
@@ -562,15 +490,9 @@
             
             if (floor !== currentFloor) return;
             
-            // Проверяем, безопасная ли кнопка
             const isSafe = safeButtons.includes(position);
             
             button.classList.add('selected');
-            
-            // Добавляем стикер лапки
-            const footprint = document.createElement('div');
-            footprint.className = 'footprint';
-            button.appendChild(footprint);
             
             // Отключаем все кнопки на этаже
             const floorButtons = document.querySelectorAll(`.btn[data-floor="${currentFloor}"]`);
@@ -584,10 +506,7 @@
                     // Показываем мины
                     mineButtons.forEach(pos => {
                         const mineBtn = document.querySelector(`.btn[data-floor="${currentFloor}"][data-position="${pos}"]`);
-                        mineBtn.classList.add('mine');
-                        setTimeout(() => {
-                            mineBtn.classList.add('exploded');
-                        }, 300);
+                        mineBtn.classList.add('mine', 'crack');
                     });
                     
                     // Выигрыш на этом этаже
@@ -595,30 +514,39 @@
                     const floorWin = Math.floor(betAmount * settings.multiplier * (currentFloor + 1) / 6);
                     currentWin += floorWin;
                     
-                    // Активируем кнопки действий
-                    takeBtn.disabled = false;
-                    continueBtn.disabled = false;
+                    // Обновляем кнопку "Забрать"
+                    actionBtn.textContent = `Забрать: ${currentWin} ₽`;
+                    actionBtn.disabled = false;
                     
-                    showMessage(`Вы прошли этап ${currentFloor + 1}! Выигрыш: ${floorWin} ₽. Общий выигрыш: ${currentWin} ₽`, 'success');
+                    // Помечаем безопасную кнопку
+                    setTimeout(() => {
+                        button.classList.add('safe');
+                    }, 500);
+                    
+                    // Переход на следующий этаж
+                    currentFloor++;
+                    
+                    if (currentFloor >= 6) {
+                        showMessage(`Поздравляем! Вы выиграли ${currentWin} ₽`, 'success');
+                        gameActive = false;
+                    } else {
+                        setTimeout(() => {
+                            generateFloor();
+                        }, 1000);
+                    }
                 } else {
-                    // Показываем все мины и неправильные кнопки
+                    // Показываем все мины
                     floorButtons.forEach(btn => {
                         const btnPos = parseInt(btn.dataset.position);
                         if (mineButtons.includes(btnPos)) {
-                            btn.classList.add('mine');
-                        } else if (btn !== button) {
-                            btn.classList.add('wrong');
+                            btn.classList.add('mine', 'crack');
                         }
-                        setTimeout(() => {
-                            if (mineButtons.includes(btnPos) || btn !== button) {
-                                btn.classList.add('exploded');
-                            }
-                        }, 300);
                     });
                     
                     // Игра окончена
                     gameActive = false;
-                    startBtn.disabled = false;
+                    actionBtn.textContent = 'Начать';
+                    actionBtn.className = 'action-btn start-btn';
                     
                     showMessage(`Вы проиграли на этапе ${currentFloor + 1}`, 'error');
                 }
@@ -642,31 +570,15 @@
             }
         }
         
-        // Продолжить игру
-        function continueGame() {
-            currentFloor++;
-            
-            if (currentFloor >= 6) {
-                takeWin();
-                return;
-            }
-            
-            takeBtn.disabled = true;
-            continueBtn.disabled = true;
-            
-            generateFloor();
-            showMessage(`Переход на этап ${currentFloor + 1}`, 'success');
-        }
-        
         // Сброс игры
         function resetGame() {
             gameActive = false;
             currentFloor = 0;
             currentWin = 0;
             
-            takeBtn.disabled = true;
-            continueBtn.disabled = true;
-            startBtn.disabled = false;
+            actionBtn.textContent = 'Начать';
+            actionBtn.className = 'action-btn start-btn';
+            actionBtn.disabled = false;
             
             createLadder();
         }
@@ -678,16 +590,14 @@
         }
         
         // Управление ставками
-        document.getElementById('betHalf').addEventListener('click', () => {
-            betAmountInput.value = Math.max(10, Math.floor(parseInt(betAmountInput.value || 100) / 2));
+        document.getElementById('betPlus1').addEventListener('click', () => {
+            const newValue = parseInt(betAmountInput.value || 1) + 1;
+            betAmountInput.value = Math.min(newValue, userBalance);
         });
         
-        document.getElementById('betDouble').addEventListener('click', () => {
-            betAmountInput.value = Math.min(userBalance, Math.floor(parseInt(betAmountInput.value || 100) * 2));
-        });
-        
-        document.getElementById('betMax').addEventListener('click', () => {
-            betAmountInput.value = userBalance;
+        document.getElementById('betPlus5').addEventListener('click', () => {
+            const newValue = parseInt(betAmountInput.value || 1) + 5;
+            betAmountInput.value = Math.min(newValue, userBalance);
         });
         
         // Выбор сложности
@@ -696,24 +606,23 @@
                 difficultyButtons.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 difficulty = btn.dataset.level;
-                
-                if (gameActive) {
-                    createLadder();
-                    generateFloor();
-                }
+                createLadder();
             });
         });
         
-        // Кнопки действий
-        startBtn.addEventListener('click', startGame);
-        takeBtn.addEventListener('click', takeWin);
-        continueBtn.addEventListener('click', continueGame);
+        // Кнопка действия
+        actionBtn.addEventListener('click', () => {
+            if (actionBtn.textContent === 'Начать') {
+                startGame();
+            } else {
+                takeWin();
+            }
+        });
         
         // Инициализация игры
         document.addEventListener('DOMContentLoaded', () => {
             createLadder();
             
-            // Запускаем обновление баланса
             if (userId) {
                 startBalanceUpdates();
             } else {
@@ -722,10 +631,10 @@
             }
             
             // Обновляем поле ставки при изменении баланса
-            const balanceObserver = setInterval(() => {
+            setInterval(() => {
                 const betValue = parseInt(betAmountInput.value);
                 if (betValue > userBalance) {
-                    betAmountInput.value = Math.max(10, userBalance);
+                    betAmountInput.value = Math.max(1, userBalance);
                 }
             }, 500);
         });
