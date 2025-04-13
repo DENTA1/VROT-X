@@ -78,17 +78,43 @@
             flex-direction: column-reverse;
             width: 100%;
             height: 100%;
-            padding: 10px;
+            padding: 10px 10px 0 10px;
         }
         
         .floor {
             display: flex;
             justify-content: center;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             width: 100%;
+            position: relative;
             opacity: 0;
             transform: translateY(20px);
             transition: all 0.5s ease;
+        }
+        
+        .floor::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: #0f3460;
+            z-index: 1;
+        }
+        
+        .floor::after {
+            content: attr(data-multiplier);
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #0f3460;
+            color: white;
+            padding: 2px 15px;
+            border-radius: 15px;
+            font-size: 14px;
+            z-index: 2;
         }
         
         .floor.visible {
@@ -117,6 +143,7 @@
             color: white;
             position: relative;
             overflow: hidden;
+            outline: none;
         }
         
         .btn:hover:not(.selected):not(.mine):not(.safe) {
@@ -137,6 +164,15 @@
             background-color: #4CAF50;
         }
         
+        .preview-mine {
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { background-color: #4a4a6a; }
+            50% { background-color: #e94560; }
+        }
+        
         @keyframes crack {
             0% { transform: scale(1); opacity: 1; }
             50% { transform: scale(1.1); opacity: 0.8; }
@@ -154,6 +190,12 @@
             width: 100%;
             max-width: 600px;
             margin: 0 auto;
+        }
+        
+        .setup-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
         
         .bet-row {
@@ -245,16 +287,33 @@
             font-weight: bold;
         }
         
-        .multiplier-info {
-            display: flex;
+        .game-info {
+            display: none;
             justify-content: space-between;
-            margin-top: 5px;
+            background-color: #16213e;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .info-label {
             font-size: 14px;
+            color: #7a7a7a;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            font-size: 18px;
+            font-weight: bold;
         }
         
         .multiplier-value {
             color: #4CAF50;
-            font-weight: bold;
         }
         
         .action-btn {
@@ -393,31 +452,43 @@
         </div>
         
         <div class="controls">
-            <div class="bet-row">
-                <div class="bet-input-container">
-                    <input type="number" class="bet-input" id="betAmount" placeholder="Ставка" min="1" value="1">
+            <div class="setup-controls" id="setupControls">
+                <div class="bet-row">
+                    <div class="bet-input-container">
+                        <input type="number" class="bet-input" id="betAmount" placeholder="Ставка" min="1" value="1">
+                    </div>
+                    <div class="bet-buttons">
+                        <button class="bet-btn" id="betPlus1">+1</button>
+                        <button class="bet-btn" id="betPlus5">+5</button>
+                        <button class="bet-btn" id="betMin">MIN</button>
+                        <button class="bet-btn" id="betMax">MAX</button>
+                    </div>
                 </div>
-                <div class="bet-buttons">
-                    <button class="bet-btn" id="betPlus1">+1</button>
-                    <button class="bet-btn" id="betPlus5">+5</button>
-                    <button class="bet-btn" id="betMin">MIN</button>
-                    <button class="bet-btn" id="betMax">MAX</button>
+                
+                <div class="difficulty-row">
+                    <div class="difficulty-buttons">
+                        <button class="difficulty-btn active" data-level="easy">Легкий</button>
+                        <button class="difficulty-btn" data-level="medium">Средний</button>
+                        <button class="difficulty-btn" data-level="hard">Сложный</button>
+                        <button class="difficulty-btn" data-level="expert">Эксперт</button>
+                    </div>
+                    <button class="help-btn" id="helpBtn">?</button>
                 </div>
             </div>
             
-            <div class="difficulty-row">
-                <div class="difficulty-buttons">
-                    <button class="difficulty-btn active" data-level="easy">Легкий</button>
-                    <button class="difficulty-btn" data-level="medium">Средний</button>
-                    <button class="difficulty-btn" data-level="hard">Сложный</button>
-                    <button class="difficulty-btn" data-level="expert">Эксперт</button>
+            <div class="game-info" id="gameInfo">
+                <div class="info-item">
+                    <div class="info-label">Ставка</div>
+                    <div class="info-value" id="currentBet">1 ₽</div>
                 </div>
-                <button class="help-btn" id="helpBtn">?</button>
-            </div>
-            
-            <div class="multiplier-info">
-                <div>Текущий множитель: <span class="multiplier-value" id="currentMultiplier">1.5x</span></div>
-                <div>Следующий множитель: <span class="multiplier-value" id="nextMultiplier">2.0x</span></div>
+                <div class="info-item">
+                    <div class="info-label">Текущий множитель</div>
+                    <div class="info-value multiplier-value" id="currentMultiplier">1.04x</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Следующий множитель</div>
+                    <div class="info-value multiplier-value" id="nextMultiplier">1.15x</div>
+                </div>
             </div>
             
             <button class="action-btn start-btn" id="actionBtn">Начать</button>
@@ -546,13 +617,26 @@
         let gameActive = false;
         let safeButtons = [];
         let mineButtons = [];
+        let previewInterval = null;
         
         // Настройки сложности
         const difficultySettings = {
-            easy: { mines: 1, multipliers: [1.5, 2.0, 2.5, 3.0, 3.5, 4.0] },
-            medium: { mines: 2, multipliers: [2.0, 2.5, 3.0, 3.5, 4.0, 5.0] },
-            hard: { mines: 3, multipliers: [3.0, 3.5, 4.0, 5.0, 6.0, 7.0] },
-            expert: { mines: 4, multipliers: [5.0, 6.0, 7.0, 8.0, 9.0, 10.0] }
+            easy: { 
+                mines: 1, 
+                multipliers: [1.04, 1.15, 1.36, 1.68, 2.02, 2.5] 
+            },
+            medium: { 
+                mines: 2, 
+                multipliers: [1.15, 1.58, 2.25, 3.02, 4.67, 8] 
+            },
+            hard: { 
+                mines: 3, 
+                multipliers: [2.5, 4.5, 7.5, 11.5, 18.5, 35] 
+            },
+            expert: { 
+                mines: 4, 
+                multipliers: [4, 16, 64, 256, 1024, 25000] 
+            }
         };
         
         // Элементы DOM
@@ -569,6 +653,9 @@
         const okBtn = document.getElementById('okBtn');
         const currentMultiplier = document.getElementById('currentMultiplier');
         const nextMultiplier = document.getElementById('nextMultiplier');
+        const setupControls = document.getElementById('setupControls');
+        const gameInfo = document.getElementById('gameInfo');
+        const currentBet = document.getElementById('currentBet');
         
         // Создание игрового поля
         function createLadder() {
@@ -580,6 +667,7 @@
                 const floor = document.createElement('div');
                 floor.className = 'floor';
                 floor.dataset.floor = i;
+                floor.dataset.multiplier = difficultySettings[difficulty].multipliers[i].toFixed(2) + 'x';
                 
                 // Всегда 5 кнопок на этаже
                 for (let j = 0; j < 5; j++) {
@@ -597,6 +685,46 @@
             // Показываем только первый этаж
             showFloor(0);
             updateMultipliers();
+            showMinesPreview();
+        }
+        
+        // Показать мины перед игрой
+        function showMinesPreview() {
+            clearPreview();
+            
+            const settings = difficultySettings[difficulty];
+            const allPositions = [0, 1, 2, 3, 4];
+            
+            // Выбираем случайные позиции для мин
+            for (let i = allPositions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [allPositions[i], allPositions[j]] = [allPositions[j], allPositions[i]];
+            }
+            
+            const previewMines = allPositions.slice(0, settings.mines);
+            
+            // Анимируем мигание мин
+            previewInterval = setInterval(() => {
+                const buttons = document.querySelectorAll('.floor.visible .btn');
+                buttons.forEach((btn, index) => {
+                    if (previewMines.includes(index)) {
+                        btn.classList.toggle('preview-mine');
+                    }
+                });
+            }, 500);
+        }
+        
+        // Остановить превью мин
+        function clearPreview() {
+            if (previewInterval) {
+                clearInterval(previewInterval);
+                previewInterval = null;
+            }
+            
+            const buttons = document.querySelectorAll('.btn.preview-mine');
+            buttons.forEach(btn => {
+                btn.classList.remove('preview-mine');
+            });
         }
         
         // Показать этаж
@@ -629,10 +757,10 @@
         // Обновление множителей
         function updateMultipliers() {
             const settings = difficultySettings[difficulty];
-            currentMultiplier.textContent = `${settings.multipliers[currentFloor]}x`;
+            currentMultiplier.textContent = `${settings.multipliers[currentFloor].toFixed(2)}x`;
             
             if (currentFloor < 5) {
-                nextMultiplier.textContent = `${settings.multipliers[currentFloor + 1]}x`;
+                nextMultiplier.textContent = `${settings.multipliers[currentFloor + 1].toFixed(2)}x`;
             } else {
                 nextMultiplier.textContent = '-';
             }
@@ -683,10 +811,16 @@
             
             updateBalance(-betAmount)
                 .then(() => {
+                    // Скрываем настройки, показываем игровую информацию
+                    setupControls.style.display = 'none';
+                    gameInfo.style.display = 'flex';
+                    currentBet.textContent = `${betAmount} ₽`;
+                    
                     actionBtn.textContent = 'Сделайте ход';
                     actionBtn.className = 'action-btn disabled-btn';
                     actionBtn.disabled = true;
                     
+                    clearPreview();
                     createLadder();
                 })
                 .catch(error => {
@@ -791,6 +925,10 @@
             gameActive = false;
             currentWin = 0;
             
+            // Показываем настройки, скрываем игровую информацию
+            setupControls.style.display = 'flex';
+            gameInfo.style.display = 'none';
+            
             actionBtn.textContent = 'Начать';
             actionBtn.className = 'action-btn start-btn';
             actionBtn.disabled = false;
@@ -824,10 +962,7 @@
                 btn.classList.add('active');
                 difficulty = btn.dataset.level;
                 updateMultipliers();
-                
-                if (gameActive) {
-                    createLadder();
-                }
+                showMinesPreview();
             });
         });
         
