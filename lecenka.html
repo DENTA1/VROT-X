@@ -142,7 +142,7 @@
         
         .btn {
             width: 50px;
-            height: 45px;
+            height: 50px;
             margin: 0 5px;
             background-color: #4a4a6a;
             border: none;
@@ -467,8 +467,8 @@
                 <div class="bet-buttons">
                     <button class="bet-btn" id="betPlus1">+1</button>
                     <button class="bet-btn" id="betPlus5">+5</button>
-                    <button class="bet-btn" id="betMin">Min</button>
-                    <button class="bet-btn" id="betMax">Max</button>
+                    <button class="bet-btn" id="betMin">MIN</button>
+                    <button class="bet-btn" id="betMax">MAX</button>
                 </div>
             </div>
             
@@ -482,7 +482,7 @@
                 <button class="help-btn" id="helpBtn">?</button>
             </div>
             
-            <button class="action-btn start-btn" id="actionBtn">▶ Запустить игру</button>
+            <button class="action-btn start-btn" id="actionBtn">Начать</button>
         </div>
     </div>
     
@@ -490,20 +490,20 @@
     <div class="modal" id="helpModal">
         <div class="modal-content">
             <div class="modal-header">
-                <div class="modal-title">Уровни сложности (!)</div>
+                <div class="modal-title">Информация об уровнях сложности</div>
                 <button class="close-modal" id="closeHelpModal">×</button>
             </div>
             <div class="difficulty-info">
-                <strong>Легко:</strong> 1 мина на этаже
+                <strong>Легкий:</strong> 1 мина на этаже
             </div>
             <div class="difficulty-info">
-                <strong>Средне:</strong> 2 мины на этаже
+                <strong>Средний:</strong> 2 мины на этаже
             </div>
             <div class="difficulty-info">
-                <strong>Сложно:</strong> 3 мины на этаже
+                <strong>Сложный:</strong> 3 мины на этаже
             </div>
             <div class="difficulty-info">
-                <strong>ХАРД:</strong> 4 мины на этаже
+                <strong>Эксперт:</strong> 4 мины на этаже
             </div>
         </div>
     </div>
@@ -615,22 +615,22 @@
             easy: { 
                 mines: 1, 
                 multipliers: [1.04, 1.15, 1.36, 1.68, 2.02, 2.5],
-                name: "Легко"
+                name: "Легкий"
             },
             medium: { 
                 mines: 2, 
                 multipliers: [1.15, 1.58, 2.25, 3.02, 4.67, 8],
-                name: "Средне"
+                name: "Средний"
             },
             hard: { 
                 mines: 3, 
                 multipliers: [2.5, 4.5, 7.5, 11.5, 18.5, 35],
-                name: "Сложно"
+                name: "Сложный"
             },
             expert: { 
                 mines: 4, 
                 multipliers: [4, 16, 64, 256, 1024, 25000],
-                name: "ХАРД"
+                name: "Эксперт"
             }
         };
         
