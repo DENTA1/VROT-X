@@ -349,6 +349,7 @@
             appId: "1:622297225288:web:5df6a5b02ffddedd96e07d"
         };
         
+        // Инициализируем Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         
@@ -361,25 +362,68 @@
         
         const userId = getCookie('tg_user_id');
         let userBalance = 0;
+        let balanceUpdateInterval;
         
-        // Загрузка баланса пользователя
-        if (userId) {
-            database.ref('users/' + userId).on('value', (snapshot) => {
-                const userData = snapshot.val();
-                if (userData && userData.balance) {
-                    userBalance = userData.balance;
-                    document.getElementById('balance').textContent = userBalance + ' ₽';
-                }
+        // Функция для загрузки баланса
+        function loadBalance() {
+            if (!userId) {
+                console.error('User ID not found in cookies');
+                return;
+            }
+            
+            return new Promise((resolve, reject) => {
+                database.ref('users/' + userId).once('value')
+                    .then((snapshot) => {
+                        const userData = snapshot.val();
+                        if (userData && userData.balance !== undefined) {
+                            userBalance = userData.balance;
+                            document.getElementById('balance').textContent = userBalance + ' ₽';
+                            resolve(userBalance);
+                        } else {
+                            reject('Balance data not found');
+                        }
+                    })
+                    .catch((error) => {
+                        reject(error);
+                    });
             });
         }
         
-        // Обновление баланса
+        // Функция для периодического обновления баланса
+        function startBalanceUpdates() {
+            // Останавливаем предыдущий интервал, если он был
+            if (balanceUpdateInterval) {
+                clearInterval(balanceUpdateInterval);
+            }
+            
+            // Загружаем баланс сразу
+            loadBalance().catch(error => {
+                console.error('Error loading balance:', error);
+            });
+            
+            // Устанавливаем интервал для обновления каждую секунду
+            balanceUpdateInterval = setInterval(() => {
+                loadBalance().catch(error => {
+                    console.error('Error loading balance:', error);
+                });
+            }, 1000);
+        }
+        
+        // Обновление баланса в Firebase
         function updateBalance(amount) {
-            if (!userId) return;
+            if (!userId) {
+                console.error('Cannot update balance - user ID not found');
+                return Promise.reject('User ID not found');
+            }
             
             const newBalance = userBalance + amount;
-            database.ref('users/' + userId).update({
+            
+            return database.ref('users/' + userId).update({
                 balance: newBalance
+            }).then(() => {
+                userBalance = newBalance;
+                document.getElementById('balance').textContent = userBalance + ' ₽';
+                return newBalance;
             });
         }
         
@@ -456,19 +500,24 @@
             currentWin = 0;
             gameActive = true;
             
-            updateBalance(-betAmount);
-            
-            startBtn.disabled = true;
-            takeBtn.disabled = true;
-            continueBtn.disabled = true;
-            
-            messageElement.textContent = '';
-            messageElement.className = 'message';
-            
-            createLadder();
-            generateFloor();
-            
-            showMessage(`Игра началась! Ставка: ${betAmount} ₽`, 'success');
+            updateBalance(-betAmount)
+                .then(() => {
+                    startBtn.disabled = true;
+                    takeBtn.disabled = true;
+                    continueBtn.disabled = true;
+                    
+                    messageElement.textContent = '';
+                    messageElement.className = 'message';
+                    
+                    createLadder();
+                    generateFloor();
+                    
+                    showMessage(`Игра началась! Ставка: ${betAmount} ₽`, 'success');
+                })
+                .catch(error => {
+                    showMessage('Ошибка при обновлении баланса', 'error');
+                    console.error('Update balance error:', error);
+                });
         }
         
         // Генерация этажа
@@ -555,7 +604,7 @@
                     // Показываем все мины и неправильные кнопки
                     floorButtons.forEach(btn => {
                         const btnPos = parseInt(btn.dataset.position);
-                        if (mineButtons.includes(btnPos) {
+                        if (mineButtons.includes(btnPos)) {
                             btn.classList.add('mine');
                         } else if (btn !== button) {
                             btn.classList.add('wrong');
@@ -579,11 +628,18 @@
         // Забрать выигрыш
         function takeWin() {
             if (currentWin > 0) {
-                updateBalance(currentWin);
-                showMessage(`Вы забрали ${currentWin} ₽!`, 'success');
+                updateBalance(currentWin)
+                    .then(() => {
+                        showMessage(`Вы забрали ${currentWin} ₽!`, 'success');
+                        resetGame();
+                    })
+                    .catch(error => {
+                        showMessage('Ошибка при обновлении баланса', 'error');
+                        console.error('Update balance error:', error);
+                    });
+            } else {
+                resetGame();
             }
-            
-            resetGame();
         }
         
         // Продолжить игру
@@ -654,7 +710,25 @@
         continueBtn.addEventListener('click', continueGame);
         
         // Инициализация игры
-        createLadder();
+        document.addEventListener('DOMContentLoaded', () => {
+            createLadder();
+            
+            // Запускаем обновление баланса
+            if (userId) {
+                startBalanceUpdates();
+            } else {
+                console.error('User ID not found in cookies');
+                showMessage('Ошибка: ID пользователя не найден', 'error');
+            }
+            
+            // Обновляем поле ставки при изменении баланса
+            const balanceObserver = setInterval(() => {
+                const betValue = parseInt(betAmountInput.value);
+                if (betValue > userBalance) {
+                    betAmountInput.value = Math.max(10, userBalance);
+                }
+            }, 500);
+        });
     </script>
 </body>
 </html>
