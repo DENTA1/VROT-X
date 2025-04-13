@@ -114,7 +114,7 @@
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             gap: 8px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         
         .cell {
@@ -151,16 +151,18 @@
         .multipliers-container {
             display: flex;
             overflow-x: auto;
-            gap: 8px;
-            margin-bottom: 15px;
+            gap: 6px;
+            margin-bottom: 12px;
             padding-bottom: 5px;
+            height: 60px;
+            align-items: center;
         }
         
         .multiplier-item {
-            min-width: 70px;
+            min-width: 60px;
             background: #252525;
-            border-radius: 8px;
-            padding: 10px;
+            border-radius: 6px;
+            padding: 8px;
             text-align: center;
             flex-shrink: 0;
         }
@@ -168,57 +170,57 @@
         .multiplier-value {
             font-weight: bold;
             color: #FFD700;
-            margin-bottom: 5px;
+            font-size: 14px;
+            margin-bottom: 3px;
         }
         
         .multiplier-step {
-            font-size: 12px;
+            font-size: 11px;
             color: #aaa;
         }
         
         .bet-controls {
             background: #252525;
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 15px;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .bet-title {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            border-radius: 8px;
+            padding: 10px;
             margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
         .bet-label {
             font-size: 14px;
             color: #aaa;
+            white-space: nowrap;
         }
         
         .bet-amount {
             font-weight: bold;
             color: #4CAF50;
-            font-size: 16px;
+            font-size: 14px;
+            min-width: 50px;
+            text-align: right;
         }
         
         .bet-buttons {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 8px;
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            flex-grow: 1;
         }
         
         .bet-button {
             background: #333;
             border: none;
             border-radius: 6px;
-            padding: 10px 5px;
+            padding: 6px 8px;
             color: #e0e0e0;
-            font-size: 14px;
+            font-size: 12px;
             cursor: pointer;
             transition: all 0.2s;
-            text-align: center;
+            white-space: nowrap;
         }
         
         .bet-button:hover {
@@ -227,35 +229,38 @@
         
         .mines-controls {
             background: #252525;
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 15px;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
-        .mines-title {
+        .mines-label {
             font-size: 14px;
             color: #aaa;
-            margin-bottom: 10px;
+            white-space: nowrap;
         }
         
         .mines-buttons {
             display: flex;
-            gap: 8px;
-            overflow-x: auto;
-            padding-bottom: 5px;
+            gap: 6px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            flex-grow: 1;
         }
         
         .mines-button {
             background: #333;
             border: none;
             border-radius: 6px;
-            padding: 10px 15px;
+            padding: 6px 10px;
             color: #e0e0e0;
-            font-size: 14px;
+            font-size: 12px;
             cursor: pointer;
             transition: all 0.2s;
             white-space: nowrap;
-            flex-shrink: 0;
         }
         
         .mines-button:hover {
@@ -273,19 +278,19 @@
             background: #4CAF50;
             color: white;
             border: none;
-            border-radius: 12px;
-            padding: 15px;
-            font-size: 18px;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 16px;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.2s;
-            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+            box-shadow: 0 3px 10px rgba(76, 175, 80, 0.4);
         }
         
         .action-button:hover {
             background: #66BB6A;
             transform: translateY(-2px);
-            box-shadow: 0 7px 20px rgba(102, 187, 106, 0.6);
+            box-shadow: 0 5px 15px rgba(102, 187, 106, 0.6);
         }
         
         .action-button:disabled {
@@ -301,7 +306,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.7);
             display: none;
             flex-direction: column;
             justify-content: center;
@@ -310,14 +315,14 @@
         }
         
         .modal-content {
-            background: #252525;
-            border-radius: 16px;
-            padding: 30px;
-            max-width: 300px;
+            background: rgba(37, 37, 37, 0.95);
+            border-radius: 12px;
+            padding: 20px;
+            max-width: 280px;
             width: 90%;
             text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
             animation: modalFadeIn 0.3s ease-out;
+            border: 1px solid #444;
         }
         
         @keyframes modalFadeIn {
@@ -326,21 +331,21 @@
         }
         
         .modal-title {
-            font-size: 24px;
-            margin-bottom: 15px;
+            font-size: 20px;
+            margin-bottom: 12px;
             color: #FFD700;
         }
         
         .modal-message {
-            font-size: 16px;
-            margin-bottom: 20px;
-            line-height: 1.5;
+            font-size: 15px;
+            margin-bottom: 15px;
+            line-height: 1.4;
         }
         
         .modal-amount {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: bold;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             color: #4CAF50;
         }
         
@@ -348,9 +353,9 @@
             background: #4285F4;
             color: white;
             border: none;
-            border-radius: 25px;
-            padding: 12px;
-            font-size: 16px;
+            border-radius: 20px;
+            padding: 10px;
+            font-size: 15px;
             font-weight: bold;
             cursor: pointer;
             width: 100%;
@@ -383,21 +388,20 @@
             <div class="multipliers-container" id="multipliersContainer"></div>
             
             <div class="bet-controls">
-                <div class="bet-title">
-                    <span class="bet-label">Ставка:</span>
-                    <span class="bet-amount" id="currentBetAmount">1.00</span>
-                </div>
+                <span class="bet-label">Ставка:</span>
+                <span class="bet-amount" id="currentBetAmount">1.00</span>
                 <div class="bet-buttons">
-                    <button class="bet-button" data-bet="0.1">+0.10</button>
-                    <button class="bet-button" data-bet="0.5">+0.50</button>
                     <button class="bet-button" data-bet="1">+1</button>
                     <button class="bet-button" data-bet="5">+5</button>
-                    <button class="bet-button" data-bet="10">+10</button>
+                    <button class="bet-button" data-bet="25">+25</button>
+                    <button class="bet-button" data-bet="50">+50</button>
+                    <button class="bet-button" data-bet="min">MIN</button>
+                    <button class="bet-button" data-bet="max">MAX</button>
                 </div>
             </div>
             
             <div class="mines-controls">
-                <div class="mines-title">Мины:</div>
+                <span class="mines-label">Кол-во мин:</span>
                 <div class="mines-buttons">
                     <button class="mines-button active" data-mines="2">2</button>
                     <button class="mines-button" data-mines="3">3</button>
@@ -481,6 +485,7 @@
         let currentMultiplierIndex = 0;
         let userRef = null;
         let balanceLoaded = false;
+        let multiplierScrollInterval = null;
 
         // Инициализация игры
         function initGame() {
@@ -555,6 +560,7 @@
             multipliers.forEach((multiplier, index) => {
                 const item = document.createElement('div');
                 item.className = 'multiplier-item';
+                item.dataset.step = index;
                 
                 const value = document.createElement('div');
                 value.className = 'multiplier-value';
@@ -568,6 +574,29 @@
                 item.appendChild(step);
                 multipliersContainer.appendChild(item);
             });
+            
+            // Автопрокрутка к текущему множителю
+            scrollToCurrentMultiplier();
+        }
+
+        // Прокрутка к текущему множителю
+        function scrollToCurrentMultiplier() {
+            if (multiplierScrollInterval) clearInterval(multiplierScrollInterval);
+            
+            multiplierScrollInterval = setInterval(() => {
+                const currentMultiplier = document.querySelector(`.multiplier-item[data-step="${currentMultiplierIndex}"]`);
+                if (currentMultiplier) {
+                    currentMultiplier.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'nearest',
+                        inline: 'center'
+                    });
+                }
+            }, 100);
+            
+            setTimeout(() => {
+                if (multiplierScrollInterval) clearInterval(multiplierScrollInterval);
+            }, 1000);
         }
 
         // Установка обработчиков событий
@@ -577,15 +606,18 @@
                 button.addEventListener('click', () => {
                     if (gameStarted) return;
                     
-                    const bet = parseFloat(button.dataset.bet);
-                    const newBet = parseFloat((currentBet + bet).toFixed(2));
+                    const bet = button.dataset.bet;
                     
-                    if (newBet < 0.01) {
-                        currentBet = 0.01;
+                    if (bet === 'min') {
+                        currentBet = 1.00;
+                    } else if (bet === 'max') {
+                        currentBet = Math.max(1.00, parseFloat((currentBalance / 2).toFixed(2)));
                     } else {
-                        currentBet = newBet;
+                        currentBet = parseFloat(currentBet) + parseFloat(bet);
                     }
                     
+                    if (currentBet < 0.01) currentBet = 0.01;
+                    currentBet = parseFloat(currentBet.toFixed(2));
                     currentBetAmount.textContent = currentBet.toFixed(2);
                 });
             });
@@ -632,7 +664,6 @@
             // Кнопка модального окна победы
             winButton.addEventListener('click', () => {
                 winModal.style.display = 'none';
-                resetGame();
             });
         }
 
@@ -664,6 +695,9 @@
             document.querySelectorAll('.bet-button, .mines-button').forEach(btn => {
                 btn.disabled = true;
             });
+            
+            // Запускаем автоскролл множителей
+            scrollToCurrentMultiplier();
         }
 
         // Генерация позиций мин
@@ -707,10 +741,13 @@
                 currentMultiplierIndex = Math.min(revealedCells, MULTIPLIERS[minesCount].length - 1);
                 actionButton.textContent = `Забрать ${(currentBet * MULTIPLIERS[minesCount][currentMultiplierIndex]).toFixed(2)}`;
                 
-                // Проверяем победу
+                // Проверяем победу (только если открыты все алмазы)
                 if (revealedCells === (25 - minesCount)) {
                     endGame(true);
                 }
+                
+                // Прокручиваем к текущему множителю
+                scrollToCurrentMultiplier();
             }
         }
 
@@ -733,11 +770,13 @@
                 }
             }
             
-            // Рассчитываем выигрыш
-            let winAmount = 0;
+            // Блокируем кнопку "Забрать"
+            actionButton.disabled = true;
+            
+            // Рассчитываем выигрыш только если игрок не подорвался на мине
             if (winByChoice || revealedCells === (25 - minesCount)) {
                 const multiplier = MULTIPLIERS[minesCount][currentMultiplierIndex];
-                winAmount = parseFloat((currentBet * multiplier).toFixed(2));
+                const winAmount = parseFloat((currentBet * multiplier).toFixed(2));
                 
                 // Обновляем баланс
                 currentBalance = parseFloat((currentBalance + winAmount).toFixed(2));
@@ -767,6 +806,7 @@
             
             // Включаем кнопки
             actionButton.textContent = 'Играть';
+            actionButton.disabled = false;
             document.querySelectorAll('.bet-button, .mines-button').forEach(btn => {
                 btn.disabled = false;
             });
