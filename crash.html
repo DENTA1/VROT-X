@@ -14,6 +14,7 @@
             --bg-light: #1e1e1e;
             --text-color: #ffffff;
             --text-secondary: #aaaaaa;
+            --accent-color: #FF5722;
         }
         
         body {
@@ -46,11 +47,13 @@
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
-            transition: background 0.3s;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         
         .back-btn:hover {
             background: #333;
+            transform: translateY(-2px);
         }
         
         .balance {
@@ -59,43 +62,55 @@
             background: var(--bg-light);
             padding: 10px 15px;
             border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .balance:hover {
+            transform: translateY(-2px);
         }
         
         .game-container {
             background: var(--bg-light);
             border-radius: 10px;
-            padding: 20px;
+            padding: 25px;
             margin-bottom: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
         }
         
-        .game-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
+        .game-container:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
         }
         
-        .players-count {
-            color: var(--text-secondary);
-            font-size: 14px;
+        .timer-container {
+            text-align: center;
+            margin: 20px 0;
+            position: relative;
         }
         
         .timer {
-            text-align: center;
-            font-size: 24px;
+            font-size: 32px;
             font-weight: bold;
-            margin: 15px 0;
-            color: var(--primary-color);
+            color: var(--accent-color);
+            text-shadow: 0 0 10px rgba(255, 87, 34, 0.5);
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            display: inline-block;
+            min-width: 100px;
+            transition: all 0.3s ease;
         }
         
         .game-area {
             height: 300px;
-            background: var(--bg-dark);
-            border-radius: 8px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 10px;
             position: relative;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             overflow: hidden;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
         }
         
         #rocket {
@@ -103,25 +118,27 @@
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            width: 40px;
-            height: 80px;
+            width: 50px;
+            height: 100px;
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%234CAF50"><path d="M12 2.5c0 0 4.5 2.04 4.5 10.5 0 2.49-1.04 5.57-1.6 7H9.1c-.56-1.43-1.6-4.51-1.6-7C7.5 4.54 12 2.5 12 2.5zm2 8.5c0-1.1-.9-2-2-2s-2 .9-2 2 .9 2 2 2 2-.9 2-2zm-6.31 9.52c-.48-1.23-1.52-4.17-1.67-6.87l-1.13.75c-.56.38-.89 1-.89 1.67V22l3.69-1.48zM20 22v-5.93c0-.67-.33-1.29-.89-1.66l-1.13-.75c-.15 2.69-1.2 5.64-1.67 6.87L20 22z"/></svg>');
             background-size: contain;
             background-repeat: no-repeat;
-            transition: bottom 0.1s linear;
+            transition: bottom 0.05s linear;
             z-index: 2;
+            filter: drop-shadow(0 0 5px rgba(76, 175, 80, 0.7));
         }
         
         #explosion {
             position: absolute;
-            width: 100px;
-            height: 100px;
+            width: 150px;
+            height: 150px;
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23f44336"><path d="M12 2c3.86 0 7 3.14 7 7 0 5.25-7 13-7 13S5 14.25 5 9c0-3.86 3.14-7 7-7zm0-2c-4.96 0-9 4.04-9 9 0 6.17 7 15 9 15s9-8.83 9-15c0-4.96-4.04-9-9-9zm-.5 3v5.21c0 .45.54.67.85.35l2.79-2.79c.2-.2.2-.51 0-.71l-2.79-2.79c-.31-.31-.85-.09-.85.35z"/></svg>');
             background-size: contain;
             background-repeat: no-repeat;
             opacity: 0;
-            transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%) scale(0.5);
             z-index: 3;
+            transition: all 0.3s ease-out;
         }
         
         .multiplier-display {
@@ -129,18 +146,19 @@
             top: 15px;
             left: 15px;
             background: rgba(0, 0, 0, 0.7);
-            padding: 8px 12px;
+            padding: 10px 15px;
             border-radius: 20px;
             font-weight: bold;
-            font-size: 18px;
+            font-size: 20px;
             color: var(--primary-color);
             z-index: 2;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
         
         .bet-controls {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 15px;
         }
         
         .bet-input {
@@ -150,16 +168,19 @@
         
         .bet-input input {
             flex: 1;
-            padding: 12px;
-            border-radius: 8px;
-            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #333;
             background: var(--bg-dark);
             color: var(--text-color);
             font-size: 16px;
+            transition: all 0.3s ease;
         }
         
         .bet-input input:focus {
-            outline: 2px solid var(--primary-color);
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
         }
         
         .bet-buttons {
@@ -169,18 +190,25 @@
         
         .bet-btn {
             flex: 1;
-            padding: 12px;
+            padding: 15px;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             background: #333;
             color: var(--text-color);
             cursor: pointer;
             font-weight: bold;
-            transition: background 0.2s;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         
         .bet-btn:hover {
             background: #444;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+        }
+        
+        .bet-btn:active {
+            transform: translateY(1px);
         }
         
         .place-bet-btn {
@@ -203,6 +231,8 @@
             background: #333;
             cursor: not-allowed;
             opacity: 0.7;
+            transform: none !important;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2) !important;
         }
         
         .loading-screen {
@@ -217,21 +247,34 @@
             justify-content: center;
             align-items: center;
             z-index: 1000;
+            transition: opacity 0.5s ease;
         }
         
         .loading-spinner {
             border: 5px solid #333;
             border-top: 5px solid var(--primary-color);
             border-radius: 50%;
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             animation: spin 1s linear infinite;
             margin-bottom: 20px;
+            box-shadow: 0 0 20px rgba(76, 175, 80, 0.3);
+        }
+        
+        .loading-text {
+            font-size: 18px;
+            color: var(--text-secondary);
+            animation: pulse 1.5s infinite alternate;
         }
         
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            100% { opacity: 1; }
         }
         
         .stars {
@@ -247,19 +290,47 @@
             position: absolute;
             background-color: white;
             border-radius: 50%;
-            animation: twinkle 1s infinite alternate;
+            animation: twinkle 2s infinite alternate;
         }
         
         @keyframes twinkle {
-            0% { opacity: 0.3; }
-            100% { opacity: 1; }
+            0% { opacity: 0.2; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1.1); }
+        }
+        
+        .flame {
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 40px;
+            background: linear-gradient(to top, #FF5722, #FFC107);
+            border-radius: 50% 50% 20% 20%;
+            filter: blur(5px);
+            z-index: 1;
+            opacity: 0.8;
+            animation: flame 0.3s infinite alternate;
+        }
+        
+        @keyframes flame {
+            0% { transform: translateX(-50%) scaleY(0.9); opacity: 0.7; }
+            100% { transform: translateX(-50%) scaleY(1.1); opacity: 1; }
+        }
+        
+        .particle {
+            position: absolute;
+            background-color: #FFC107;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 4;
         }
     </style>
 </head>
 <body>
     <div class="loading-screen" id="loadingScreen">
         <div class="loading-spinner"></div>
-        <div>Загрузка игры...</div>
+        <div class="loading-text">Загрузка игры...</div>
     </div>
 
     <div class="container" id="gameContainer" style="display: none;">
@@ -269,18 +340,19 @@
         </div>
         
         <div class="game-container">
-            <div class="game-header">
-                <div class="players-count">Игроков онлайн: <span id="playersOnline">0</span></div>
-                <div class="multiplier-display" id="multiplierDisplay">1.00x</div>
+            <div class="timer-container">
+                <div class="timer" id="timer">10</div>
             </div>
-            
-            <div class="timer" id="timer">Ожидание игроков...</div>
             
             <div class="game-area">
                 <div class="stars" id="stars"></div>
-                <div id="rocket"></div>
+                <div id="rocket">
+                    <div class="flame"></div>
+                </div>
                 <div id="explosion"></div>
             </div>
+            
+            <div class="multiplier-display" id="multiplierDisplay">1.00x</div>
             
             <div class="bet-controls">
                 <div class="bet-input">
@@ -330,19 +402,16 @@
         let currentBet = 0;
         let hasBet = false;
         let hasCashedOut = false;
-        let gameRef;
-        let playerRef;
-        let playersRef;
         let gameInterval;
         let bettingInterval;
         let crashMultiplier = 0;
         let currentMultiplier = 1.0;
+        let playerRef;
         
         // Элементы интерфейса
         const loadingScreen = document.getElementById('loadingScreen');
         const gameContainer = document.getElementById('gameContainer');
         const balanceElement = document.getElementById('balance');
-        const playersOnlineElement = document.getElementById('playersOnline');
         const timerElement = document.getElementById('timer');
         const betAmountInput = document.getElementById('betAmount');
         const actionButton = document.getElementById('actionButton');
@@ -350,11 +419,11 @@
         const rocket = document.getElementById('rocket');
         const explosion = document.getElementById('explosion');
         const starsContainer = document.getElementById('stars');
+        const gameArea = document.querySelector('.game-area');
         
         // Создаем звезды для фона
         function createStars() {
-            const starsCount = 50;
-            const gameArea = document.querySelector('.game-area');
+            const starsCount = 100;
             const width = gameArea.offsetWidth;
             const height = gameArea.offsetHeight;
             
@@ -362,25 +431,98 @@
                 const star = document.createElement('div');
                 star.className = 'star';
                 
-                const size = Math.random() * 2 + 1;
+                const size = Math.random() * 3;
                 const x = Math.random() * width;
                 const y = Math.random() * height;
                 const delay = Math.random() * 2;
+                const duration = 1 + Math.random() * 3;
                 
                 star.style.width = `${size}px`;
                 star.style.height = `${size}px`;
                 star.style.left = `${x}px`;
                 star.style.top = `${y}px`;
                 star.style.animationDelay = `${delay}s`;
+                star.style.animationDuration = `${duration}s`;
                 
                 starsContainer.appendChild(star);
+            }
+        }
+        
+        // Создаем частицы для взрыва
+        function createParticles(x, y) {
+            const particlesCount = 30;
+            
+            for (let i = 0; i < particlesCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                const size = 5 + Math.random() * 10;
+                const angle = Math.random() * Math.PI * 2;
+                const velocity = 2 + Math.random() * 5;
+                const lifetime = 500 + Math.random() * 1000;
+                
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${x}px`;
+                particle.style.top = `${y}px`;
+                
+                gameArea.appendChild(particle);
+                
+                const startTime = Date.now();
+                
+                function updateParticle() {
+                    const elapsed = Date.now() - startTime;
+                    const progress = elapsed / lifetime;
+                    
+                    if (progress >= 1) {
+                        particle.remove();
+                        return;
+                    }
+                    
+                    const currentX = x + Math.cos(angle) * velocity * elapsed / 20;
+                    const currentY = y + Math.sin(angle) * velocity * elapsed / 20;
+                    const opacity = 1 - progress;
+                    const scale = 1 - progress * 0.8;
+                    
+                    particle.style.left = `${currentX}px`;
+                    particle.style.top = `${currentY}px`;
+                    particle.style.opacity = opacity;
+                    particle.style.transform = `scale(${scale})`;
+                    
+                    requestAnimationFrame(updateParticle);
+                }
+                
+                requestAnimationFrame(updateParticle);
             }
         }
         
         // Инициализация игры
         function initGame() {
             createStars();
-            connectToGame();
+            loadUserData();
+        }
+        
+        // Загрузка данных пользователя
+        function loadUserData() {
+            playerRef = database.ref('users/' + userId);
+            
+            playerRef.on('value', (snapshot) => {
+                const playerData = snapshot.val();
+                if (playerData && playerData.balance !== undefined) {
+                    userBalance = playerData.balance;
+                    balanceElement.textContent = userBalance;
+                    
+                    // Скрываем загрузочный экран после загрузки баланса
+                    setTimeout(() => {
+                        loadingScreen.style.opacity = '0';
+                        setTimeout(() => {
+                            loadingScreen.style.display = 'none';
+                            gameContainer.style.display = 'block';
+                            startNewRound();
+                        }, 500);
+                    }, 500);
+                }
+            });
         }
         
         // Установка суммы ставки
@@ -399,201 +541,104 @@
             }
         }
         
-        // Подключение к игре
-        function connectToGame() {
-            gameRef = database.ref('crash');
-            playerRef = database.ref('users/' + userId);
-            playersRef = database.ref('players');
-            
-            // Загрузка баланса
-            playerRef.on('value', (snapshot) => {
-                const playerData = snapshot.val();
-                if (playerData && playerData.balance !== undefined) {
-                    userBalance = playerData.balance;
-                    balanceElement.textContent = userBalance;
-                    
-                    // Скрываем загрузочный экран после загрузки баланса
-                    loadingScreen.style.display = 'none';
-                    gameContainer.style.display = 'block';
-                }
-            });
-            
-            // Установка присутствия игрока
-            playersRef.child(userId).onDisconnect().remove();
-            playersRef.child(userId).set({
-                online: true,
-                lastActive: firebase.database.ServerValue.TIMESTAMP
-            });
-            
-            // Обновление количества игроков
-            playersRef.on('value', (snapshot) => {
-                const players = snapshot.val() || {};
-                const onlinePlayers = Object.entries(players).filter(([_, p]) => p.online);
-                playersOnlineElement.textContent = onlinePlayers.length;
-                
-                // Если есть игроки, но нет игры - создаем
-                if (onlinePlayers.length > 0) {
-                    gameRef.once('value').then((gameSnapshot) => {
-                        if (!gameSnapshot.exists()) {
-                            startNewRound();
-                        }
-                    });
-                }
-                // Если нет игроков - удаляем игру
-                else if (onlinePlayers.length === 0) {
-                    gameRef.remove();
-                    clearIntervals();
-                    timerElement.textContent = 'Ожидание игроков...';
-                    resetGameUI();
-                }
-            });
-            
-            // Слушаем изменения в игре
-            gameRef.on('value', (snapshot) => {
-                const gameData = snapshot.val();
-                if (!gameData) {
-                    timerElement.textContent = 'Ожидание игроков...';
-                    actionButton.disabled = true;
-                    resetGameUI();
-                    return;
-                }
-                
-                crashMultiplier = gameData.crashPoint;
-                updateGameState(gameData);
-            });
-            
-            // Проверка ввода ставки
-            betAmountInput.addEventListener('input', checkBetInput);
-        }
-        
-        // Обновление состояния игры
-        function updateGameState(gameData) {
-            if (gameData.phase === 'betting') {
-                currentMultiplier = 1.0;
-                updateRocketPosition();
-                explosion.style.opacity = '0';
-                
-                const now = Date.now();
-                const timeLeft = Math.max(0, gameData.bettingEndTime - now);
-                const secondsLeft = Math.ceil(timeLeft / 1000);
-                
-                timerElement.textContent = `Ставки принимаются: ${secondsLeft}с`;
-                
-                // Обновляем таймер каждую секунду
-                if (bettingInterval) clearInterval(bettingInterval);
-                bettingInterval = setInterval(() => {
-                    const newTimeLeft = Math.max(0, gameData.bettingEndTime - Date.now());
-                    const newSecondsLeft = Math.ceil(newTimeLeft / 1000);
-                    
-                    if (newSecondsLeft <= 0) {
-                        clearInterval(bettingInterval);
-                        return;
-                    }
-                    
-                    timerElement.textContent = `Ставки принимаются: ${newSecondsLeft}с`;
-                    
-                    // Блокируем кнопку за 1 секунду до конца
-                    if (newSecondsLeft <= 1) {
-                        actionButton.disabled = true;
-                    }
-                }, 200);
-                
-                if (timeLeft > 1000 && !hasBet) {
-                    actionButton.textContent = 'Поставить';
-                    actionButton.className = 'bet-btn place-bet-btn action-btn';
-                    actionButton.onclick = placeBet;
-                    checkBetInput();
-                    
-                    // Разблокируем кнопки ставок
-                    document.querySelectorAll('.bet-buttons .bet-btn').forEach(btn => {
-                        btn.disabled = false;
-                    });
-                } else {
-                    actionButton.disabled = true;
-                }
-            } 
-            else if (gameData.phase === 'playing') {
-                currentMultiplier = gameData.currentMultiplier;
-                updateRocketPosition();
-                
-                if (gameData.crashPoint === 0 && currentMultiplier === 0) {
-                    // Мгновенный краш
-                    showExplosion();
-                    timerElement.textContent = 'Краш! 0.00x';
-                    actionButton.disabled = true;
-                    scheduleNextRound();
-                } else if (currentMultiplier >= gameData.crashPoint) {
-                    // Игра закончилась
-                    showExplosion();
-                    timerElement.textContent = `Краш! ${gameData.crashPoint.toFixed(2)}x`;
-                    actionButton.disabled = true;
-                    scheduleNextRound();
-                } else {
-                    // Игра продолжается
-                    timerElement.textContent = 'Игра идет...';
-                    multiplierDisplay.textContent = currentMultiplier.toFixed(2) + 'x';
-                    
-                    // Блокируем кнопки ставок во время игры
-                    document.querySelectorAll('.bet-buttons .bet-btn').forEach(btn => {
-                        btn.disabled = true;
-                    });
-                    
-                    if (hasBet && !hasCashedOut) {
-                        actionButton.textContent = 'Забрать';
-                        actionButton.className = 'bet-btn cash-out-btn action-btn';
-                        actionButton.disabled = false;
-                        actionButton.onclick = cashOut;
-                    } else {
-                        actionButton.disabled = true;
-                    }
-                }
-            }
-        }
-        
-        // Обновление позиции ракеты
-        function updateRocketPosition() {
-            const gameArea = document.querySelector('.game-area');
-            const maxHeight = gameArea.offsetHeight - 100;
-            const progress = Math.min(currentMultiplier / 5, 1); // Максимум 5x для визуализации
-            rocket.style.bottom = `${20 + progress * maxHeight}px`;
-        }
-        
-        // Показать взрыв
-        function showExplosion() {
-            explosion.style.opacity = '1';
-            explosion.style.left = rocket.style.left;
-            explosion.style.top = rocket.style.bottom;
-            
-            setTimeout(() => {
-                explosion.style.opacity = '0';
-            }, 1000);
-        }
-        
         // Начало нового раунда
         function startNewRound() {
             hasBet = false;
             hasCashedOut = false;
             currentMultiplier = 1.0;
+            rocket.style.display = 'none';
+            explosion.style.opacity = '0';
+            multiplierDisplay.textContent = '1.00x';
+            
+            // Очищаем предыдущие интервалы
+            clearIntervals();
+            
+            // Запускаем таймер ставок
+            startBettingTimer();
+        }
+        
+        // Таймер ставок
+        function startBettingTimer() {
+            let timeLeft = 10;
+            timerElement.textContent = timeLeft;
+            
+            bettingInterval = setInterval(() => {
+                timeLeft--;
+                timerElement.textContent = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(bettingInterval);
+                    startGame();
+                } else if (timeLeft <= 3) {
+                    timerElement.style.color = 'var(--danger-color)';
+                    timerElement.style.animation = 'pulse 0.5s infinite';
+                }
+            }, 1000);
+            
+            // Разблокируем кнопки
+            actionButton.textContent = 'Поставить';
+            actionButton.className = 'bet-btn place-bet-btn action-btn';
+            actionButton.onclick = placeBet;
+            actionButton.disabled = true;
+            
+            document.querySelectorAll('.bet-buttons .bet-btn').forEach(btn => {
+                btn.disabled = false;
+            });
+        }
+        
+        // Начало игры
+        function startGame() {
+            // Блокируем кнопки ставок
+            document.querySelectorAll('.bet-buttons .bet-btn').forEach(btn => {
+                btn.disabled = true;
+            });
             
             // Генерируем точку краша (20% шанс на мгновенный краш 0x)
             const isInstantCrash = Math.random() < 0.2;
-            const crashPoint = isInstantCrash ? 0 : generateCrashPoint();
+            crashMultiplier = isInstantCrash ? 0 : generateCrashPoint();
             
-            const gameData = {
-                phase: 'betting',
-                startTime: Date.now(),
-                bettingEndTime: Date.now() + 15000,
-                crashPoint: crashPoint,
-                currentMultiplier: 1.0,
-                nextRoundScheduled: false
-            };
+            // Показываем ракету
+            rocket.style.display = 'block';
+            rocket.style.bottom = '20px';
             
-            gameRef.set(gameData).then(() => {
-                // Запускаем игру после окончания ставок
-                setTimeout(() => {
-                    startGamePlay();
-                }, 15000);
-            });
+            // Сбрасываем таймер
+            timerElement.textContent = 'ПОЛЕТ!';
+            timerElement.style.color = 'var(--primary-color)';
+            timerElement.style.animation = 'none';
+            
+            // Запускаем игру
+            const startTime = Date.now();
+            clearInterval(gameInterval);
+            
+            gameInterval = setInterval(() => {
+                const elapsed = (Date.now() - startTime) / 1000;
+                
+                if (crashMultiplier === 0) {
+                    currentMultiplier = 0;
+                } else {
+                    currentMultiplier = Math.min(crashMultiplier, 1.0 + elapsed * 0.5);
+                    
+                    // Рандомный краш при достижении точки
+                    if (currentMultiplier >= crashMultiplier) {
+                        currentMultiplier = crashMultiplier;
+                    }
+                }
+                
+                // Обновляем отображение
+                multiplierDisplay.textContent = currentMultiplier.toFixed(2) + 'x';
+                updateRocketPosition();
+                
+                // Если есть ставка и кнопка "Забрать" активна
+                if (hasBet && !hasCashedOut) {
+                    actionButton.textContent = `Забрать ${currentMultiplier.toFixed(2)}x`;
+                }
+                
+                // Проверяем завершение игры
+                if (currentMultiplier === 0 || currentMultiplier >= crashMultiplier) {
+                    clearInterval(gameInterval);
+                    endGame();
+                }
+            }, 50);
         }
         
         // Генерация точки краша
@@ -614,60 +659,60 @@
             }
         }
         
-        // Начало игры после ставок
-        function startGamePlay() {
-            gameRef.update({
-                phase: 'playing'
-            });
+        // Обновление позиции ракеты
+        function updateRocketPosition() {
+            const maxHeight = gameArea.offsetHeight - 120;
+            const progress = Math.min(currentMultiplier / 5, 1); // Максимум 5x для визуализации
+            rocket.style.bottom = `${20 + progress * maxHeight}px`;
+        }
+        
+        // Завершение игры
+        function endGame() {
+            // Показываем взрыв
+            showExplosion();
             
-            const startTime = Date.now();
-            clearInterval(gameInterval);
+            if (currentMultiplier === 0) {
+                timerElement.textContent = 'КРАШ 0.00x!';
+            } else {
+                timerElement.textContent = `КРАШ ${crashMultiplier.toFixed(2)}x!`;
+            }
+            timerElement.style.color = 'var(--danger-color)';
             
-            gameInterval = setInterval(() => {
-                const elapsed = (Date.now() - startTime) / 1000;
-                let multiplier = 1.0;
-                
-                if (crashMultiplier === 0) {
-                    multiplier = 0;
-                } else {
-                    multiplier = Math.min(crashMultiplier, 1.0 + elapsed * 0.5);
-                    
-                    // Рандомный краш при достижении точки
-                    if (multiplier >= crashMultiplier) {
-                        multiplier = crashMultiplier;
-                    }
-                }
-                
-                gameRef.update({
-                    currentMultiplier: multiplier
+            // Если игрок сделал ставку, но не успел забрать
+            if (hasBet && !hasCashedOut) {
+                playerRef.update({
+                    balance: firebase.database.ServerValue.increment(-currentBet)
                 });
-                
-                // Завершаем игру если достигли точки краша
-                if (multiplier === 0 || multiplier >= crashMultiplier) {
-                    clearInterval(gameInterval);
-                }
-            }, 50);
+            }
+            
+            // Через 5 секунд начинаем новый раунд
+            setTimeout(startNewRound, 5000);
         }
         
-        // Запланировать следующий раунд
-        function scheduleNextRound() {
-            gameRef.update({ nextRoundScheduled: true });
+        // Показать взрыв
+        function showExplosion() {
+            const rocketRect = rocket.getBoundingClientRect();
+            const gameAreaRect = gameArea.getBoundingClientRect();
+            
+            const x = rocketRect.left + rocketRect.width / 2 - gameAreaRect.left;
+            const y = rocketRect.bottom - gameAreaRect.top;
+            
+            explosion.style.left = `${x}px`;
+            explosion.style.top = `${y}px`;
+            explosion.style.opacity = '1';
+            explosion.style.transform = 'translate(-50%, -50%) scale(1)';
+            
+            // Создаем частицы взрыва
+            createParticles(x, y);
+            
+            // Скрываем ракету
+            rocket.style.display = 'none';
+            
+            // Анимация исчезновения взрыва
             setTimeout(() => {
-                if (hasBet && !hasCashedOut) {
-                    // Если игрок не успел забрать ставку
-                    playerRef.update({
-                        balance: firebase.database.ServerValue.increment(-currentBet)
-                    });
-                }
-                startNewRound();
-            }, 5000);
-        }
-        
-        // Сброс UI игры
-        function resetGameUI() {
-            currentMultiplier = 1.0;
-            updateRocketPosition();
-            multiplierDisplay.textContent = '1.00x';
+                explosion.style.opacity = '0';
+                explosion.style.transform = 'translate(-50%, -50%) scale(0.5)';
+            }, 1000);
         }
         
         // Очистка интервалов
@@ -688,11 +733,15 @@
             currentBet = betAmount;
             hasBet = true;
             
+            // Обновляем баланс
             playerRef.update({
                 balance: firebase.database.ServerValue.increment(-betAmount)
             });
             
-            actionButton.disabled = true;
+            // Меняем кнопку на "Забрать"
+            actionButton.textContent = 'Забрать 1.00x';
+            actionButton.className = 'bet-btn cash-out-btn action-btn';
+            actionButton.onclick = cashOut;
         }
         
         // Забрать выигрыш
@@ -702,23 +751,20 @@
             const winAmount = Math.floor(currentBet * currentMultiplier);
             hasCashedOut = true;
             
+            // Обновляем баланс
             playerRef.update({
                 balance: firebase.database.ServerValue.increment(winAmount)
             });
             
+            // Блокируем кнопку
             actionButton.disabled = true;
+            actionButton.textContent = `Забрано ${currentMultiplier.toFixed(2)}x`;
         }
         
         // Запуск игры при загрузке страницы
         window.onload = function() {
             initGame();
         };
-        
-        // Обработка закрытия страницы
-        window.addEventListener('beforeunload', () => {
-            playersRef.child(userId).remove();
-            clearIntervals();
-        });
     </script>
 </body>
 </html>
