@@ -3,395 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Минера - Игра</title>
+    <title>Игра Минер</title>
+    <!-- Подключаем Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        :root {
-            --primary-dark: #1e3a8a;
-            --primary: #1e40af;
-            --primary-light: #3b82f6;
-            --success: #10b981;
-            --danger: #ef4444;
-            --dark-bg: #0a192f;
-            --text-light: #e6f1ff;
-            --text-muted: #a5b4fc;
-            --gray-dark: #4b5563;
-            --gray-light: #9ca3af;
-        }
-        
         body {
             font-family: Arial, sans-serif;
-            background-color: var(--dark-bg);
-            color: var(--text-light);
             margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
+            padding: 0;
+            background-color: #f5f5f5;
         }
         
-        .header {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .back-button {
-            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+        .balance-container {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background-color: #4CAF50;
             color: white;
-            border: none;
-            padding: 10px 20px;
+            padding: 10px 15px;
             border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
         }
         
-        .back-button:hover {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            transform: translateY(-2px);
-        }
-        
-        .balance {
-            background: rgba(30, 58, 138, 0.5);
-            padding: 10px 20px;
-            border-radius: 5px;
+        .balance-amount {
+            margin-left: 5px;
             font-weight: bold;
         }
         
         .game-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-            width: 100%;
-            max-width: 400px;
-        }
-        
-        .game-board {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            grid-template-rows: repeat(5, 1fr);
-            gap: 5px;
-            width: 100%;
-            aspect-ratio: 1/1;
-        }
-        
-        .cell {
-            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-            border-radius: 5px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
-            cursor: pointer;
-            transition: all 0.3s;
-            user-select: none;
-        }
-        
-        .cell:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 10px rgba(100, 200, 255, 0.5);
-        }
-        
-        .cell.revealed {
-            background: var(--gray-dark);
-        }
-        
-        .cell.mine {
-            background: var(--danger);
-        }
-        
-        .controls {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            width: 100%;
-        }
-        
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            width: 100%;
-        }
-        
-        .control-label {
-            font-size: 14px;
-            color: var(--text-muted);
-        }
-        
-        .bet-input-container {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            width: 100%;
-        }
-        
-        .bet-input {
-            flex: 1;
-            background: rgba(30, 58, 138, 0.5);
-            border: 1px solid var(--primary);
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-        
-        .bet-buttons {
-            display: flex;
-            gap: 5px;
-        }
-        
-        .bet-button {
-            background: rgba(30, 58, 138, 0.5);
-            border: 1px solid var(--primary);
-            color: white;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .bet-button:hover {
-            background: var(--primary);
-        }
-        
-        .bomb-buttons {
-            display: flex;
-            gap: 5px;
-            flex-wrap: wrap;
-        }
-        
-        .bomb-button {
-            flex: 1;
-            min-width: 60px;
-            background: rgba(30, 58, 138, 0.5);
-            border: 1px solid var(--primary);
-            color: white;
-            padding: 8px 5px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.2s;
+            padding: 20px;
+            margin-top: 60px;
             text-align: center;
         }
         
-        .bomb-button.active {
-            background: var(--primary);
-            font-weight: bold;
+        h1 {
+            color: #333;
         }
         
-        .bomb-button:hover {
-            background: var(--primary);
-        }
-        
-        .action-button {
-            width: 100%;
-            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 16px;
-            transition: all 0.3s;
-        }
-        
-        .action-button:hover {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            transform: translateY(-2px);
-        }
-        
-        .action-button:disabled {
-            background: var(--gray-dark);
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .result-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(10, 25, 47, 0.9);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            display: none;
-        }
-        
-        .result-box {
-            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-            padding: 30px;
-            border-radius: 10px;
-            text-align: center;
-            max-width: 300px;
-            width: 100%;
-        }
-        
-        .win {
-            border: 3px solid var(--success);
-        }
-        
-        .lose {
-            border: 3px solid var(--danger);
-        }
-        
-        .result-title {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
-        
-        .win .result-title {
-            color: var(--success);
-        }
-        
-        .lose .result-title {
-            color: var(--danger);
-        }
-        
-        .multiplier {
-            font-size: 20px;
-            margin-bottom: 10px;
-        }
-        
-        .profit {
-            font-size: 18px;
-            margin-bottom: 20px;
-        }
-        
-        .close-button {
-            background: var(--success);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
-        }
-        
-        .close-button:hover {
-            background: #059669;
-            transform: translateY(-2px);
-        }
-
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(10, 25, 47, 0.9);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-        }
-        
-        .loading-spinner {
-            border: 5px solid rgba(59, 130, 246, 0.3);
-            border-radius: 50%;
-            border-top: 5px solid var(--primary-light);
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .loading-text {
-            color: var(--text-light);
-            font-size: 18px;
-            margin-bottom: 10px;
-        }
-        
-        .error-message {
-            color: var(--danger);
-            background: rgba(239, 68, 68, 0.1);
-            padding: 15px;
-            border-radius: 5px;
-            margin-top: 20px;
-            max-width: 300px;
-            text-align: center;
-            border: 1px solid var(--danger);
-        }
-        
-        .user-id-display {
-            color: var(--text-muted);
-            font-size: 14px;
-            margin-top: 10px;
+        /* Стиль для будущей игры */
+        .mine-field {
+            margin-top: 30px;
+            display: inline-block;
+            border: 2px solid #333;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
         }
     </style>
 </head>
 <body>
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-spinner"></div>
-        <div class="loading-text">Загрузка данных...</div>
-        <div class="user-id-display" id="userIdDisplay"></div>
-        <div class="error-message" id="errorMessage" style="display: none;"></div>
+    <div class="balance-container">
+        <span>Баланс:</span>
+        <span class="balance-amount" id="userBalance">0</span>
+    </div>
+    
+    <div class="game-container">
+        <h1>Игра Минер</h1>
+        <p>Игра в разработке. Ваш баланс отображается в правом верхнем углу.</p>
+        
+        <!-- Здесь будет поле для игры -->
+        <div class="mine-field">
+            <p>Игровое поле появится здесь скоро</p>
+        </div>
     </div>
 
-    <div class="header">
-        <button class="back-button" onclick="window.location.href='index.html'">← Назад</button>
-        <div class="balance">Баланс: <span id="balance">0.00</span> ₽</div>
-    </div>
-    
-    <div class="game-container" id="gameContainer" style="display: none;">
-        <div class="game-board" id="gameBoard"></div>
-        
-        <div class="controls">
-            <div class="control-group">
-                <div class="control-label">Сумма ставки:</div>
-                <div class="bet-input-container">
-                    <input type="number" id="betAmount" class="bet-input" value="10" min="1" step="1">
-                    <div class="bet-buttons">
-                        <button class="bet-button" onclick="adjustBet(1)">+1</button>
-                        <button class="bet-button" onclick="adjustBet(5)">+5</button>
-                        <button class="bet-button" onclick="adjustBet(25)">+25</button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="control-group">
-                <div class="control-label">Количество мин:</div>
-                <div class="bomb-buttons" id="bombButtons">
-                    <button class="bomb-button active" data-bombs="3">3 мины</button>
-                    <button class="bomb-button" data-bombs="5">5 мин</button>
-                    <button class="bomb-button" data-bombs="7">7 мин</button>
-                    <button class="bomb-button" data-bombs="10">10 мин</button>
-                </div>
-            </div>
-            
-            <button class="action-button" id="gameActionButton">Начать игру</button>
-        </div>
-    </div>
-    
-    <div class="result-overlay" id="resultOverlay">
-        <div class="result-box" id="resultBox">
-            <div class="result-title" id="resultTitle">Победа!</div>
-            <div class="multiplier">Множитель: <span id="multiplierDisplay">0x</span></div>
-            <div class="profit">Прибыль: <span id="profitDisplay">0</span> ₽</div>
-            <button class="close-button" id="closeResult">Закрыть</button>
-        </div>
-    </div>
-    
     <script>
-        // Инициализация Firebase
+        // Ваша конфигурация Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyCMos6Y7C-krTLuKCI4VJG-TFLo6QI--k8",
             authDomain: "vrot-x-7a48f.firebaseapp.com",
@@ -402,207 +83,49 @@
             appId: "1:622297225288:web:5df6a5b02ffddedd96e07d"
         };
         
-        // Инициализация Firebase
+        // Инициализируем Firebase
         firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-
-        // Элементы DOM
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        const userIdDisplay = document.getElementById('userIdDisplay');
-        const errorMessage = document.getElementById('errorMessage');
-        const gameContainer = document.getElementById('gameContainer');
-        const balanceElement = document.getElementById('balance');
-        const boardElement = document.getElementById('gameBoard');
-        const gameActionButton = document.getElementById('gameActionButton');
-        const betAmountInput = document.getElementById('betAmount');
-        const bombButtons = document.getElementById('bombButtons');
-        const resultOverlay = document.getElementById('resultOverlay');
-        const resultTitle = document.getElementById('resultTitle');
-        const multiplierDisplay = document.getElementById('multiplierDisplay');
-        const profitDisplay = document.getElementById('profitDisplay');
-        const closeResultButton = document.getElementById('closeResult');
-
-        // Игровые переменные
-        let userId = null;
-        let userRef = null;
-        let userBalance = 0;
-        let gameBoard = [];
-        let revealedCells = 0;
-        let totalDiamonds = 0;
-        let bombCount = 3;
-        let betAmount = 10;
-        let gameActive = false;
-        let currentMultiplier = 1.0;
-        let multiplierInterval = null;
-
-        // Получение ID пользователя из URL или cookie
-        function getUserId() {
-            // Пробуем получить из URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const urlUserId = urlParams.get('user');
-            if (urlUserId) return urlUserId;
-            
-            // Пробуем получить из cookie
-            const cookies = document.cookie.split(';');
-            for (let cookie of cookies) {
-                const [name, value] = cookie.trim().split('=');
-                if (name === 'tg_user_id') {
-                    return value;
-                }
-            }
-            
+        
+        // Функция для получения cookie по имени
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
             return null;
         }
-
-        // Инициализация игры
-        async function initializeGame() {
-            // Получаем ID пользователя
-            userId = getUserId();
+        
+        // Получаем ID пользователя из cookie
+        const userId = getCookie('userId');
+        
+        if (userId) {
+            console.log("Найден ID пользователя в cookie:", userId);
             
-            if (!userId) {
-                showError("ID пользователя не найден. Пожалуйста, войдите через главное меню.");
-                return;
-            }
+            // Ссылка на данные пользователя в Firebase
+            const userRef = firebase.database().ref('users/' + userId);
             
-            // Показываем ID пользователя
-            userIdDisplay.textContent = `ID: ${userId}`;
-            
-            // Инициализируем ссылку на данные пользователя
-            userRef = database.ref('users/' + userId);
-            
-            // Загружаем баланс
-            try {
-                await loadBalance();
-                
-                // Скрываем экран загрузки и показываем игру
-                loadingOverlay.style.display = 'none';
-                gameContainer.style.display = 'flex';
-                initializeBoard();
-                setupEventListeners();
-            } catch (error) {
-                console.error("Ошибка загрузки данных:", error);
-                showError(`Ошибка загрузки баланса: ${error.message}`);
-            }
-        }
-
-        // Показать сообщение об ошибке
-        function showError(message) {
-            errorMessage.textContent = message;
-            errorMessage.style.display = 'block';
-            
-            // Добавляем кнопку "Назад"
-            const backButton = document.createElement('button');
-            backButton.textContent = 'Вернуться в меню';
-            backButton.style.marginTop = '15px';
-            backButton.style.padding = '8px 16px';
-            backButton.style.background = 'var(--primary)';
-            backButton.style.color = 'white';
-            backButton.style.border = 'none';
-            backButton.style.borderRadius = '5px';
-            backButton.style.cursor = 'pointer';
-            backButton.onclick = () => window.location.href = 'index.html';
-            
-            errorMessage.appendChild(backButton);
-        }
-
-        // Загрузка баланса
-        function loadBalance() {
-            return new Promise((resolve, reject) => {
-                userRef.once('value')
-                    .then((snapshot) => {
-                        const data = snapshot.val();
-                        
-                        if (data && typeof data.balance === 'number') {
-                            userBalance = data.balance;
-                            balanceElement.textContent = userBalance.toFixed(2);
-                            resolve();
-                        } else {
-                            // Если баланса нет, устанавливаем 0
-                            userBalance = 0;
-                            balanceElement.textContent = '0.00';
-                            userRef.update({ balance: 0 })
-                                .then(resolve)
-                                .catch(reject);
-                        }
-                    })
-                    .catch(reject);
+            // Получаем данные пользователя
+            userRef.on('value', (snapshot) => {
+                const userData = snapshot.val();
+                if (userData && typeof userData.balance !== 'undefined') {
+                    console.log("Текущий баланс:", userData.balance);
+                    document.getElementById('userBalance').textContent = userData.balance;
+                } else {
+                    console.log("Баланс не найден, устанавливаем 0");
+                    document.getElementById('userBalance').textContent = '0';
+                    // Если баланса нет, устанавливаем его в 0
+                    userRef.update({ balance: 0 });
+                }
+            }, (error) => {
+                console.error("Ошибка при чтении данных:", error);
+                document.getElementById('userBalance').textContent = 'Ошибка';
             });
-        }
-
-        // Обновление баланса в Firebase
-        function updateBalance(amount) {
-            const newBalance = userBalance + amount;
-            userRef.update({
-                balance: newBalance
-            }).then(() => {
-                userBalance = newBalance;
-                balanceElement.textContent = newBalance.toFixed(2);
-            }).catch((error) => {
-                console.error("Ошибка обновления баланса:", error);
-            });
-        }
-
-        // Настройка обработчиков событий
-        function setupEventListeners() {
-            // Обработчик изменения ставки
-            betAmountInput.addEventListener('input', validateBetAmount);
+        } else {
+            console.error("ID пользователя не найден в cookie");
+            document.getElementById('userBalance').textContent = 'Не авторизован';
             
-            // Обработчики кнопок выбора количества мин
-            const bombButtonsElements = bombButtons.querySelectorAll('.bomb-button');
-            bombButtonsElements.forEach(button => {
-                button.addEventListener('click', () => {
-                    bombButtons.querySelectorAll('.bomb-button').forEach(btn => btn.classList.remove('active'));
-                    button.classList.add('active');
-                    bombCount = parseInt(button.dataset.bombs);
-                });
-            });
-            
-            // Обработчик основной кнопки игры
-            gameActionButton.addEventListener('click', handleGameAction);
-            
-            // Обработчик закрытия результата
-            closeResultButton.addEventListener('click', closeResult);
+            // Для тестирования можно раскомментировать следующую строку
+            // document.cookie = "userId=ВАШ_TEST_ID; path=/";
         }
-
-        // Валидация суммы ставки
-        function validateBetAmount() {
-            let value = parseFloat(betAmountInput.value);
-            if (isNaN(value) || value < 1) {
-                value = 1;
-            }
-            betAmountInput.value = Math.floor(value);
-            betAmount = Math.floor(value);
-        }
-
-        // Изменение ставки
-        function adjustBet(amount) {
-            betAmount = Math.max(1, betAmount + amount);
-            betAmountInput.value = betAmount;
-        }
-
-        // Инициализация игрового поля
-        function initializeBoard() {
-            boardElement.innerHTML = '';
-            gameBoard = [];
-            revealedCells = 0;
-            currentMultiplier = 1.0;
-            
-            // Создаем пустое поле 5x5
-            for (let i = 0; i < 25; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'cell';
-                cell.dataset.index = i;
-                cell.addEventListener('click', () => handleCellClick(i));
-                boardElement.appendChild(cell);
-                gameBoard.push({ revealed: false, isBomb: false });
-            }
-        }
-
-        // Обработчик основной кнопки игры
-        function handleGameAction() {
-            if (gameActive) {
-                cashOut();
-            } else {
-                startGame();
-            }
- 
+    </script>
+</body>
+</html>
