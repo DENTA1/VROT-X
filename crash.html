@@ -165,14 +165,31 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         
+        // Получаем Telegram user_id из cookie
+        function getTelegramUserId() {
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                const [name, value] = cookie.trim().split('=');
+                if (name === 'tg_user_id') {
+                    return value;
+                }
+            }
+            return null;
+        }
+        
         // Переменные игры
-        let userBalance = 1000; // Временное значение, потом заменим на данные из БД
+        let userBalance = 0;
         let currentBet = 0;
         let hasBet = false;
         let hasCashedOut = false;
         let gameRef;
         let playerRef;
-        let userId = generateUserId();
+        let userId = getTelegramUserId();
+        
+        if (!userId) {
+            alert('Telegram user ID не найден!');
+            window.location.href = 'index.html';
+        }
         
         // Элементы интерфейса
         const balanceElement = document.getElementById('balance');
@@ -224,11 +241,6 @@
             }
         });
         
-        // Генерация ID пользователя
-        function generateUserId() {
-            return 'user_' + Math.random().toString(36).substr(2, 9);
-        }
-        
         // Установка суммы ставки
         function setBetAmount(amount) {
             betAmountInput.value = amount;
@@ -254,23 +266,38 @@
             const playersRef = database.ref('players');
             playersRef.on('value', (snapshot) => {
                 const players = snapshot.val() || {};
-                playersOnlineElement.textContent = Object.keys(players).length;
+                const onlinePlayers = Object.values(players).filter(p => p.online);
+                playersOnlineElement.textContent = onlinePlayers.length;
                 
                 // Если нет игроков, удаляем игру
-                if (Object.keys(players).length === 0) {
+                if (onlinePlayers.length === 0) {
                     database.ref('crash').remove();
+                }
+                // Если есть игроки, но нет активной игры - создаем
+                else if (onlinePlayers.length > 0) {
+                    gameRef.once('value', (gameSnapshot) => {
+                        if (!gameSnapshot.exists()) {
+                            startNewRound();
+                        }
+                    });
                 }
             });
             
             // Установка присутствия игрока
+            playerRef.onDisconnect().remove();
             playerRef.set({
                 online: true,
-                balance: userBalance
+                balance: userBalance,
+                lastActive: Date.now()
             });
             
-            // Удаление игрока при закрытии вкладки
-            window.addEventListener('beforeunload', () => {
-                playerRef.remove();
+            // Обновление баланса из БД
+            playerRef.on('value', (snapshot) => {
+                const playerData = snapshot.val();
+                if (playerData && playerData.balance !== undefined) {
+                    userBalance = playerData.balance;
+                    balanceElement.textContent = userBalance;
+                }
             });
             
             // Слушаем изменения в игре
@@ -278,23 +305,13 @@
                 const gameData = snapshot.val();
                 
                 if (!gameData) {
-                    // Игра не существует, создаем новую
-                    if (Object.keys(playersRef.once('value')).length > 0) {
-                        startNewRound();
-                    }
+                    // Игра не существует
+                    timerElement.textContent = 'Ожидание игроков...';
+                    actionButton.disabled = true;
                     return;
                 }
                 
                 updateGameState(gameData);
-            });
-            
-            // Обновление баланса из БД
-            playerRef.on('value', (snapshot) => {
-                const playerData = snapshot.val();
-                if (playerData && playerData.balance) {
-                    userBalance = playerData.balance;
-                    balanceElement.textContent = userBalance;
-                }
             });
             
             // Проверка ввода ставки
@@ -304,7 +321,6 @@
         // Обновление состояния игры
         function updateGameState(gameData) {
             const now = Date.now();
-            const gameTime = now - gameData.startTime;
             
             if (gameData.phase === 'betting') {
                 const timeLeft = Math.max(0, gameData.bettingEndTime - now);
@@ -381,7 +397,8 @@
                 crashPoint: crashPoint,
                 currentMultiplier: 1.0,
                 history: [1.0],
-                nextRoundScheduled: false
+                nextRoundScheduled: false,
+                active: true
             };
             
             database.ref('crash').set(gameData);
@@ -446,9 +463,16 @@
                     // Завершаем игру если достигли точки краша
                     if (multiplier === 0 || multiplier >= gameData.crashPoint) {
                         clearInterval(updateInterval);
+                        endGameRound();
                     }
                 });
             }, 50); // Обновляем каждые 50мс для плавности
+        }
+        
+        // Завершение раунда игры
+        function endGameRound() {
+            // Здесь можно добавить логику обработки результатов
+            console.log('Раунд завершен');
         }
         
         // Сделать ставку
@@ -495,8 +519,25 @@
         
         // Запуск игры при загрузке страницы
         window.onload = function() {
-            balanceElement.textContent = userBalance;
+            if (!userId) return;
+            
             connectToGame();
+            
+            // Проверяем активную игру каждые 5 секунд
+            setInterval(() => {
+                database.ref('players').once('value', (snapshot) => {
+                    const players = snapshot.val() || {};
+                    const onlinePlayers = Object.values(players).filter(p => p.online);
+                    
+                    if (onlinePlayers.length > 0) {
+                        database.ref('crash').once('value', (gameSnapshot) => {
+                            if (!gameSnapshot.exists()) {
+                                startNewRound();
+                            }
+                        });
+                    }
+                });
+            }, 5000);
         };
     </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
