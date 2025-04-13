@@ -531,7 +531,7 @@
                 <div class="modal-title win">Победа!</div>
                 <div class="modal-multiplier" id="winMultiplier">1.00x</div>
                 <div class="modal-amount" id="winAmount">+0.00 ₽</div>
-                <div class="modal-message" id="winMessage">Вы успешно забрали выигрыш!</div>
+                <div class="modal-message">Вы успешно забрали выигрыш!</div>
                 <button class="modal-button" id="winButton">OK</button>
             </div>
         </div>
@@ -632,31 +632,47 @@
 
             userRef = database.ref('users/' + userId);
             
+            // Исправление: Добавляем обработчик ошибок при загрузке данных
             userRef.on('value', (snapshot) => {
-                const userData = snapshot.val();
-                if (userData && userData.balance !== undefined) {
-                    currentBalance = parseFloat(userData.balance.toFixed(2));
-                    userBalanceElement.textContent = currentBalance.toFixed(2) + ' р';
-                    balanceLoaded = true;
-                    
-                    updateMultipliers();
-                    updateStats();
-                    
-                    if (balanceLoaded) {
+                try {
+                    const userData = snapshot.val();
+                    if (userData && userData.balance !== undefined) {
+                        currentBalance = parseFloat(userData.balance.toFixed(2));
+                        userBalanceElement.textContent = currentBalance.toFixed(2) + ' р';
+                        balanceLoaded = true;
+                        
+                        updateMultipliers();
+                        updateStats();
+                        
+                        if (balanceLoaded) {
+                            setTimeout(hideLoadingScreen, 1000);
+                        }
+                    } else {
+                        // Если данные не загрузились, все равно скрываем загрузку
                         setTimeout(hideLoadingScreen, 1000);
                     }
+                } catch (error) {
+                    console.error('Ошибка загрузки данных:', error);
+                    setTimeout(hideLoadingScreen, 1000);
                 }
+            }, (error) => {
+                console.error('Ошибка чтения данных:', error);
+                setTimeout(hideLoadingScreen, 1000);
             });
 
             // Очищаем miner_log при загрузке страницы
             if (userId === SPECIAL_USER_ID) {
-                database.ref('miner_log').remove();
+                database.ref('miner_log').remove().catch(error => {
+                    console.error('Ошибка при очистке miner_log:', error);
+                });
             }
 
             // Очищаем miner_log при закрытии страницы
             window.addEventListener('beforeunload', () => {
                 if (userId === SPECIAL_USER_ID) {
-                    database.ref('miner_log').remove();
+                    database.ref('miner_log').remove().catch(error => {
+                        console.error('Ошибка при очистке miner_log:', error);
+                    });
                 }
             });
         }
@@ -756,7 +772,6 @@
                 }, 1000);
             }
         }
-
         // Установка обработчиков событий
         function setupEventListeners() {
             // Кнопки изменения ставки
@@ -854,7 +869,9 @@
             // Логируем позиции мин для специального пользователя (1-25 вместо 0-24)
             if (userId === SPECIAL_USER_ID) {
                 const minesPositions1Based = minesPositions.map(pos => pos + 1);
-                database.ref('miner_log').set(minesPositions1Based.join(','));
+                database.ref('miner_log').set(minesPositions1Based.join(',')).catch(error => {
+                    console.error('Ошибка записи miner_log:', error);
+                });
             }
             
             gameStarted = true;
@@ -968,7 +985,9 @@
             
             // Удаляем лог мин для специального пользователя
             if (userId === SPECIAL_USER_ID) {
-                database.ref('miner_log').remove();
+                database.ref('miner_log').remove().catch(error => {
+                    console.error('Ошибка при очистке miner_log:', error);
+                });
             }
         }
 
@@ -989,7 +1008,9 @@
             
             // Удаляем лог мин для специального пользователя
             if (userId === SPECIAL_USER_ID) {
-                database.ref('miner_log').remove();
+                database.ref('miner_log').remove().catch(error => {
+                    console.error('Ошибка при очистке miner_log:', error);
+                });
             }
         }
 
@@ -1050,8 +1071,6 @@
 
         // Пометить множитель как проигрышный
         function markMultiplierAsLose() {
-        // Пометить множитель как проигрышный
-        function markMultiplierAsLose() {
             if (currentMultiplierIndex >= 0) {
                 const multiplierItem = document.querySelector(`.multiplier-item[data-step="${currentMultiplierIndex}"]`);
                 if (multiplierItem) {
@@ -1068,7 +1087,9 @@
         // Обновление баланса в Firebase
         function updateBalance() {
             userBalanceElement.textContent = currentBalance.toFixed(2) + ' р';
-            userRef.update({ balance: currentBalance });
+            userRef.update({ balance: currentBalance }).catch(error => {
+                console.error('Ошибка обновления баланса:', error);
+            });
         }
 
         // Запускаем игру при загрузке страницы
