@@ -61,15 +61,25 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
+            gap: 20px;
+        }
+        
+        .game-board {
+            border: 3px solid #0f3460;
+            border-radius: 10px;
+            padding: 15px;
+            background-color: #16213e;
+            width: 100%;
+            max-width: 500px;
+            position: relative;
+            min-height: 200px;
         }
         
         .ladder {
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-bottom: 20px;
             width: 100%;
-            max-width: 500px;
         }
         
         .floor {
@@ -77,6 +87,14 @@
             justify-content: center;
             margin-bottom: 10px;
             width: 100%;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+        
+        .floor.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
         
         .btn {
@@ -128,11 +146,17 @@
         
         .controls {
             display: flex;
-            flex-direction: column;
+            flex-wrap: wrap;
+            gap: 15px;
             width: 100%;
             max-width: 500px;
+        }
+        
+        .control-card {
+            flex: 1;
+            min-width: 200px;
             background-color: #16213e;
-            padding: 20px;
+            padding: 15px;
             border-radius: 10px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
         }
@@ -140,7 +164,12 @@
         .bet-controls {
             display: flex;
             flex-direction: column;
-            margin-bottom: 20px;
+        }
+        
+        .bet-title {
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #e94560;
         }
         
         .bet-amount {
@@ -150,12 +179,17 @@
         }
         
         .bet-input {
-            width: 100px;
+            width: 100%;
             padding: 10px;
             border-radius: 5px;
             border: none;
             margin-right: 10px;
             font-size: 16px;
+        }
+        
+        .bet-buttons {
+            display: flex;
+            gap: 5px;
         }
         
         .bet-btn {
@@ -166,22 +200,58 @@
             color: white;
             cursor: pointer;
             font-size: 14px;
-            margin-right: 5px;
             transition: background-color 0.3s;
+            flex: 1;
         }
         
         .bet-btn:hover {
             background-color: #1a3a6e;
         }
         
-        .difficulty {
+        .difficulty-controls {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .difficulty-title {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 20px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .difficulty-name {
+            font-weight: bold;
+            color: #e94560;
+        }
+        
+        .help-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.3s;
+        }
+        
+        .help-btn:hover {
+            background-color: #0f3460;
+        }
+        
+        .difficulty-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
         }
         
         .difficulty-btn {
-            padding: 10px 15px;
+            padding: 10px;
             border-radius: 5px;
             border: none;
             background-color: #4a4a6a;
@@ -189,8 +259,6 @@
             cursor: pointer;
             font-size: 14px;
             transition: all 0.3s;
-            flex: 1;
-            margin: 0 5px;
         }
         
         .difficulty-btn:hover {
@@ -211,6 +279,7 @@
             cursor: pointer;
             transition: all 0.3s;
             width: 100%;
+            margin-top: 10px;
         }
         
         .start-btn {
@@ -222,34 +291,80 @@
             background-color: #d83550;
         }
         
-        .take-btn {
-            background-color: #4CAF50;
+        .restart-btn {
+            background-color: #3a7bd5;
             color: white;
         }
         
-        .take-btn:hover {
-            background-color: #45a049;
+        .restart-btn:hover {
+            background-color: #2a6bc5;
         }
         
-        .message {
-            margin-top: 15px;
-            padding: 10px;
-            border-radius: 5px;
-            text-align: center;
-            font-weight: bold;
+        .modal {
             display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
         }
         
-        .success {
-            background-color: rgba(76, 175, 80, 0.3);
-            color: #4CAF50;
-            display: block;
+        .modal-content {
+            background-color: #16213e;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 400px;
+            width: 90%;
+            position: relative;
         }
         
-        .error {
-            background-color: rgba(233, 69, 96, 0.3);
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        .modal-title {
             color: #e94560;
-            display: block;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        
+        .difficulty-info {
+            margin-bottom: 10px;
+        }
+        
+        .result-modal {
+            text-align: center;
+        }
+        
+        .result-title {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: #e94560;
+        }
+        
+        .win {
+            color: #4CAF50;
+        }
+        
+        .lose {
+            color: #e94560;
+        }
+        
+        .result-amount {
+            font-size: 20px;
+            margin-bottom: 20px;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -260,29 +375,68 @@
     </header>
     
     <div class="game-container">
-        <div class="ladder" id="ladder">
-            <!-- Этажи будут созданы динамически -->
+        <div class="game-board">
+            <div class="ladder" id="ladder">
+                <!-- Этажи будут созданы динамически -->
+            </div>
         </div>
         
         <div class="controls">
-            <div class="bet-controls">
+            <div class="control-card bet-controls">
+                <div class="bet-title">Сумма ставки</div>
                 <div class="bet-amount">
                     <input type="number" class="bet-input" id="betAmount" placeholder="Сумма ставки" min="1" value="1">
+                </div>
+                <div class="bet-buttons">
                     <button class="bet-btn" id="betPlus1">+1</button>
                     <button class="bet-btn" id="betPlus5">+5</button>
+                    <button class="bet-btn" id="betMin">MIN</button>
+                    <button class="bet-btn" id="betMax">MAX</button>
                 </div>
             </div>
             
-            <div class="difficulty">
-                <button class="difficulty-btn active" data-level="easy">Легкий</button>
-                <button class="difficulty-btn" data-level="medium">Средний</button>
-                <button class="difficulty-btn" data-level="hard">Сложный</button>
-                <button class="difficulty-btn" data-level="expert">Эксперт</button>
+            <div class="control-card difficulty-controls">
+                <div class="difficulty-title">
+                    <div class="difficulty-name">Уровень сложности</div>
+                    <button class="help-btn" id="helpBtn">?</button>
+                </div>
+                <div class="difficulty-buttons">
+                    <button class="difficulty-btn active" data-level="easy">Легкий</button>
+                    <button class="difficulty-btn" data-level="medium">Средний</button>
+                    <button class="difficulty-btn" data-level="hard">Сложный</button>
+                    <button class="difficulty-btn" data-level="expert">Эксперт</button>
+                </div>
+                <button class="action-btn start-btn" id="actionBtn">Начать</button>
             </div>
-            
-            <button class="action-btn start-btn" id="actionBtn">Начать</button>
-            
-            <div class="message" id="message"></div>
+        </div>
+    </div>
+    
+    <!-- Модальное окно помощи -->
+    <div class="modal" id="helpModal">
+        <div class="modal-content">
+            <button class="close-modal" id="closeHelpModal">×</button>
+            <div class="modal-title">Уровни сложности</div>
+            <div class="difficulty-info">
+                <strong>Легкий:</strong> 1 мина, коэффициент ×1.5
+            </div>
+            <div class="difficulty-info">
+                <strong>Средний:</strong> 2 мины, коэффициент ×2
+            </div>
+            <div class="difficulty-info">
+                <strong>Сложный:</strong> 3 мины, коэффициент ×3
+            </div>
+            <div class="difficulty-info">
+                <strong>Эксперт:</strong> 4 мины, коэффициент ×5
+            </div>
+        </div>
+    </div>
+    
+    <!-- Модальное окно результата -->
+    <div class="modal" id="resultModal">
+        <div class="modal-content result-modal">
+            <div class="result-title" id="resultTitle">Результат</div>
+            <div class="result-amount" id="resultAmount">0 ₽</div>
+            <button class="action-btn restart-btn" id="restartBtn">Новая игра</button>
         </div>
     </div>
     
@@ -378,91 +532,79 @@
         
         // Настройки сложности
         const difficultySettings = {
-            easy: { buttons: 5, mines: 1, multiplier: 1.2 },
-            medium: { buttons: 4, mines: 1, multiplier: 1.5 },
-            hard: { buttons: 3, mines: 1, multiplier: 2 },
-            expert: { buttons: 3, mines: 2, multiplier: 2.5 }
+            easy: { mines: 1, multiplier: 1.5 },
+            medium: { mines: 2, multiplier: 2 },
+            hard: { mines: 3, multiplier: 3 },
+            expert: { mines: 4, multiplier: 5 }
         };
         
         // Элементы DOM
         const ladderElement = document.getElementById('ladder');
         const betAmountInput = document.getElementById('betAmount');
         const actionBtn = document.getElementById('actionBtn');
-        const messageElement = document.getElementById('message');
         const difficultyButtons = document.querySelectorAll('.difficulty-btn');
+        const helpBtn = document.getElementById('helpBtn');
+        const helpModal = document.getElementById('helpModal');
+        const closeHelpModal = document.getElementById('closeHelpModal');
+        const resultModal = document.getElementById('resultModal');
+        const resultTitle = document.getElementById('resultTitle');
+        const resultAmount = document.getElementById('resultAmount');
+        const restartBtn = document.getElementById('restartBtn');
         
         // Создание игрового поля
         function createLadder() {
             ladderElement.innerHTML = '';
+            currentFloor = 0;
             
-            for (let i = 5; i >= 0; i--) {
-                const floor = document.createElement('div');
-                floor.className = 'floor';
-                
-                const buttonsCount = difficultySettings[difficulty].buttons;
-                
-                for (let j = 0; j < buttonsCount; j++) {
-                    const btn = document.createElement('button');
-                    btn.className = 'btn';
-                    btn.dataset.floor = i;
-                    btn.dataset.position = j;
-                    btn.addEventListener('click', () => selectButton(btn));
-                    floor.appendChild(btn);
-                }
-                
-                ladderElement.appendChild(floor);
-            }
+            // Создаем только первый этаж (остальные будут добавляться по мере прохождения)
+            addFloor(0);
         }
         
-        // Начало игры
-        function startGame() {
-            const bet = parseInt(betAmountInput.value);
+        // Добавление этажа
+        function addFloor(floorNumber) {
+            const floor = document.createElement('div');
+            floor.className = 'floor';
+            if (floorNumber === 0) floor.classList.add('visible');
+            floor.dataset.floor = floorNumber;
             
-            if (isNaN(bet) || bet < 1) {
-                showMessage('Минимальная ставка - 1 ₽', 'error');
-                return;
+            // Всегда 5 кнопок на этаже
+            for (let j = 0; j < 5; j++) {
+                const btn = document.createElement('button');
+                btn.className = 'btn';
+                btn.dataset.floor = floorNumber;
+                btn.dataset.position = j;
+                btn.addEventListener('click', () => selectButton(btn));
+                floor.appendChild(btn);
             }
             
-            if (bet > userBalance) {
-                showMessage('Недостаточно средств', 'error');
-                return;
-            }
-            
-            betAmount = bet;
-            currentFloor = 0;
-            currentWin = 0;
-            gameActive = true;
-            
-            updateBalance(-betAmount)
-                .then(() => {
-                    actionBtn.textContent = 'Забрать: 0 ₽';
-                    actionBtn.className = 'action-btn take-btn';
-                    actionBtn.disabled = true;
-                    
-                    messageElement.textContent = '';
-                    messageElement.className = 'message';
-                    
-                    createLadder();
+            ladderElement.appendChild(floor);
+        }
+        
+        // Показать следующий этаж
+        function showNextFloor() {
+            currentFloor++;
+            if (currentFloor < 6) {
+                addFloor(currentFloor);
+                setTimeout(() => {
+                    const floors = document.querySelectorAll('.floor');
+                    floors[currentFloor].classList.add('visible');
                     generateFloor();
-                    
-                    showMessage(`Игра началась! Ставка: ${betAmount} ₽`, 'success');
-                })
-                .catch(error => {
-                    showMessage('Ошибка при обновлении баланса', 'error');
-                    console.error('Update balance error:', error);
-                });
+                }, 300);
+            } else {
+                // Игрок дошел до конца
+                showResult(true);
+            }
         }
         
         // Генерация этажа
         function generateFloor() {
             const settings = difficultySettings[difficulty];
-            const buttonsCount = settings.buttons;
             const minesCount = settings.mines;
             
             safeButtons = [];
             mineButtons = [];
             
-            const allPositions = Array.from({ length: buttonsCount }, (_, i) => i);
+            const allPositions = [0, 1, 2, 3, 4]; // Всегда 5 кнопок
             
             // Перемешиваем позиции
             for (let i = allPositions.length - 1; i > 0; i--) {
@@ -470,8 +612,8 @@
                 [allPositions[i], allPositions[j]] = [allPositions[j], allPositions[i]];
             }
             
-            safeButtons = allPositions.slice(0, buttonsCount - minesCount);
-            mineButtons = allPositions.slice(buttonsCount - minesCount);
+            mineButtons = allPositions.slice(0, minesCount);
+            safeButtons = allPositions.slice(minesCount);
             
             // Активируем кнопки на текущем этаже
             const currentFloorButtons = document.querySelectorAll(`.btn[data-floor="${currentFloor}"]`);
@@ -479,6 +621,36 @@
                 btn.disabled = false;
                 btn.classList.remove('selected', 'mine', 'safe', 'crack');
             });
+        }
+        
+        // Начало игры
+        function startGame() {
+            const bet = parseInt(betAmountInput.value);
+            
+            if (isNaN(bet) || bet < 1) {
+                return;
+            }
+            
+            if (bet > userBalance) {
+                return;
+            }
+            
+            betAmount = bet;
+            currentWin = 0;
+            gameActive = true;
+            
+            updateBalance(-betAmount)
+                .then(() => {
+                    actionBtn.textContent = 'Новая игра';
+                    actionBtn.className = 'action-btn restart-btn';
+                    actionBtn.disabled = true;
+                    
+                    createLadder();
+                    generateFloor();
+                })
+                .catch(error => {
+                    console.error('Update balance error:', error);
+                });
         }
         
         // Выбор кнопки
@@ -514,26 +686,15 @@
                     const floorWin = Math.floor(betAmount * settings.multiplier * (currentFloor + 1) / 6);
                     currentWin += floorWin;
                     
-                    // Обновляем кнопку "Забрать"
-                    actionBtn.textContent = `Забрать: ${currentWin} ₽`;
-                    actionBtn.disabled = false;
-                    
                     // Помечаем безопасную кнопку
                     setTimeout(() => {
                         button.classList.add('safe');
                     }, 500);
                     
                     // Переход на следующий этаж
-                    currentFloor++;
-                    
-                    if (currentFloor >= 6) {
-                        showMessage(`Поздравляем! Вы выиграли ${currentWin} ₽`, 'success');
-                        gameActive = false;
-                    } else {
-                        setTimeout(() => {
-                            generateFloor();
-                        }, 1000);
-                    }
+                    setTimeout(() => {
+                        showNextFloor();
+                    }, 1000);
                 } else {
                     // Показываем все мины
                     floorButtons.forEach(btn => {
@@ -545,35 +706,37 @@
                     
                     // Игра окончена
                     gameActive = false;
-                    actionBtn.textContent = 'Начать';
-                    actionBtn.className = 'action-btn start-btn';
+                    actionBtn.disabled = false;
                     
-                    showMessage(`Вы проиграли на этапе ${currentFloor + 1}`, 'error');
+                    setTimeout(() => {
+                        showResult(false);
+                    }, 500);
                 }
             }, 500);
         }
         
-        // Забрать выигрыш
-        function takeWin() {
-            if (currentWin > 0) {
+        // Показать результат
+        function showResult(isWin) {
+            if (isWin) {
+                // Автоматическое зачисление выигрыша
                 updateBalance(currentWin)
                     .then(() => {
-                        showMessage(`Вы забрали ${currentWin} ₽!`, 'success');
-                        resetGame();
-                    })
-                    .catch(error => {
-                        showMessage('Ошибка при обновлении баланса', 'error');
-                        console.error('Update balance error:', error);
+                        resultTitle.textContent = 'Победа!';
+                        resultTitle.className = 'result-title win';
+                        resultAmount.textContent = `+${currentWin} ₽`;
+                        resultModal.style.display = 'flex';
                     });
             } else {
-                resetGame();
+                resultTitle.textContent = 'Проигрыш';
+                resultTitle.className = 'result-title lose';
+                resultAmount.textContent = `-${betAmount} ₽`;
+                resultModal.style.display = 'flex';
             }
         }
         
         // Сброс игры
         function resetGame() {
             gameActive = false;
-            currentFloor = 0;
             currentWin = 0;
             
             actionBtn.textContent = 'Начать';
@@ -581,12 +744,6 @@
             actionBtn.disabled = false;
             
             createLadder();
-        }
-        
-        // Показать сообщение
-        function showMessage(text, type) {
-            messageElement.textContent = text;
-            messageElement.className = `message ${type}`;
         }
         
         // Управление ставками
@@ -600,13 +757,20 @@
             betAmountInput.value = Math.min(newValue, userBalance);
         });
         
+        document.getElementById('betMin').addEventListener('click', () => {
+            betAmountInput.value = 1;
+        });
+        
+        document.getElementById('betMax').addEventListener('click', () => {
+            betAmountInput.value = userBalance;
+        });
+        
         // Выбор сложности
         difficultyButtons.forEach(btn => {
             btn.addEventListener('click', () => {
                 difficultyButtons.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 difficulty = btn.dataset.level;
-                createLadder();
             });
         });
         
@@ -615,7 +779,31 @@
             if (actionBtn.textContent === 'Начать') {
                 startGame();
             } else {
-                takeWin();
+                resetGame();
+            }
+        });
+        
+        // Модальные окна
+        helpBtn.addEventListener('click', () => {
+            helpModal.style.display = 'flex';
+        });
+        
+        closeHelpModal.addEventListener('click', () => {
+            helpModal.style.display = 'none';
+        });
+        
+        restartBtn.addEventListener('click', () => {
+            resultModal.style.display = 'none';
+            resetGame();
+        });
+        
+        // Закрытие модальных окон при клике вне контента
+        window.addEventListener('click', (e) => {
+            if (e.target === helpModal) {
+                helpModal.style.display = 'none';
+            }
+            if (e.target === resultModal) {
+                resultModal.style.display = 'none';
             }
         });
         
@@ -627,7 +815,6 @@
                 startBalanceUpdates();
             } else {
                 console.error('User ID not found in cookies');
-                showMessage('Ошибка: ID пользователя не найден', 'error');
             }
             
             // Обновляем поле ставки при изменении баланса
