@@ -150,6 +150,7 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         // Инициализация Firebase
         const firebaseConfig = {
@@ -166,15 +167,16 @@
         const database = firebase.database();
         
         // Получаем Telegram user_id из cookie
-        function getTelegramUserId() {
-            const cookies = document.cookie.split(';');
-            for (let cookie of cookies) {
-                const [name, value] = cookie.trim().split('=');
-                if (name === 'tg_user_id') {
-                    return value;
-                }
-            }
-            return null;
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+        
+        const userId = getCookie('tg_user_id');
+        if (!userId) {
+            alert('Telegram user ID не найден!');
+            window.location.href = 'index.html';
         }
         
         // Переменные игры
@@ -184,12 +186,8 @@
         let hasCashedOut = false;
         let gameRef;
         let playerRef;
-        let userId = getTelegramUserId();
-        
-        if (!userId) {
-            alert('Telegram user ID не найден!');
-            window.location.href = 'index.html';
-        }
+        let playersRef;
+        let chart;
         
         // Элементы интерфейса
         const balanceElement = document.getElementById('balance');
@@ -198,48 +196,50 @@
         const betAmountInput = document.getElementById('betAmount');
         const actionButton = document.getElementById('actionButton');
         const multiplierDisplay = document.getElementById('multiplierDisplay');
-        const gameGraph = document.getElementById('gameGraph').getContext('2d');
+        const gameGraphCtx = document.getElementById('gameGraph').getContext('2d');
         
         // Инициализация графика
-        let chart = new Chart(gameGraph, {
-            type: 'line',
-            data: {
-                datasets: [{
-                    label: 'Множитель',
-                    borderColor: '#4CAF50',
-                    borderWidth: 2,
-                    data: [],
-                    fill: false,
-                    tension: 0.1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    x: {
-                        display: false
-                    },
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            color: 'white'
+        function initChart() {
+            chart = new Chart(gameGraphCtx, {
+                type: 'line',
+                data: {
+                    datasets: [{
+                        label: 'Множитель',
+                        borderColor: '#4CAF50',
+                        borderWidth: 2,
+                        data: [],
+                        fill: false,
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            display: false
                         },
-                        grid: {
-                            color: 'rgba(255, 255, 255, 0.1)'
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: 'white'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
                         }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    animation: {
+                        duration: 0
                     }
-                },
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
-                animation: {
-                    duration: 0
                 }
-            }
-        });
+            });
+        }
         
         // Установка суммы ставки
         function setBetAmount(amount) {
@@ -261,21 +261,38 @@
         function connectToGame() {
             gameRef = database.ref('crash');
             playerRef = database.ref('players/' + userId);
+            playersRef = database.ref('players');
+            
+            // Инициализация игрока
+            playerRef.onDisconnect().remove();
+            playerRef.update({
+                online: true,
+                lastActive: firebase.database.ServerValue.TIMESTAMP
+            });
+            
+            // Загрузка баланса
+            playerRef.on('value', (snapshot) => {
+                const playerData = snapshot.val();
+                if (playerData && playerData.balance !== undefined) {
+                    userBalance = playerData.balance;
+                    balanceElement.textContent = userBalance;
+                } else {
+                    // Если баланса нет, устанавливаем начальный
+                    playerRef.update({
+                        balance: 1000
+                    });
+                }
+            });
             
             // Обновление количества игроков
-            const playersRef = database.ref('players');
             playersRef.on('value', (snapshot) => {
                 const players = snapshot.val() || {};
                 const onlinePlayers = Object.values(players).filter(p => p.online);
                 playersOnlineElement.textContent = onlinePlayers.length;
                 
-                // Если нет игроков, удаляем игру
-                if (onlinePlayers.length === 0) {
-                    database.ref('crash').remove();
-                }
-                // Если есть игроки, но нет активной игры - создаем
-                else if (onlinePlayers.length > 0) {
-                    gameRef.once('value', (gameSnapshot) => {
+                // Если есть игроки, но нет игры - создаем
+                if (onlinePlayers.length > 0) {
+                    gameRef.once('value').then((gameSnapshot) => {
                         if (!gameSnapshot.exists()) {
                             startNewRound();
                         }
@@ -283,34 +300,14 @@
                 }
             });
             
-            // Установка присутствия игрока
-            playerRef.onDisconnect().remove();
-            playerRef.set({
-                online: true,
-                balance: userBalance,
-                lastActive: Date.now()
-            });
-            
-            // Обновление баланса из БД
-            playerRef.on('value', (snapshot) => {
-                const playerData = snapshot.val();
-                if (playerData && playerData.balance !== undefined) {
-                    userBalance = playerData.balance;
-                    balanceElement.textContent = userBalance;
-                }
-            });
-            
             // Слушаем изменения в игре
             gameRef.on('value', (snapshot) => {
                 const gameData = snapshot.val();
-                
                 if (!gameData) {
-                    // Игра не существует
                     timerElement.textContent = 'Ожидание игроков...';
                     actionButton.disabled = true;
                     return;
                 }
-                
                 updateGameState(gameData);
             });
             
@@ -326,7 +323,6 @@
                 const timeLeft = Math.max(0, gameData.bettingEndTime - now);
                 timerElement.textContent = `Ставки принимаются: ${Math.ceil(timeLeft / 1000)}с`;
                 
-                // Активируем кнопку ставки
                 if (timeLeft > 1000 && !hasBet) {
                     actionButton.textContent = 'Поставить';
                     actionButton.className = 'bet-btn place-bet-btn';
@@ -337,29 +333,20 @@
                 }
             } 
             else if (gameData.phase === 'playing') {
-                // Обновляем график
                 updateChart(gameData);
                 
                 if (gameData.crashPoint === 0 && gameData.currentMultiplier === 0) {
-                    // Мгновенный краш
                     timerElement.textContent = 'Краш! 0.00x';
                     actionButton.disabled = true;
-                } else if (gameData.crashPoint > 0 && gameData.currentMultiplier >= gameData.crashPoint) {
-                    // Игра закончилась
+                    scheduleNextRound();
+                } else if (gameData.currentMultiplier >= gameData.crashPoint) {
                     timerElement.textContent = `Краш! ${gameData.crashPoint.toFixed(2)}x`;
                     actionButton.disabled = true;
-                    
-                    // Через 5 секунд начинаем новый раунд
-                    if (!gameData.nextRoundScheduled) {
-                        database.ref('crash').update({ nextRoundScheduled: true });
-                        setTimeout(startNewRound, 5000);
-                    }
+                    scheduleNextRound();
                 } else {
-                    // Игра продолжается
                     timerElement.textContent = 'Игра идет...';
                     multiplierDisplay.textContent = gameData.currentMultiplier.toFixed(2) + 'x';
                     
-                    // Активируем кнопку вывода
                     if (hasBet && !hasCashedOut) {
                         actionButton.textContent = 'Забрать';
                         actionButton.className = 'bet-btn cash-out-btn';
@@ -387,70 +374,56 @@
             hasBet = false;
             hasCashedOut = false;
             
-            // Генерируем точку краша (1% шанс на мгновенный краш 0x)
             const crashPoint = Math.random() < 0.01 ? 0 : generateCrashPoint();
             
             const gameData = {
                 phase: 'betting',
                 startTime: Date.now(),
-                bettingEndTime: Date.now() + 15000, // 15 секунд на ставки
+                bettingEndTime: Date.now() + 15000,
                 crashPoint: crashPoint,
                 currentMultiplier: 1.0,
                 history: [1.0],
-                nextRoundScheduled: false,
-                active: true
+                nextRoundScheduled: false
             };
             
-            database.ref('crash').set(gameData);
-            
-            // Запускаем игру после окончания ставок
-            setTimeout(() => {
-                startGamePlay();
-            }, 15000);
+            gameRef.set(gameData).then(() => {
+                setTimeout(startGamePlay, 15000);
+            });
         }
         
         // Генерация точки краша
         function generateCrashPoint() {
-            // Формула для определения точки краша (можно настроить)
-            const e = Math.pow(10, Math.random() * 3); // От 1x до 1000x
+            const e = Math.pow(10, Math.random() * 3);
             return Math.max(1.0, (100 * e - 50) / (e - 1));
         }
         
         // Начало игры после ставок
         function startGamePlay() {
-            database.ref('crash').update({
+            gameRef.update({
                 phase: 'playing'
             });
             
-            // Анимация роста множителя
             const startTime = Date.now();
-            const gameRef = database.ref('crash');
-            
             const updateInterval = setInterval(() => {
-                gameRef.once('value', (snapshot) => {
+                gameRef.once('value').then((snapshot) => {
                     const gameData = snapshot.val();
                     if (!gameData || gameData.phase !== 'playing') {
                         clearInterval(updateInterval);
                         return;
                     }
                     
-                    const elapsed = (Date.now() - startTime) / 1000; // В секундах
+                    const elapsed = (Date.now() - startTime) / 1000;
                     let multiplier = 1.0;
                     
                     if (gameData.crashPoint === 0) {
-                        // Мгновенный краш
                         multiplier = 0;
                     } else {
-                        // Плавный рост с возможностью краша в любой момент
                         multiplier = Math.min(gameData.crashPoint, 1.0 + elapsed * 0.5);
-                        
-                        // Рандомный краш при достижении точки
                         if (multiplier >= gameData.crashPoint) {
                             multiplier = gameData.crashPoint;
                         }
                     }
                     
-                    // Обновляем историю (последние 100 точек)
                     const history = gameData.history || [1.0];
                     history.push(multiplier);
                     if (history.length > 100) history.shift();
@@ -460,19 +433,17 @@
                         history: history
                     });
                     
-                    // Завершаем игру если достигли точки краша
                     if (multiplier === 0 || multiplier >= gameData.crashPoint) {
                         clearInterval(updateInterval);
-                        endGameRound();
                     }
                 });
-            }, 50); // Обновляем каждые 50мс для плавности
+            }, 50);
         }
         
-        // Завершение раунда игры
-        function endGameRound() {
-            // Здесь можно добавить логику обработки результатов
-            console.log('Раунд завершен');
+        // Запланировать следующий раунд
+        function scheduleNextRound() {
+            gameRef.update({ nextRoundScheduled: true });
+            setTimeout(startNewRound, 5000);
         }
         
         // Сделать ставку
@@ -487,7 +458,6 @@
             currentBet = betAmount;
             hasBet = true;
             
-            // Обновляем баланс в БД
             playerRef.update({
                 balance: userBalance - betAmount
             });
@@ -499,7 +469,7 @@
         function cashOut() {
             if (!hasBet || hasCashedOut) return;
             
-            gameRef.once('value', (snapshot) => {
+            gameRef.once('value').then((snapshot) => {
                 const gameData = snapshot.val();
                 if (!gameData || gameData.phase !== 'playing') return;
                 
@@ -508,9 +478,8 @@
                 
                 hasCashedOut = true;
                 
-                // Обновляем баланс в БД
                 playerRef.update({
-                    balance: userBalance + winAmount
+                    balance: firebase.database.ServerValue.increment(winAmount)
                 });
                 
                 actionButton.disabled = true;
@@ -519,27 +488,9 @@
         
         // Запуск игры при загрузке страницы
         window.onload = function() {
-            if (!userId) return;
-            
+            initChart();
             connectToGame();
-            
-            // Проверяем активную игру каждые 5 секунд
-            setInterval(() => {
-                database.ref('players').once('value', (snapshot) => {
-                    const players = snapshot.val() || {};
-                    const onlinePlayers = Object.values(players).filter(p => p.online);
-                    
-                    if (onlinePlayers.length > 0) {
-                        database.ref('crash').once('value', (gameSnapshot) => {
-                            if (!gameSnapshot.exists()) {
-                                startNewRound();
-                            }
-                        });
-                    }
-                });
-            }, 5000);
         };
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 </html>
