@@ -60,13 +60,15 @@
             flex-direction: column;
             padding: 20px;
             gap: 15px;
+            overflow: hidden;
         }
         
         .game-board {
             border: 3px solid #0f3460;
             border-radius: 10px;
             background-color: #16213e;
-            flex: 1;
+            height: calc(100vh - 320px);
+            min-height: 300px;
             position: relative;
             overflow: hidden;
             display: flex;
@@ -79,6 +81,7 @@
             width: 100%;
             height: 100%;
             padding: 10px 10px 0 10px;
+            overflow-y: auto;
         }
         
         .floor {
@@ -162,15 +165,6 @@
         
         .safe {
             background-color: #4CAF50;
-        }
-        
-        .preview-mine {
-            animation: blink 1s infinite;
-        }
-        
-        @keyframes blink {
-            0%, 100% { background-color: #4a4a6a; }
-            50% { background-color: #e94560; }
         }
         
         @keyframes crack {
@@ -260,7 +254,7 @@
             cursor: pointer;
             font-size: 14px;
             transition: all 0.3s;
-            flex: 1;
+            width: 23%; /* Уменьшили ширину на 5% */
             text-align: center;
         }
         
@@ -285,20 +279,29 @@
             justify-content: center;
             cursor: pointer;
             font-weight: bold;
+            flex-shrink: 0;
         }
         
         .game-info {
             display: none;
-            justify-content: space-between;
+            flex-direction: column;
+            gap: 10px;
             background-color: #16213e;
             padding: 15px;
             border-radius: 10px;
+            transition: all 0.3s;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
         }
         
         .info-item {
             display: flex;
             flex-direction: column;
             align-items: center;
+            flex: 1;
         }
         
         .info-label {
@@ -325,6 +328,11 @@
             cursor: pointer;
             transition: all 0.3s;
             width: 100%;
+        }
+        
+        .take-btn-container {
+            display: none;
+            margin-top: 10px;
         }
         
         .start-btn {
@@ -441,7 +449,7 @@
 <body>
     <header>
         <button class="back-btn" onclick="window.location.href='index.html'">Назад</button>
-        <div class="balance" id="balance">0 ₽</div>
+        <div class="balance" id="balance">0.00 ₽</div>
     </header>
     
     <div class="game-container">
@@ -449,6 +457,10 @@
             <div class="ladder" id="ladder">
                 <!-- Этажи будут созданы динамически -->
             </div>
+        </div>
+        
+        <div class="take-btn-container" id="takeBtnContainer">
+            <button class="action-btn take-btn disabled-btn" id="takeBtn">Сделайте ход</button>
         </div>
         
         <div class="controls">
@@ -477,21 +489,25 @@
             </div>
             
             <div class="game-info" id="gameInfo">
-                <div class="info-item">
-                    <div class="info-label">Ставка</div>
-                    <div class="info-value" id="currentBet">1 ₽</div>
+                <div class="info-row">
+                    <div class="info-item">
+                        <div class="info-label">Ставка</div>
+                        <div class="info-value" id="currentBet">1 ₽</div>
+                    </div>
                 </div>
-                <div class="info-item">
-                    <div class="info-label">Текущий множитель</div>
-                    <div class="info-value multiplier-value" id="currentMultiplier">1.04x</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Следующий множитель</div>
-                    <div class="info-value multiplier-value" id="nextMultiplier">1.15x</div>
+                <div class="info-row">
+                    <div class="info-item">
+                        <div class="info-label">Текущий множитель</div>
+                        <div class="info-value multiplier-value" id="currentMultiplier">1.04x</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Следующий множитель</div>
+                        <div class="info-value multiplier-value" id="nextMultiplier">1.15x</div>
+                    </div>
                 </div>
             </div>
             
-            <button class="action-btn start-btn" id="actionBtn">Начать</button>
+            <button class="action-btn start-btn" id="startBtn">Начать</button>
         </div>
     </div>
     
@@ -521,7 +537,7 @@
     <div class="modal" id="resultModal">
         <div class="modal-content result-modal">
             <div class="result-title" id="resultTitle">Результат</div>
-            <div class="result-amount" id="resultAmount">0 ₽</div>
+            <div class="result-amount" id="resultAmount">0.00 ₽</div>
             <div class="modal-actions">
                 <button class="ok-btn" id="okBtn">Ок</button>
             </div>
@@ -565,8 +581,8 @@
                 .then((snapshot) => {
                     const userData = snapshot.val();
                     if (userData && userData.balance !== undefined) {
-                        userBalance = userData.balance;
-                        document.getElementById('balance').textContent = userBalance + ' ₽';
+                        userBalance = parseFloat(userData.balance.toFixed(2));
+                        document.getElementById('balance').textContent = userBalance.toFixed(2) + ' ₽';
                         return userBalance;
                     } else {
                         throw new Error('Balance data not found');
@@ -598,13 +614,13 @@
                 return Promise.reject('User ID not found');
             }
             
-            const newBalance = userBalance + amount;
+            const newBalance = parseFloat((userBalance + amount).toFixed(2));
             
             return database.ref('users/' + userId).update({
                 balance: newBalance
             }).then(() => {
                 userBalance = newBalance;
-                document.getElementById('balance').textContent = userBalance + ' ₽';
+                document.getElementById('balance').textContent = userBalance.toFixed(2) + ' ₽';
                 return newBalance;
             });
         }
@@ -617,7 +633,6 @@
         let gameActive = false;
         let safeButtons = [];
         let mineButtons = [];
-        let previewInterval = null;
         
         // Настройки сложности
         const difficultySettings = {
@@ -642,7 +657,9 @@
         // Элементы DOM
         const ladderElement = document.getElementById('ladder');
         const betAmountInput = document.getElementById('betAmount');
-        const actionBtn = document.getElementById('actionBtn');
+        const startBtn = document.getElementById('startBtn');
+        const takeBtn = document.getElementById('takeBtn');
+        const takeBtnContainer = document.getElementById('takeBtnContainer');
         const difficultyButtons = document.querySelectorAll('.difficulty-btn');
         const helpBtn = document.getElementById('helpBtn');
         const helpModal = document.getElementById('helpModal');
@@ -685,46 +702,6 @@
             // Показываем только первый этаж
             showFloor(0);
             updateMultipliers();
-            showMinesPreview();
-        }
-        
-        // Показать мины перед игрой
-        function showMinesPreview() {
-            clearPreview();
-            
-            const settings = difficultySettings[difficulty];
-            const allPositions = [0, 1, 2, 3, 4];
-            
-            // Выбираем случайные позиции для мин
-            for (let i = allPositions.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [allPositions[i], allPositions[j]] = [allPositions[j], allPositions[i]];
-            }
-            
-            const previewMines = allPositions.slice(0, settings.mines);
-            
-            // Анимируем мигание мин
-            previewInterval = setInterval(() => {
-                const buttons = document.querySelectorAll('.floor.visible .btn');
-                buttons.forEach((btn, index) => {
-                    if (previewMines.includes(index)) {
-                        btn.classList.toggle('preview-mine');
-                    }
-                });
-            }, 500);
-        }
-        
-        // Остановить превью мин
-        function clearPreview() {
-            if (previewInterval) {
-                clearInterval(previewInterval);
-                previewInterval = null;
-            }
-            
-            const buttons = document.querySelectorAll('.btn.preview-mine');
-            buttons.forEach(btn => {
-                btn.classList.remove('preview-mine');
-            });
         }
         
         // Показать этаж
@@ -816,11 +793,15 @@
                     gameInfo.style.display = 'flex';
                     currentBet.textContent = `${betAmount} ₽`;
                     
-                    actionBtn.textContent = 'Сделайте ход';
-                    actionBtn.className = 'action-btn disabled-btn';
-                    actionBtn.disabled = true;
+                    // Показываем кнопку "Забрать" под игровым полем
+                    takeBtnContainer.style.display = 'block';
+                    takeBtn.textContent = 'Сделайте ход';
+                    takeBtn.className = 'action-btn take-btn disabled-btn';
+                    takeBtn.disabled = true;
                     
-                    clearPreview();
+                    // Скрываем кнопку "Начать"
+                    startBtn.style.display = 'none';
+                    
                     createLadder();
                 })
                 .catch(error => {
@@ -848,11 +829,9 @@
             });
             
             // Активируем кнопку "Забрать" после первого хода
-            if (actionBtn.textContent === 'Сделайте ход') {
-                actionBtn.textContent = `Забрать ${currentWin} ₽`;
-                actionBtn.className = 'action-btn take-btn';
-                actionBtn.disabled = false;
-            }
+            takeBtn.textContent = `Забрать ${currentWin.toFixed(2)} ₽`;
+            takeBtn.className = 'action-btn take-btn';
+            takeBtn.disabled = false;
             
             // Задержка перед показом мин
             setTimeout(() => {
@@ -865,11 +844,11 @@
                     
                     // Выигрыш на этом этаже
                     const settings = difficultySettings[difficulty];
-                    const floorWin = Math.floor(betAmount * settings.multipliers[currentFloor]);
+                    const floorWin = parseFloat((betAmount * settings.multipliers[currentFloor]).toFixed(2));
                     currentWin += floorWin;
                     
                     // Обновляем кнопку "Забрать"
-                    actionBtn.textContent = `Забрать ${currentWin} ₽`;
+                    takeBtn.textContent = `Забрать ${currentWin.toFixed(2)} ₽`;
                     
                     // Помечаем безопасную кнопку
                     setTimeout(() => {
@@ -891,8 +870,9 @@
                     
                     // Игра окончена
                     gameActive = false;
-                    actionBtn.textContent = 'Начать';
-                    actionBtn.className = 'action-btn start-btn';
+                    takeBtn.style.display = 'none';
+                    startBtn.style.display = 'block';
+                    startBtn.textContent = 'Начать';
                     
                     setTimeout(() => {
                         showResult(false);
@@ -909,13 +889,13 @@
                     .then(() => {
                         resultTitle.textContent = 'Вы выиграли!';
                         resultTitle.className = 'result-title win';
-                        resultAmount.textContent = `+${currentWin} ₽`;
+                        resultAmount.textContent = `+${currentWin.toFixed(2)} ₽`;
                         resultModal.style.display = 'flex';
                     });
             } else {
                 resultTitle.textContent = 'Вы проиграли';
                 resultTitle.className = 'result-title lose';
-                resultAmount.textContent = `-${betAmount} ₽`;
+                resultAmount.textContent = `-${betAmount.toFixed(2)} ₽`;
                 resultModal.style.display = 'flex';
             }
         }
@@ -928,10 +908,11 @@
             // Показываем настройки, скрываем игровую информацию
             setupControls.style.display = 'flex';
             gameInfo.style.display = 'none';
+            takeBtnContainer.style.display = 'none';
             
-            actionBtn.textContent = 'Начать';
-            actionBtn.className = 'action-btn start-btn';
-            actionBtn.disabled = false;
+            // Показываем кнопку "Начать"
+            startBtn.style.display = 'block';
+            startBtn.textContent = 'Начать';
             
             createLadder();
         }
@@ -952,7 +933,7 @@
         });
         
         document.getElementById('betMax').addEventListener('click', () => {
-            betAmountInput.value = userBalance;
+            betAmountInput.value = Math.max(1, userBalance);
         });
         
         // Выбор сложности
@@ -962,15 +943,16 @@
                 btn.classList.add('active');
                 difficulty = btn.dataset.level;
                 updateMultipliers();
-                showMinesPreview();
+                
+                if (gameActive) {
+                    createLadder();
+                }
             });
         });
         
-        // Кнопка действия
-        actionBtn.addEventListener('click', () => {
-            if (actionBtn.textContent === 'Начать') {
-                startGame();
-            } else if (actionBtn.textContent.startsWith('Забрать')) {
+        // Кнопка "Забрать"
+        takeBtn.addEventListener('click', () => {
+            if (takeBtn.textContent.startsWith('Забрать')) {
                 updateBalance(currentWin)
                     .then(() => {
                         showResult(true);
@@ -980,6 +962,9 @@
                     });
             }
         });
+        
+        // Кнопка "Начать"
+        startBtn.addEventListener('click', startGame);
         
         // Модальные окна
         helpBtn.addEventListener('click', () => {
