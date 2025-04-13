@@ -25,13 +25,6 @@
             border-radius: 5px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             z-index: 1000;
-            display: flex;
-            align-items: center;
-        }
-        
-        .balance-amount {
-            margin-left: 5px;
-            font-weight: bold;
         }
         
         .game-container {
@@ -44,87 +37,90 @@
             color: #333;
         }
         
-        /* Стиль для будущей игры */
-        .mine-field {
-            margin-top: 30px;
-            display: inline-block;
-            border: 2px solid #333;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
+        .debug-info {
+            background-color: #f0f0f0;
+            padding: 10px;
+            margin: 20px;
+            border-radius: 5px;
+            font-family: monospace;
         }
     </style>
 </head>
 <body>
     <div class="balance-container">
-        <span>Баланс:</span>
-        <span class="balance-amount" id="userBalance">0</span>
+        Баланс: <span id="userBalance">Загрузка...</span>
     </div>
     
     <div class="game-container">
         <h1>Игра Минер</h1>
-        <p>Игра в разработке. Ваш баланс отображается в правом верхнем углу.</p>
-        
-        <!-- Здесь будет поле для игры -->
-        <div class="mine-field">
-            <p>Игровое поле появится здесь скоро</p>
-        </div>
+        <p>Здесь будет игра. Сейчас отображается только баланс.</p>
+    </div>
+
+    <div class="debug-info" id="debugInfo">
+        Отладочная информация появится здесь...
     </div>
 
     <script>
-        // Ваша конфигурация Firebase
+        // Конфигурация Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyCMos6Y7C-krTLuKCI4VJG-TFLo6QI--k8",
             authDomain: "vrot-x-7a48f.firebaseapp.com",
             databaseURL: "https://vrot-x-7a48f-default-rtdb.firebaseio.com",
             projectId: "vrot-x-7a48f",
-            storageBucket: "vrot-x-7a48f.firebasestorage.app",
+            storageBucket: "vrot-x-7a48f.appspot.com",
             messagingSenderId: "622297225288",
             appId: "1:622297225288:web:5df6a5b02ffddedd96e07d"
         };
-        
+
         // Инициализируем Firebase
-        firebase.initializeApp(firebaseConfig);
-        
-        // Функция для получения cookie по имени
-        function getCookie(name) {
-            const value = `; ${document.cookie}`;
-            const parts = value.split(`; ${name}=`);
-            if (parts.length === 2) return parts.pop().split(';').shift();
-            return null;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            document.getElementById('debugInfo').innerHTML += '<br>Firebase инициализирован успешно';
+        } catch (error) {
+            document.getElementById('debugInfo').innerHTML += '<br>Ошибка инициализации Firebase: ' + error;
         }
-        
+
+        // Улучшенная функция для получения cookie
+        function getCookie(name) {
+            let matches = document.cookie.match(new RegExp(
+                "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+            ));
+            return matches ? decodeURIComponent(matches[1]) : undefined;
+        }
+
         // Получаем ID пользователя из cookie
         const userId = getCookie('userId');
-        
+        document.getElementById('debugInfo').innerHTML += '<br>ID пользователя из cookie: ' + (userId || 'не найден');
+
         if (userId) {
-            console.log("Найден ID пользователя в cookie:", userId);
-            
-            // Ссылка на данные пользователя в Firebase
-            const userRef = firebase.database().ref('users/' + userId);
-            
-            // Получаем данные пользователя
-            userRef.on('value', (snapshot) => {
-                const userData = snapshot.val();
-                if (userData && typeof userData.balance !== 'undefined') {
-                    console.log("Текущий баланс:", userData.balance);
-                    document.getElementById('userBalance').textContent = userData.balance;
-                } else {
-                    console.log("Баланс не найден, устанавливаем 0");
-                    document.getElementById('userBalance').textContent = '0';
-                    // Если баланса нет, устанавливаем его в 0
-                    userRef.update({ balance: 0 });
-                }
-            }, (error) => {
-                console.error("Ошибка при чтении данных:", error);
-                document.getElementById('userBalance').textContent = 'Ошибка';
-            });
+            try {
+                const database = firebase.database();
+                const userRef = database.ref('users/' + userId);
+                
+                document.getElementById('debugInfo').innerHTML += '<br>Пытаемся получить данные по пути: users/' + userId;
+                
+                userRef.on('value', (snapshot) => {
+                    const userData = snapshot.val();
+                    document.getElementById('debugInfo').innerHTML += '<br>Получены данные: ' + JSON.stringify(userData);
+                    
+                    if (userData && userData.balance !== undefined) {
+                        document.getElementById('userBalance').textContent = userData.balance;
+                        document.getElementById('debugInfo').innerHTML += '<br>Баланс успешно установлен: ' + userData.balance;
+                    } else {
+                        document.getElementById('userBalance').textContent = '0';
+                        document.getElementById('debugInfo').innerHTML += '<br>Баланс не найден, устанавливаем 0';
+                        userRef.update({ balance: 0 });
+                    }
+                }, (error) => {
+                    document.getElementById('userBalance').textContent = 'Ошибка';
+                    document.getElementById('debugInfo').innerHTML += '<br>Ошибка при чтении данных: ' + error.message;
+                });
+            } catch (error) {
+                document.getElementById('debugInfo').innerHTML += '<br>Ошибка при работе с базой данных: ' + error.message;
+            }
         } else {
-            console.error("ID пользователя не найден в cookie");
             document.getElementById('userBalance').textContent = 'Не авторизован';
-            
-            // Для тестирования можно раскомментировать следующую строку
-            // document.cookie = "userId=ВАШ_TEST_ID; path=/";
+            document.getElementById('debugInfo').innerHTML += '<br>ID пользователя не найден в cookie';
         }
     </script>
 </body>
