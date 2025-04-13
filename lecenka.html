@@ -20,6 +20,41 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            position: relative;
+        }
+        
+        /* Loading screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #0a0a1a;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top-color: #e94560;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+        
+        .loading-text {
+            color: #ccc;
+            font-size: 16px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
         
         header {
@@ -80,13 +115,14 @@
             flex-direction: column-reverse;
             width: 100%;
             height: 100%;
-            padding: 15px 10px 0 10px;
+            padding: 10px 5px 0 5px;
+            overflow-y: auto;
         }
         
         .floor {
             display: flex;
             justify-content: center;
-            margin-bottom: 25px;
+            margin-bottom: 15px;
             width: 100%;
             position: relative;
             opacity: 0;
@@ -97,7 +133,7 @@
         .floor::before {
             content: '';
             position: absolute;
-            top: -15px;
+            top: -10px;
             left: 0;
             right: 0;
             height: 2px;
@@ -108,16 +144,17 @@
         .floor::after {
             content: attr(data-multiplier);
             position: absolute;
-            top: -25px;
+            top: -22px;
             left: 50%;
             transform: translateX(-50%);
             background-color: #0f3460;
             color: white;
-            padding: 3px 15px;
+            padding: 2px 10px;
             border-radius: 15px;
-            font-size: 14px;
+            font-size: 12px;
             z-index: 2;
             transition: all 0.3s;
+            white-space: nowrap;
         }
         
         .floor.visible {
@@ -141,19 +178,19 @@
         }
         
         .btn {
-            width: 50px;
-            height: 50px;
-            margin: 0 5px;
+            width: 45px;
+            height: 45px;
+            margin: 0 3px;
             background-color: #4a4a6a;
             border: none;
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
             transition: all 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 16px;
+            font-size: 14px;
             color: white;
             position: relative;
             overflow: hidden;
@@ -327,6 +364,10 @@
             cursor: pointer;
             transition: all 0.3s;
             width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
         
         .start-btn {
@@ -447,6 +488,11 @@
     </style>
 </head>
 <body>
+    <div class="loading-screen">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Загрузка данных...</div>
+    </div>
+    
     <header>
         <button class="back-btn" onclick="window.location.href='index.html'">Назад</button>
         <div class="balance" id="balance">0.00 ₽</div>
@@ -474,15 +520,15 @@
             
             <div class="difficulty-row">
                 <div class="difficulty-buttons">
-                    <button class="difficulty-btn active" data-level="easy">Легкий</button>
-                    <button class="difficulty-btn" data-level="medium">Средний</button>
-                    <button class="difficulty-btn" data-level="hard">Сложный</button>
-                    <button class="difficulty-btn" data-level="expert">Эксперт</button>
+                    <button class="difficulty-btn active" data-level="easy">Легко</button>
+                    <button class="difficulty-btn" data-level="medium">Средне</button>
+                    <button class="difficulty-btn" data-level="hard">Сложно</button>
+                    <button class="difficulty-btn" data-level="expert">ХАРД</button>
                 </div>
                 <button class="help-btn" id="helpBtn">?</button>
             </div>
             
-            <button class="action-btn start-btn" id="actionBtn">Начать</button>
+            <button class="action-btn start-btn" id="actionBtn">▶ Запустить игру</button>
         </div>
     </div>
     
@@ -494,16 +540,16 @@
                 <button class="close-modal" id="closeHelpModal">×</button>
             </div>
             <div class="difficulty-info">
-                <strong>Легкий:</strong> 1 мина на этаже
+                <strong>Легко:</strong> 1 мина на этаже
             </div>
             <div class="difficulty-info">
-                <strong>Средний:</strong> 2 мины на этаже
+                <strong>Средне:</strong> 2 мины на этаже
             </div>
             <div class="difficulty-info">
-                <strong>Сложный:</strong> 3 мины на этаже
+                <strong>Сложно:</strong> 3 мины на этаже
             </div>
             <div class="difficulty-info">
-                <strong>Эксперт:</strong> 4 мины на этаже
+                <strong>ХАРД:</strong> 4 мины на этаже
             </div>
         </div>
     </div>
@@ -615,22 +661,22 @@
             easy: { 
                 mines: 1, 
                 multipliers: [1.04, 1.15, 1.36, 1.68, 2.02, 2.5],
-                name: "Легкий"
+                name: "Легко"
             },
             medium: { 
                 mines: 2, 
                 multipliers: [1.15, 1.58, 2.25, 3.02, 4.67, 8],
-                name: "Средний"
+                name: "Средне"
             },
             hard: { 
                 mines: 3, 
                 multipliers: [2.5, 4.5, 7.5, 11.5, 18.5, 35],
-                name: "Сложный"
+                name: "Сложно"
             },
             expert: { 
                 mines: 4, 
                 multipliers: [4, 16, 64, 256, 1024, 25000],
-                name: "Эксперт"
+                name: "ХАРД"
             }
         };
         
@@ -651,6 +697,7 @@
         const betPlus5Btn = document.getElementById('betPlus5');
         const betMinBtn = document.getElementById('betMin');
         const betMaxBtn = document.getElementById('betMax');
+        const loadingScreen = document.querySelector('.loading-screen');
         
         // Создание игрового поля
         function createLadder() {
@@ -813,14 +860,17 @@
             actionBtn.className = 'action-btn take-btn';
             actionBtn.disabled = false;
             
-            // Задержка перед показом мин
+            // Задержка перед показом результатов
             setTimeout(() => {
+                // Показываем мины
+                mineButtons.forEach(pos => {
+                    const mineBtn = document.querySelector(`.btn[data-floor="${currentFloor}"][data-position="${pos}"]`);
+                    mineBtn.classList.add('mine', 'crack');
+                });
+                
                 if (isSafe) {
-                    // Показываем мины
-                    mineButtons.forEach(pos => {
-                        const mineBtn = document.querySelector(`.btn[data-floor="${currentFloor}"][data-position="${pos}"]`);
-                        mineBtn.classList.add('mine', 'crack');
-                    });
+                    // Помечаем безопасную кнопку
+                    button.classList.add('safe');
                     
                     // Выигрыш на этом этаже
                     const settings = difficultySettings[difficulty];
@@ -830,27 +880,14 @@
                     // Обновляем кнопку "Забрать"
                     actionBtn.textContent = `Забрать ${currentWin.toFixed(2)} ₽`;
                     
-                    // Помечаем безопасную кнопку
-                    setTimeout(() => {
-                        button.classList.add('safe');
-                    }, 500);
-                    
                     // Переход на следующий этаж
                     setTimeout(() => {
                         showNextFloor();
                     }, 1000);
                 } else {
-                    // Показываем все мины
-                    floorButtons.forEach(btn => {
-                        const btnPos = parseInt(btn.dataset.position);
-                        if (mineButtons.includes(btnPos)) {
-                            btn.classList.add('mine', 'crack');
-                        }
-                    });
-                    
                     // Игра окончена
                     gameActive = false;
-                    actionBtn.textContent = 'Начать';
+                    actionBtn.textContent = '▶ Запустить игру';
                     actionBtn.className = 'action-btn start-btn';
                     
                     setTimeout(() => {
@@ -896,7 +933,7 @@
             helpBtn.disabled = false;
             
             // Возвращаем кнопку "Начать"
-            actionBtn.textContent = 'Начать';
+            actionBtn.textContent = '▶ Запустить игру';
             actionBtn.className = 'action-btn start-btn';
             actionBtn.disabled = false;
             
@@ -934,7 +971,7 @@
         
         // Кнопка действия
         actionBtn.addEventListener('click', () => {
-            if (actionBtn.textContent === 'Начать') {
+            if (actionBtn.textContent === '▶ Запустить игру') {
                 startGame();
             } else if (actionBtn.textContent.startsWith('Забрать')) {
                 updateBalance(currentWin)
@@ -973,6 +1010,14 @@
         
         // Инициализация игры
         document.addEventListener('DOMContentLoaded', () => {
+            // Скрываем экран загрузки через 1 секунду
+            setTimeout(() => {
+                loadingScreen.style.opacity = '0';
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                }, 300);
+            }, 1000);
+            
             createLadder();
             
             if (userId) {
