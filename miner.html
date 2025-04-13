@@ -25,6 +25,13 @@
             border-radius: 5px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             z-index: 1000;
+            display: flex;
+            align-items: center;
+        }
+        
+        .balance-amount {
+            margin-left: 5px;
+            font-weight: bold;
         }
         
         .game-container {
@@ -48,12 +55,13 @@
 </head>
 <body>
     <div class="balance-container">
-        Баланс: <span id="userBalance">Загрузка...</span>
+        <span>Баланс:</span>
+        <span class="balance-amount" id="userBalance">0</span>
     </div>
     
     <div class="game-container">
         <h1>Игра Минер</h1>
-        <p>Здесь будет игра. Сейчас отображается только баланс.</p>
+        <p>Игра в разработке. Ваш баланс отображается в правом верхнем углу.</p>
     </div>
 
     <div class="debug-info" id="debugInfo">
@@ -80,16 +88,18 @@
             document.getElementById('debugInfo').innerHTML += '<br>Ошибка инициализации Firebase: ' + error;
         }
 
-        // Улучшенная функция для получения cookie
-        function getCookie(name) {
-            let matches = document.cookie.match(new RegExp(
-                "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
-            ));
-            return matches ? decodeURIComponent(matches[1]) : undefined;
+        // Функция для получения cookie по имени (аналогичная функции из главного меню)
+        function getTelegramIdFromCookie() {
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                const [name, value] = cookie.trim().split('=');
+                if (name === 'tg_user_id') return value;
+            }
+            return null;
         }
 
         // Получаем ID пользователя из cookie
-        const userId = getCookie('userId');
+        const userId = getTelegramIdFromCookie();
         document.getElementById('debugInfo').innerHTML += '<br>ID пользователя из cookie: ' + (userId || 'не найден');
 
         if (userId) {
@@ -121,6 +131,9 @@
         } else {
             document.getElementById('userBalance').textContent = 'Не авторизован';
             document.getElementById('debugInfo').innerHTML += '<br>ID пользователя не найден в cookie';
+            
+            // Для тестирования можно раскомментировать следующую строку
+            // document.cookie = "tg_user_id=ВАШ_TEST_ID; path=/; SameSite=Lax";
         }
     </script>
 </body>
