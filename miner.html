@@ -110,6 +110,32 @@
             margin: 0 auto;
         }
         
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            background: #252525;
+            border-radius: 8px;
+            padding: 8px 15px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .stat-value {
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        
+        .stat-label {
+            color: #aaa;
+            font-size: 12px;
+        }
+        
         .game-board {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -144,8 +170,18 @@
             background: #ff5252;
         }
         
+        .cell.mine.hidden {
+            opacity: 0.6;
+            background: #ff525280;
+        }
+        
         .cell.diamond {
             background: #4CAF50;
+        }
+        
+        .cell.diamond.hidden {
+            opacity: 0.6;
+            background: #4CAF5080;
         }
         
         .multipliers-container {
@@ -154,15 +190,15 @@
             gap: 6px;
             margin-bottom: 12px;
             padding-bottom: 5px;
-            height: 50px;
+            height: 40px;
             align-items: center;
         }
         
         .multiplier-item {
-            min-width: 60px;
+            min-width: 50px;
             background: #252525;
             border-radius: 6px;
-            padding: 6px 8px;
+            padding: 4px 6px;
             text-align: center;
             flex-shrink: 0;
         }
@@ -170,8 +206,8 @@
         .multiplier-value {
             font-weight: bold;
             color: #e0e0e0;
-            font-size: 14px;
-            margin-bottom: 3px;
+            font-size: 12px;
+            margin-bottom: 2px;
         }
         
         .multiplier-value.past {
@@ -179,16 +215,36 @@
         }
         
         .multiplier-value.current {
-            animation: pulse 1s infinite alternate;
+            animation: pulse 0.5s infinite alternate;
+        }
+        
+        .multiplier-value.win {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        
+        .multiplier-value.lose {
+            color: #ff5252;
+            font-weight: bold;
+        }
+        
+        .multiplier-item.win {
+            background: #4CAF5030;
+            border: 1px solid #4CAF50;
+        }
+        
+        .multiplier-item.lose {
+            background: #ff525230;
+            border: 1px solid #ff5252;
         }
         
         @keyframes pulse {
             from { color: #e0e0e0; }
-            to { color: #aaa; }
+            to { color: #FFD700; }
         }
         
         .multiplier-step {
-            font-size: 11px;
+            font-size: 9px;
             color: #aaa;
         }
         
@@ -338,7 +394,15 @@
             width: 90%;
             text-align: center;
             animation: modalFadeIn 0.3s ease-out;
-            border: 1px solid #444;
+        }
+        
+        .modal-content.win {
+            border: 2px solid #4CAF50;
+        }
+        
+        .modal-content.legendary {
+            border: 2px solid;
+            border-image: linear-gradient(45deg, #FFA500, #4CAF50) 1;
         }
         
         @keyframes modalFadeIn {
@@ -349,20 +413,38 @@
         .modal-title {
             font-size: 20px;
             margin-bottom: 12px;
+            font-weight: bold;
+        }
+        
+        .modal-title.win {
+            color: #4CAF50;
+        }
+        
+        .modal-title.legendary {
+            background: linear-gradient(45deg, #FFA500, #4CAF50);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .modal-multiplier {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
             color: #FFD700;
         }
         
-        .modal-message {
-            font-size: 15px;
+        .modal-amount {
+            font-size: 22px;
+            font-weight: bold;
             margin-bottom: 15px;
-            line-height: 1.4;
+            color: #4CAF50;
         }
         
-        .modal-amount {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            color: #4CAF50;
+        .modal-message {
+            font-size: 13px;
+            margin-bottom: 15px;
+            line-height: 1.4;
+            color: #aaa;
         }
         
         .modal-button {
@@ -399,6 +481,21 @@
         </div>
 
         <div class="game-container">
+            <div class="stats-row">
+                <div class="stat-item">
+                    <span class="stat-value" id="diamondsCount">???</span>
+                    <span class="stat-label">Кристаллы</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="chanceValue">???</span>
+                    <span class="stat-label">Шанс</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="minesCountValue">???</span>
+                    <span class="stat-label">Мины</span>
+                </div>
+            </div>
+            
             <div class="game-board" id="gameBoard"></div>
             
             <div class="multipliers-container" id="multipliersContainer"></div>
@@ -407,11 +504,9 @@
                 <span class="bet-label">Ставка:</span>
                 <span class="bet-amount" id="currentBetAmount">1.00</span>
                 <div class="bet-buttons">
+                    <button class="bet-button" data-bet="min">MIN</button>
                     <button class="bet-button" data-bet="1">+1</button>
                     <button class="bet-button" data-bet="5">+5</button>
-                    <button class="bet-button" data-bet="25">+25</button>
-                    <button class="bet-button" data-bet="50">+50</button>
-                    <button class="bet-button" data-bet="min">MIN</button>
                     <button class="bet-button" data-bet="max">MAX</button>
                 </div>
             </div>
@@ -432,11 +527,22 @@
         </div>
 
         <div class="modal" id="winModal">
-            <div class="modal-content">
-                <div class="modal-title">Победа!</div>
-                <div class="modal-message" id="winMessage"></div>
+            <div class="modal-content win">
+                <div class="modal-title win">Победа!</div>
+                <div class="modal-multiplier" id="winMultiplier">1.00x</div>
                 <div class="modal-amount" id="winAmount">+0.00 ₽</div>
+                <div class="modal-message" id="winMessage">Вы успешно забрали выигрыш!</div>
                 <button class="modal-button" id="winButton">OK</button>
+            </div>
+        </div>
+
+        <div class="modal" id="legendaryModal">
+            <div class="modal-content legendary">
+                <div class="modal-title legendary">Легендарная победа</div>
+                <div class="modal-multiplier" id="legendaryMultiplier">1.00x</div>
+                <div class="modal-amount" id="legendaryAmount">+0.00 ₽</div>
+                <div class="modal-message">Вы нашли все алмазы!</div>
+                <button class="modal-button" id="legendaryButton">OK</button>
             </div>
         </div>
     </div>
@@ -487,8 +593,15 @@
         const actionButton = document.getElementById('actionButton');
         const winModal = document.getElementById('winModal');
         const winAmountElement = document.getElementById('winAmount');
-        const winMessage = document.getElementById('winMessage');
+        const winMultiplierElement = document.getElementById('winMultiplier');
         const winButton = document.getElementById('winButton');
+        const legendaryModal = document.getElementById('legendaryModal');
+        const legendaryAmountElement = document.getElementById('legendaryAmount');
+        const legendaryMultiplierElement = document.getElementById('legendaryMultiplier');
+        const legendaryButton = document.getElementById('legendaryButton');
+        const diamondsCountElement = document.getElementById('diamondsCount');
+        const minesCountValueElement = document.getElementById('minesCountValue');
+        const chanceValueElement = document.getElementById('chanceValue');
 
         // Игровые переменные
         let userId = null;
@@ -527,6 +640,7 @@
                     balanceLoaded = true;
                     
                     updateMultipliers();
+                    updateStats();
                     
                     if (balanceLoaded) {
                         setTimeout(hideLoadingScreen, 1000);
@@ -545,6 +659,21 @@
                     database.ref('miner_log').remove();
                 }
             });
+        }
+
+        // Обновление статистики
+        function updateStats() {
+            if (!gameStarted) {
+                diamondsCountElement.textContent = "???";
+                minesCountValueElement.textContent = "???";
+                chanceValueElement.textContent = "???";
+            } else {
+                const diamonds = 25 - minesCount;
+                diamondsCountElement.textContent = diamonds;
+                minesCountValueElement.textContent = minesCount;
+                const chance = ((diamonds - revealedCells) / (25 - revealedCells) * 100).toFixed(0);
+                chanceValueElement.textContent = `${chance}%`;
+            }
         }
 
         // Скрытие экрана загрузки
@@ -640,7 +769,7 @@
                     if (bet === 'min') {
                         currentBet = 1.00;
                     } else if (bet === 'max') {
-                        currentBet = Math.max(1.00, parseFloat((currentBalance / 2).toFixed(2)));
+                        currentBet = Math.max(1.00, parseFloat(currentBalance.toFixed(2)));
                     } else {
                         currentBet = parseFloat(currentBet) + parseFloat(bet);
                     }
@@ -676,6 +805,7 @@
                     button.classList.add('active');
                     
                     updateMultipliers();
+                    updateStats();
                 });
             });
 
@@ -693,12 +823,13 @@
             // Кнопка модального окна победы
             winButton.addEventListener('click', () => {
                 winModal.style.display = 'none';
-                actionButton.textContent = 'Играть';
-                actionButton.disabled = false;
-                document.querySelectorAll('.bet-button, .mines-button').forEach(btn => {
-                    btn.disabled = false;
-                });
-                gameStarted = false;
+                resetGameUI();
+            });
+
+            // Кнопка модального окна легендарной победы
+            legendaryButton.addEventListener('click', () => {
+                legendaryModal.style.display = 'none';
+                resetGameUI();
             });
         }
 
@@ -743,6 +874,7 @@
             });
             
             updateMultipliers();
+            updateStats();
         }
 
         // Генерация позиций мин
@@ -793,16 +925,17 @@
                 }
                 
                 if (revealedCells === (25 - minesCount)) {
-                    endGame(true);
+                    endGame(true, true);
                 }
                 
                 updateMultipliers();
+                updateStats();
                 scrollToCurrentMultiplier();
             }
         }
 
         // Завершение игры (обычный режим)
-        function endGame(winByChoice) {
+        function endGame(winByChoice, isLegendary = false) {
             gameStarted = false;
             
             // Показываем все мины и алмазы
@@ -810,15 +943,24 @@
             
             actionButton.disabled = true;
             
-            if (winByChoice || revealedCells === (25 - minesCount)) {
+            if (winByChoice || isLegendary) {
                 const multiplier = MULTIPLIERS[minesCount][currentMultiplierIndex];
                 const winAmount = parseFloat((currentBet * multiplier).toFixed(2));
                 
                 currentBalance = parseFloat((currentBalance + winAmount).toFixed(2));
                 updateBalance();
                 
-                showWin(winAmount, winByChoice);
+                if (isLegendary) {
+                    showLegendaryWin(winAmount, multiplier);
+                } else {
+                    showWin(winAmount, multiplier);
+                }
+                
+                // Помечаем множитель как выигрышный
+                markMultiplierAsWin();
             } else {
+                // Помечаем множитель как проигрышный
+                markMultiplierAsLose();
                 setTimeout(() => {
                     resetGameUI();
                 }, 500);
@@ -837,6 +979,9 @@
             // Показываем все мины и алмазы
             revealAllCells();
             
+            // Помечаем множитель как проигрышный
+            markMultiplierAsLose();
+            
             // Для 24 мин просто сбрасываем игру без изменения баланса
             setTimeout(() => {
                 resetGameUI();
@@ -853,12 +998,11 @@
             for (let i = 0; i < 25; i++) {
                 const cell = document.querySelector(`.cell[data-index="${i}"]`);
                 if (!cell.classList.contains('revealed')) {
-                    cell.classList.add('revealed');
                     if (minesPositions.includes(i)) {
-                        cell.classList.add('mine');
+                        cell.classList.add('mine', 'hidden');
                         cell.textContent = '💣';
                     } else {
-                        cell.classList.add('diamond');
+                        cell.classList.add('diamond', 'hidden');
                         cell.textContent = '💎';
                     }
                 }
@@ -872,15 +1016,53 @@
             document.querySelectorAll('.bet-button, .mines-button').forEach(btn => {
                 btn.disabled = false;
             });
+            updateStats();
         }
 
         // Показать экран победы
-        function showWin(amount, winByChoice) {
+        function showWin(amount, multiplier) {
+            winMultiplierElement.textContent = `${multiplier.toFixed(2)}x`;
             winAmountElement.textContent = `+${amount.toFixed(2)} ₽`;
-            winMessage.textContent = winByChoice 
-                ? 'Вы успешно забрали выигрыш!' 
-                : 'Вы нашли все алмазы!';
             winModal.style.display = 'flex';
+        }
+
+        // Показать экран легендарной победы
+        function showLegendaryWin(amount, multiplier) {
+            legendaryMultiplierElement.textContent = `${multiplier.toFixed(2)}x`;
+            legendaryAmountElement.textContent = `+${amount.toFixed(2)} ₽`;
+            legendaryModal.style.display = 'flex';
+        }
+
+        // Пометить множитель как выигрышный
+        function markMultiplierAsWin() {
+            if (currentMultiplierIndex >= 0) {
+                const multiplierItem = document.querySelector(`.multiplier-item[data-step="${currentMultiplierIndex}"]`);
+                if (multiplierItem) {
+                    multiplierItem.classList.add('win');
+                    const value = multiplierItem.querySelector('.multiplier-value');
+                    if (value) {
+                        value.classList.remove('current');
+                        value.classList.add('win');
+                    }
+                }
+            }
+        }
+
+        // Пометить множитель как проигрышный
+        function markMultiplierAsLose() {
+        // Пометить множитель как проигрышный
+        function markMultiplierAsLose() {
+            if (currentMultiplierIndex >= 0) {
+                const multiplierItem = document.querySelector(`.multiplier-item[data-step="${currentMultiplierIndex}"]`);
+                if (multiplierItem) {
+                    multiplierItem.classList.add('lose');
+                    const value = multiplierItem.querySelector('.multiplier-value');
+                    if (value) {
+                        value.classList.remove('current');
+                        value.classList.add('lose');
+                    }
+                }
+            }
         }
 
         // Обновление баланса в Firebase
