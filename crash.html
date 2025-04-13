@@ -38,6 +38,7 @@
             align-items: center;
             z-index: 100;
             font-size: 24px;
+            transition: opacity 0.3s;
         }
         
         .header {
@@ -344,40 +345,7 @@
         let crashPoint = 1.0;
         let hasBet = false;
         
-        // Загрузка баланса пользователя
-        function loadBalance() {
-            if (!tgUserId) {
-                console.error('User ID not found in cookies');
-                balanceElement.textContent = '0.00р';
-                hideLoading();
-                return;
-            }
-            
-            database.ref(`users/${tgUserId}/balance`).on('value', (snapshot) => {
-                const userBalance = snapshot.val();
-                if (userBalance !== null) {
-                    balance = parseFloat(userBalance);
-                    balanceElement.textContent = balance.toFixed(2) + 'р';
-                } else {
-                    // Если баланса нет, устанавливаем начальный баланс
-                    database.ref(`users/${tgUserId}`).set({
-                        balance: 100.00
-                    });
-                    balance = 100.00;
-                    balanceElement.textContent = balance.toFixed(2) + 'р';
-                }
-                
-                hideLoading();
-                startGameCycle();
-            }, (error) => {
-                console.error('Error loading balance:', error);
-                balanceElement.textContent = '0.00р';
-                hideLoading();
-                startGameCycle();
-            });
-        }
-        
-        // Скрываем загрузку
+        // Скрываем загрузку через 1 секунду (даже если баланс не загрузился)
         function hideLoading() {
             setTimeout(() => {
                 loadingOverlay.style.opacity = '0';
@@ -387,12 +355,68 @@
             }, 1000);
         }
         
+        // Загрузка баланса пользователя
+        function loadBalance() {
+            if (!tgUserId) {
+                console.log('User ID not found in cookies. Using demo mode.');
+                balance = 100.00;
+                balanceElement.textContent = balance.toFixed(2) + 'р';
+                hideLoading();
+                startGameCycle();
+                return;
+            }
+            
+            const balanceRef = database.ref(`users/${tgUserId}/balance`);
+            
+            // Пытаемся получить баланс с таймаутом
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => {
+                    reject(new Error('Timeout'));
+                }, 3000); // Таймаут 3 секунды
+            });
+            
+            const balancePromise = new Promise((resolve) => {
+                balanceRef.once('value', (snapshot) => {
+                    resolve(snapshot.val());
+                }, (error) => {
+                    console.error('Error loading balance:', error);
+                    resolve(null);
+                });
+            });
+            
+            Promise.race([balancePromise, timeoutPromise])
+                .then((userBalance) => {
+                    if (userBalance !== null) {
+                        balance = parseFloat(userBalance);
+                    } else {
+                        // Если баланса нет, устанавливаем начальный баланс
+                        database.ref(`users/${tgUserId}`).set({
+                            balance: 100.00
+                        });
+                        balance = 100.00;
+                    }
+                    
+                    balanceElement.textContent = balance.toFixed(2) + 'р';
+                    hideLoading();
+                    startGameCycle();
+                })
+                .catch(() => {
+                    console.log('Balance loading timeout. Using demo mode.');
+                    balance = 100.00;
+                    balanceElement.textContent = balance.toFixed(2) + 'р';
+                    hideLoading();
+                    startGameCycle();
+                });
+        }
+        
         // Обновление баланса в Firebase
         function updateBalance(newBalance) {
             if (!tgUserId) return;
             
             database.ref(`users/${tgUserId}`).update({
                 balance: newBalance
+            }).catch(error => {
+                console.error('Error updating balance:', error);
             });
         }
         
@@ -401,7 +425,7 @@
             // Вероятность краша увеличивается с ростом множителя
             const r = Math.random() * 100;
             let e = 1 / (1 + 0.1 * Math.pow(r, 2));
-            crashPoint = Math.max(1.0, (1 / (1 - e) - 1).toFixed(2);
+            crashPoint = Math.max(1.0, (1 / (1 - e) - 1).toFixed(2));
             return parseFloat(crashPoint);
         }
         
@@ -542,7 +566,12 @@
             
             const betAmount = parseInt(betAmountInput.value);
             
-            if (isNaN(betAmount) || betAmount < 1) {
+            if (isNaN(betAmount) {
+                alert('Введите корректную сумму ставки');
+                return;
+            }
+            
+            if (betAmount < 1) {
                 alert('Минимальная ставка 1р');
                 return;
             }
