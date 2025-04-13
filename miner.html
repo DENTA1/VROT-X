@@ -482,7 +482,7 @@
         let gameStarted = false;
         let minesPositions = [];
         let revealedCells = 0;
-        let currentMultiplierIndex = 0;
+        let currentMultiplierIndex = -1; // Начинаем с -1, так как первый ход еще не сделан
         let userRef = null;
         let balanceLoaded = false;
         let multiplierScrollInterval = null;
@@ -583,20 +583,23 @@
         function scrollToCurrentMultiplier() {
             if (multiplierScrollInterval) clearInterval(multiplierScrollInterval);
             
-            multiplierScrollInterval = setInterval(() => {
-                const currentMultiplier = document.querySelector(`.multiplier-item[data-step="${currentMultiplierIndex}"]`);
-                if (currentMultiplier) {
-                    currentMultiplier.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'nearest',
-                        inline: 'center'
-                    });
-                }
-            }, 100);
-            
-            setTimeout(() => {
-                if (multiplierScrollInterval) clearInterval(multiplierScrollInterval);
-            }, 1000);
+            // Прокручиваем только если есть текущий множитель (не -1)
+            if (currentMultiplierIndex >= 0) {
+                multiplierScrollInterval = setInterval(() => {
+                    const currentMultiplier = document.querySelector(`.multiplier-item[data-step="${currentMultiplierIndex}"]`);
+                    if (currentMultiplier) {
+                        currentMultiplier.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'nearest',
+                            inline: 'center'
+                        });
+                    }
+                }, 100);
+                
+                setTimeout(() => {
+                    if (multiplierScrollInterval) clearInterval(multiplierScrollInterval);
+                }, 1000);
+            }
         }
 
         // Установка обработчиков событий
@@ -653,8 +656,10 @@
             // Кнопка действия (Играть/Забрать)
             actionButton.addEventListener('click', () => {
                 if (gameStarted) {
-                    // Забрать выигрыш
-                    endGame(true);
+                    // Забрать выигрыш (только если сделан хотя бы один ход)
+                    if (currentMultiplierIndex >= 0) {
+                        endGame(true);
+                    }
                 } else {
                     // Начать игру
                     startGame();
@@ -664,6 +669,7 @@
             // Кнопка модального окна победы
             winButton.addEventListener('click', () => {
                 winModal.style.display = 'none';
+                resetGame();
             });
         }
 
@@ -688,16 +694,14 @@
             
             gameStarted = true;
             revealedCells = 0;
-            currentMultiplierIndex = 0;
-            actionButton.textContent = `Забрать ${(currentBet * MULTIPLIERS[minesCount][0]).toFixed(2)}`;
+            currentMultiplierIndex = -1; // Сбрасываем индекс множителя
+            actionButton.textContent = 'Забрать';
+            actionButton.disabled = true; // Блокируем кнопку "Забрать" до первого хода
             
             // Блокируем кнопки
             document.querySelectorAll('.bet-button, .mines-button').forEach(btn => {
                 btn.disabled = true;
             });
-            
-            // Запускаем автоскролл множителей
-            scrollToCurrentMultiplier();
         }
 
         // Генерация позиций мин
@@ -737,9 +741,14 @@
                 cell.classList.add('diamond');
                 cell.textContent = '💎';
                 
-                // Обновляем текущий множитель
-                currentMultiplierIndex = Math.min(revealedCells, MULTIPLIERS[minesCount].length - 1);
-                actionButton.textContent = `Забрать ${(currentBet * MULTIPLIERS[minesCount][currentMultiplierIndex]).toFixed(2)}`;
+                // Обновляем текущий множитель (первый ход становится шагом 0)
+                currentMultiplierIndex = Math.min(revealedCells - 1, MULTIPLIERS[minesCount].length - 1);
+                
+                // Разблокируем кнопку "Забрать" после первого хода
+                if (currentMultiplierIndex >= 0) {
+                    actionButton.disabled = false;
+                    actionButton.textContent = `Забрать ${(currentBet * MULTIPLIERS[minesCount][currentMultiplierIndex]).toFixed(2)}`;
+                }
                 
                 // Проверяем победу (только если открыты все алмазы)
                 if (revealedCells === (25 - minesCount)) {
@@ -804,12 +813,17 @@
                 cell.textContent = '';
             });
             
-            // Включаем кнопки
+            // Восстанавливаем кнопки
             actionButton.textContent = 'Играть';
             actionButton.disabled = false;
             document.querySelectorAll('.bet-button, .mines-button').forEach(btn => {
                 btn.disabled = false;
             });
+            
+            // Сбрасываем игровые переменные
+            gameStarted = false;
+            revealedCells = 0;
+            currentMultiplierIndex = -1;
         }
 
         // Обновление баланса в Firebase
