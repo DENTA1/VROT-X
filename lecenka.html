@@ -67,7 +67,7 @@
             border: 3px solid #0f3460;
             border-radius: 10px;
             background-color: #16213e;
-            height: calc(100vh - 320px);
+            height: calc(100vh - 300px);
             min-height: 300px;
             position: relative;
             overflow: hidden;
@@ -81,13 +81,12 @@
             width: 100%;
             height: 100%;
             padding: 10px 10px 0 10px;
-            overflow-y: auto;
         }
         
         .floor {
             display: flex;
             justify-content: center;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             width: 100%;
             position: relative;
             opacity: 0;
@@ -118,6 +117,7 @@
             border-radius: 15px;
             font-size: 14px;
             z-index: 2;
+            transition: all 0.3s;
         }
         
         .floor.visible {
@@ -126,12 +126,23 @@
         }
         
         .floor.passed {
-            opacity: 0.6;
+            opacity: 0.3;
+        }
+        
+        .floor.active::after {
+            background-color: #FF9800;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.1); }
+            100% { transform: translateX(-50%) scale(1); }
         }
         
         .btn {
             width: 50px;
-            height: 50px;
+            height: 40px;
             margin: 0 5px;
             background-color: #4a4a6a;
             border: none;
@@ -246,7 +257,7 @@
         }
         
         .difficulty-btn {
-            padding: 10px;
+            padding: 10px 5px;
             border-radius: 5px;
             border: none;
             background-color: #4a4a6a;
@@ -254,8 +265,11 @@
             cursor: pointer;
             font-size: 14px;
             transition: all 0.3s;
-            width: 23%; /* Уменьшили ширину на 5% */
+            width: 23%;
             text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .difficulty-btn:hover {
@@ -280,6 +294,7 @@
             cursor: pointer;
             font-weight: bold;
             flex-shrink: 0;
+            margin-left: auto;
         }
         
         .game-info {
@@ -290,33 +305,30 @@
             padding: 15px;
             border-radius: 10px;
             transition: all 0.3s;
+            opacity: 0.7;
         }
         
-        .info-row {
+        .disabled-controls {
             display: flex;
             justify-content: space-between;
+            opacity: 0.7;
         }
         
-        .info-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+        .disabled-bet {
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #4a4a6a;
             flex: 1;
+            text-align: center;
         }
         
-        .info-label {
-            font-size: 14px;
-            color: #7a7a7a;
-            margin-bottom: 5px;
-        }
-        
-        .info-value {
-            font-size: 18px;
-            font-weight: bold;
-        }
-        
-        .multiplier-value {
-            color: #4CAF50;
+        .disabled-difficulty {
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #4a4a6a;
+            width: 23%;
+            text-align: center;
+            margin-right: 5px;
         }
         
         .action-btn {
@@ -489,21 +501,9 @@
             </div>
             
             <div class="game-info" id="gameInfo">
-                <div class="info-row">
-                    <div class="info-item">
-                        <div class="info-label">Ставка</div>
-                        <div class="info-value" id="currentBet">1 ₽</div>
-                    </div>
-                </div>
-                <div class="info-row">
-                    <div class="info-item">
-                        <div class="info-label">Текущий множитель</div>
-                        <div class="info-value multiplier-value" id="currentMultiplier">1.04x</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Следующий множитель</div>
-                        <div class="info-value multiplier-value" id="nextMultiplier">1.15x</div>
-                    </div>
+                <div class="disabled-controls">
+                    <div class="disabled-bet" id="disabledBet">Ставка: 1 ₽</div>
+                    <div class="disabled-difficulty" id="disabledDifficulty">Легкий</div>
                 </div>
             </div>
             
@@ -620,7 +620,7 @@
                 balance: newBalance
             }).then(() => {
                 userBalance = newBalance;
-                document.getElementById('balance').textContent = userBalance.toFixed(2) + ' ₽';
+                document.getElementById('balance').textContent = newBalance.toFixed(2) + ' ₽';
                 return newBalance;
             });
         }
@@ -638,19 +638,23 @@
         const difficultySettings = {
             easy: { 
                 mines: 1, 
-                multipliers: [1.04, 1.15, 1.36, 1.68, 2.02, 2.5] 
+                multipliers: [1.04, 1.15, 1.36, 1.68, 2.02, 2.5],
+                name: "Легкий"
             },
             medium: { 
                 mines: 2, 
-                multipliers: [1.15, 1.58, 2.25, 3.02, 4.67, 8] 
+                multipliers: [1.15, 1.58, 2.25, 3.02, 4.67, 8],
+                name: "Средний"
             },
             hard: { 
                 mines: 3, 
-                multipliers: [2.5, 4.5, 7.5, 11.5, 18.5, 35] 
+                multipliers: [2.5, 4.5, 7.5, 11.5, 18.5, 35],
+                name: "Сложный"
             },
             expert: { 
                 mines: 4, 
-                multipliers: [4, 16, 64, 256, 1024, 25000] 
+                multipliers: [4, 16, 64, 256, 1024, 25000],
+                name: "Эксперт"
             }
         };
         
@@ -668,18 +672,17 @@
         const resultTitle = document.getElementById('resultTitle');
         const resultAmount = document.getElementById('resultAmount');
         const okBtn = document.getElementById('okBtn');
-        const currentMultiplier = document.getElementById('currentMultiplier');
-        const nextMultiplier = document.getElementById('nextMultiplier');
         const setupControls = document.getElementById('setupControls');
         const gameInfo = document.getElementById('gameInfo');
-        const currentBet = document.getElementById('currentBet');
+        const disabledBet = document.getElementById('disabledBet');
+        const disabledDifficulty = document.getElementById('disabledDifficulty');
         
         // Создание игрового поля
         function createLadder() {
             ladderElement.innerHTML = '';
             currentFloor = 0;
             
-            // Создаем все 6 этажей (но скрываем)
+            // Создаем все 6 этажей
             for (let i = 0; i < 6; i++) {
                 const floor = document.createElement('div');
                 floor.className = 'floor';
@@ -699,13 +702,24 @@
                 ladderElement.appendChild(floor);
             }
             
-            // Показываем только первый этаж
-            showFloor(0);
-            updateMultipliers();
+            // Показываем все этажи с коэффициентами перед игрой
+            if (!gameActive) {
+                document.querySelectorAll('.floor').forEach(floor => {
+                    floor.classList.add('visible', 'passed');
+                });
+            } else {
+                // Показываем только первый этаж во время игры
+                showFloor(0);
+            }
         }
         
         // Показать этаж
         function showFloor(floorNumber) {
+            const floors = document.querySelectorAll('.floor');
+            floors.forEach(floor => {
+                floor.classList.remove('visible', 'active');
+            });
+            
             const floor = document.querySelector(`.floor[data-floor="${floorNumber}"]`);
             if (floor) {
                 floor.classList.add('visible');
@@ -719,27 +733,20 @@
             const currentFloorElement = document.querySelector(`.floor[data-floor="${currentFloor}"]`);
             if (currentFloorElement) {
                 currentFloorElement.classList.add('passed');
+                currentFloorElement.classList.remove('active');
             }
             
             currentFloor++;
             if (currentFloor < 6) {
                 showFloor(currentFloor);
-                updateMultipliers();
+                // Подсвечиваем овал с текущим множителем
+                const newFloor = document.querySelector(`.floor[data-floor="${currentFloor}"]`);
+                if (newFloor) {
+                    newFloor.classList.add('active');
+                }
             } else {
                 // Игрок дошел до конца
                 showResult(true);
-            }
-        }
-        
-        // Обновление множителей
-        function updateMultipliers() {
-            const settings = difficultySettings[difficulty];
-            currentMultiplier.textContent = `${settings.multipliers[currentFloor].toFixed(2)}x`;
-            
-            if (currentFloor < 5) {
-                nextMultiplier.textContent = `${settings.multipliers[currentFloor + 1].toFixed(2)}x`;
-            } else {
-                nextMultiplier.textContent = '-';
             }
         }
         
@@ -791,7 +798,8 @@
                     // Скрываем настройки, показываем игровую информацию
                     setupControls.style.display = 'none';
                     gameInfo.style.display = 'flex';
-                    currentBet.textContent = `${betAmount} ₽`;
+                    disabledBet.textContent = `Ставка: ${betAmount} ₽`;
+                    disabledDifficulty.textContent = difficultySettings[difficulty].name;
                     
                     // Показываем кнопку "Забрать" под игровым полем
                     takeBtnContainer.style.display = 'block';
@@ -845,7 +853,7 @@
                     // Выигрыш на этом этаже
                     const settings = difficultySettings[difficulty];
                     const floorWin = parseFloat((betAmount * settings.multipliers[currentFloor]).toFixed(2));
-                    currentWin += floorWin;
+                    currentWin = floorWin; // Обновляем текущий выигрыш
                     
                     // Обновляем кнопку "Забрать"
                     takeBtn.textContent = `Забрать ${currentWin.toFixed(2)} ₽`;
@@ -870,7 +878,7 @@
                     
                     // Игра окончена
                     gameActive = false;
-                    takeBtn.style.display = 'none';
+                    takeBtnContainer.style.display = 'none';
                     startBtn.style.display = 'block';
                     startBtn.textContent = 'Начать';
                     
@@ -942,11 +950,7 @@
                 difficultyButtons.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 difficulty = btn.dataset.level;
-                updateMultipliers();
-                
-                if (gameActive) {
-                    createLadder();
-                }
+                createLadder();
             });
         });
         
