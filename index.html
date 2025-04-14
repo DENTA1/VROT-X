@@ -37,41 +37,64 @@
         }
         .logo span {
             display: inline-block;
-            transition: color 0.3s;
+            transition: all 0.5s ease;
         }
-        @keyframes logoAnimation {
-            0%, 100% { color: white; }
-            16.6% { color: #64b5f6; }
+        @keyframes highlight {
+            0%, 100% { color: white; transform: scale(1); }
+            50% { color: #64b5f6; transform: scale(1.1); }
         }
         @keyframes oAnimation {
             0%, 100% { letter-spacing: 1px; }
             50% { letter-spacing: 4px; }
         }
+        .buttons-container {
+            display: flex;
+            margin: 20px;
+            margin-top: 70px;
+            gap: 10px;
+        }
         .account-button {
             background: #1e1e1e;
-            margin: 20px;
             padding: 15px 20px;
             border-radius: 10px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
             cursor: pointer;
             font-size: 18px;
             font-weight: bold;
             color: #e0e0e0;
             transition: all 0.2s;
-            margin-top: 70px;
             border: 1px solid #333;
+            flex: 2;
         }
-        .account-button:hover {
+        .leaderboard-button {
+            background: #FFD700;
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            cursor: pointer;
+            font-size: 24px;
+            transition: all 0.2s;
+            border: none;
+            flex: 1;
+        }
+        .account-button:hover, .leaderboard-button:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+        }
+        .account-button:active, .leaderboard-button:active {
+            transform: translateY(0);
+        }
+        .account-button:hover {
             background: #252525;
         }
-        .account-button:active {
-            background: #1a1a1a;
-            transform: translateY(0);
+        .leaderboard-button:hover {
+            background: #FFC000;
         }
         .account-icon {
             width: 24px;
@@ -87,11 +110,6 @@
         .account-icon svg {
             width: 14px;
             height: 14px;
-        }
-        .arrow-icon {
-            font-size: 24px;
-            font-weight: bold;
-            color: #4285F4;
         }
         .games-container {
             padding: 0 20px;
@@ -221,6 +239,39 @@
             z-index: 1002;
             text-align: center;
         }
+        .leaderboard-screen {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            color: white;
+            font-size: 20px;
+            z-index: 1003;
+            padding: 20px;
+        }
+        .leaderboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .leaderboard-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #FFD700;
+        }
+        .close-leaderboard {
+            font-size: 30px;
+            cursor: pointer;
+            color: white;
+        }
         .loader {
             width: 48px;
             height: 48px;
@@ -345,10 +396,10 @@
             position: absolute;
             width: 50%;
             height: 50%;
-            transform-origin: bottom right;
             left: 50%;
             top: 0;
-            transform: translateX(-50%) rotate(0deg) skewY(-60deg);
+            transform-origin: bottom center;
+            clip-path: polygon(0 0, 100% 0, 50% 100%);
         }
         .roulette-green {
             background: #2e7d32;
@@ -427,18 +478,30 @@
         <button id="telegramAuthButton">Войти через Telegram</button>
     </div>
 
+    <div class="leaderboard-screen" id="leaderboardScreen">
+        <div class="leaderboard-header">
+            <div class="leaderboard-title">ЛидерБорд</div>
+            <div class="close-leaderboard" id="closeLeaderboard">×</div>
+        </div>
+        <!-- Здесь будет содержимое лидерборда -->
+    </div>
+
     <div id="appContent" style="display: none;">
-        <div class="account-button" id="accountButton">
-            <div style="display: flex; align-items: center;">
-                <div class="account-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="12" cy="7" r="4"></circle>
-                    </svg>
+        <div class="buttons-container">
+            <div class="account-button" id="accountButton">
+                <div style="display: flex; align-items: center;">
+                    <div class="account-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    </div>
+                    <span>Мой профиль</span>
                 </div>
-                <span>Мой профиль</span>
             </div>
-            <div class="arrow-icon">→</div>
+            <div class="leaderboard-button" id="leaderboardButton">
+                🏆
+            </div>
         </div>
         <div class="games-container">
             <div class="games-title-container">
@@ -483,6 +546,9 @@
         const statusText = document.getElementById('statusText');
         const userIdText = document.getElementById('userIdText');
         const authScreen = document.getElementById('authScreen');
+        const leaderboardScreen = document.getElementById('leaderboardScreen');
+        const closeLeaderboard = document.getElementById('closeLeaderboard');
+        const leaderboardButton = document.getElementById('leaderboardButton');
         const appContentElement = document.getElementById('appContent');
         const gamesGrid = document.getElementById('gamesGrid');
         const telegramAuthButton = document.getElementById('telegramAuthButton');
@@ -501,6 +567,15 @@
         document.addEventListener('DOMContentLoaded', async () => {
             // Запускаем анимацию логотипа
             startLogoAnimation();
+            
+            // Назначаем обработчики для кнопок
+            leaderboardButton.addEventListener('click', () => {
+                leaderboardScreen.style.display = 'flex';
+            });
+            
+            closeLeaderboard.addEventListener('click', () => {
+                leaderboardScreen.style.display = 'none';
+            });
             
             // Пытаемся загрузить Telegram WebApp
             try {
@@ -536,25 +611,28 @@
 
         // Анимация логотипа
         function startLogoAnimation() {
+            // Функция для анимации букв
+            function animateLetter(letter, delay) {
+                setTimeout(() => {
+                    letter.style.animation = 'highlight 1.5s ease-in-out';
+                    setTimeout(() => {
+                        letter.style.animation = 'none';
+                    }, 1500);
+                }, delay);
+            }
+            
             // Анимация подсветки букв по очереди
             function highlightLetters() {
-                setTimeout(() => { logoV.style.color = '#64b5f6'; }, 0);
-                setTimeout(() => { logoR.style.color = '#64b5f6'; }, 300);
-                setTimeout(() => { logoO.style.color = '#64b5f6'; }, 600);
-                setTimeout(() => { logoT.style.color = '#64b5f6'; }, 900);
-                setTimeout(() => { logoDash.style.color = '#64b5f6'; }, 1200);
-                setTimeout(() => { logoX.style.color = '#64b5f6'; }, 1500);
+                animateLetter(logoV, 0);
+                animateLetter(logoR, 300);
+                animateLetter(logoO, 600);
+                animateLetter(logoT, 900);
+                animateLetter(logoDash, 1200);
+                animateLetter(logoX, 1500);
                 
-                setTimeout(() => { logoX.style.color = 'white'; }, 1800);
-                setTimeout(() => { logoDash.style.color = 'white'; }, 2100);
-                setTimeout(() => { logoT.style.color = 'white'; }, 2400);
-                setTimeout(() => { logoO.style.color = 'white'; }, 2700);
-                setTimeout(() => { logoR.style.color = 'white'; }, 3000);
-                setTimeout(() => { logoV.style.color = 'white'; }, 3300);
-                
+                // Анимация буквы O
                 setTimeout(() => {
-                    // Анимация увеличения буквы O
-                    logoElement.style.animation = 'oAnimation 4s infinite';
+                    logoElement.style.animation = 'oAnimation 4s ease-in-out';
                     setTimeout(() => {
                         logoO.textContent = 'OOOO';
                         setTimeout(() => {
@@ -563,8 +641,8 @@
                             // Запускаем цикл заново
                             setTimeout(highlightLetters, 1000);
                         }, 2000);
-                    }, 1000);
-                }, 3300);
+                    }, 1800);
+                }, 1800);
             }
             
             highlightLetters();
@@ -839,10 +917,10 @@
                 { color: 'roulette-black', angle: 320 }
             ];
             
-            sectors.forEach((sector, index) => {
+            sectors.forEach(sector => {
                 const sectorElement = document.createElement('div');
                 sectorElement.className = `roulette-sector ${sector.color}`;
-                sectorElement.style.transform = `rotate(${sector.angle}deg) skewY(-60deg)`;
+                sectorElement.style.transform = `rotate(${sector.angle}deg)`;
                 wheel.appendChild(sectorElement);
             });
             
