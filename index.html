@@ -252,18 +252,6 @@
             font-size: 14px;
             margin-top: 10px;
         }
-        .locked-game {
-            filter: grayscale(80%) brightness(0.6);
-            position: relative;
-        }
-        .locked-game::after {
-            content: '🔒';
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 20px;
-            z-index: 3;
-        }
 
         /* Стили для игровых паттернов */
         .miner-pattern {
@@ -324,31 +312,66 @@
             background: rgba(38, 198, 218, 0.7);
         }
 
-        .slots-pattern {
+        .roulette-pattern {
             background: linear-gradient(135deg, #ff6d00, #ff3d00);
-        }
-        .slots-machine {
-            width: 140px;
-            height: 80px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 8px;
             display: flex;
-            border: 2px solid rgba(255, 255, 255, 0.2);
+            justify-content: center;
+            align-items: center;
+        }
+        .roulette-wheel {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
             position: relative;
             overflow: hidden;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            transform: rotate(0deg);
+            transition: transform 0.5s;
         }
-        .slots-reel {
-            flex: 1;
-            border-right: 1px solid rgba(255, 255, 255, 0.2);
+        .roulette-sector {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            transform-origin: bottom right;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
-            color: gold;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
         }
-        .slots-reel:nth-child(1)::after { content: '🍒'; }
-        .slots-reel:nth-child(2)::after { content: '7'; color: white; }
-        .slots-reel:nth-child(3)::after { content: '💰'; }
+        .roulette-green {
+            background: #2e7d32;
+        }
+        .roulette-red {
+            background: #c62828;
+        }
+        .roulette-black {
+            background: #212121;
+        }
+        .roulette-center {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: white;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+        }
+        .roulette-pointer {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 20px solid white;
+            z-index: 3;
+        }
 
         @keyframes rotation {
             0% { transform: rotate(0deg); }
@@ -433,11 +456,7 @@
         const gamesAvailability = {
             miner: true,
             ladder: true,
-            slots: false,
-            crash: false,
-            classic: false,
-            plinko: false,
-            roulette: false
+            roulette: true
         };
         
         let userId = null;
@@ -597,10 +616,6 @@
             const games = [
                 { id: 'miner', name: 'Минёр' },
                 { id: 'ladder', name: 'Лесенка' },
-                { id: 'slots', name: 'Слоты' },
-                { id: 'crash', name: 'Краш' },
-                { id: 'classic', name: 'Классик' },
-                { id: 'plinko', name: 'Плинко' },
                 { id: 'roulette', name: 'Рулетка' }
             ];
             
@@ -608,16 +623,13 @@
             
             games.forEach(game => {
                 const gameCard = document.createElement('div');
-                gameCard.className = `game-card ${gamesAvailability[game.id] ? '' : 'locked-game'}`;
+                gameCard.className = 'game-card';
                 
                 let pattern;
                 switch(game.id) {
                     case 'miner': pattern = createMinerPattern(); break;
                     case 'ladder': pattern = createLadderPattern(); break;
-                    case 'slots': pattern = createSlotsPattern(); break;
-                    case 'crash': pattern = createCrashPattern(); break;
-                    case 'classic': pattern = createClassicPattern(); break;
-                    case 'plinko': pattern = createPlinkoPattern(); break;
+                    case 'roulette': pattern = createRoulettePattern(); break;
                     default: 
                         pattern = document.createElement('div');
                         pattern.className = 'game-pattern';
@@ -639,8 +651,6 @@
                     
                     if (gamesAvailability[game.id]) {
                         openGame(game.id);
-                    } else {
-                        alert('Эта игра временно недоступна');
                     }
                 });
                 
@@ -661,10 +671,7 @@
             switch(game) {
                 case 'miner': window.location.href = `miner.html?${params.toString()}`; break;
                 case 'ladder': window.location.href = `lecenka.html?${params.toString()}`; break;
-                case 'slots': window.location.href = `slots.html?${params.toString()}`; break;
-                case 'crash': window.location.href = `crash.html?${params.toString()}`; break;
-                case 'classic': window.location.href = `classik.html?${params.toString()}`; break;
-                case 'plinko': window.location.href = `plinko.html?${params.toString()}`; break;
+                case 'roulette': window.location.href = `roulette.html?${params.toString()}`; break;
                 default: console.error('Неизвестная игра:', game);
             }
         }
@@ -747,89 +754,58 @@
             return pattern;
         }
 
-        function createSlotsPattern() {
+        function createRoulettePattern() {
             const pattern = document.createElement('div');
-            pattern.className = 'game-pattern slots-pattern';
+            pattern.className = 'game-pattern roulette-pattern';
             
-            const machine = document.createElement('div');
-            machine.className = 'slots-machine';
+            const wheel = document.createElement('div');
+            wheel.className = 'roulette-wheel';
             
-            for (let i = 0; i < 3; i++) {
-                const reel = document.createElement('div');
-                reel.className = 'slots-reel';
-                machine.appendChild(reel);
-            }
-            
-            pattern.appendChild(machine);
-            return pattern;
-        }
-
-        function createCrashPattern() {
-            const pattern = document.createElement('div');
-            pattern.className = 'game-pattern crash-pattern';
-            
-            const graph = document.createElement('div');
-            graph.className = 'crash-graph';
-            
-            const line = document.createElement('div');
-            line.className = 'crash-line';
-            
-            const multiplier = document.createElement('div');
-            multiplier.className = 'crash-multiplier';
-            multiplier.textContent = 'x2.45';
-            
-            graph.appendChild(line);
-            pattern.appendChild(graph);
-            pattern.appendChild(multiplier);
-            
-            return pattern;
-        }
-
-        function createClassicPattern() {
-            const pattern = document.createElement('div');
-            pattern.className = 'game-pattern classic-pattern';
-            
-            const cards = document.createElement('div');
-            cards.className = 'classic-cards';
-            
-            const symbols = ['♥', '♦', '♣'];
-            for (let i = 0; i < 3; i++) {
-                const card = document.createElement('div');
-                card.className = 'classic-card';
-                card.textContent = symbols[i];
-                cards.appendChild(card);
-            }
-            
-            pattern.appendChild(cards);
-            return pattern;
-        }
-
-        function createPlinkoPattern() {
-            const pattern = document.createElement('div');
-            pattern.className = 'game-pattern plinko-pattern';
-            
-            const board = document.createElement('div');
-            board.className = 'plinko-board';
-            
-            const pinPositions = [
-                [60, 20], [50, 35], [70, 35], [40, 50], [60, 50], 
-                [80, 50], [30, 65], [50, 65], [70, 65], [90, 65],
-                [20, 80], [40, 80], [60, 80], [80, 80], [100, 80]
+            // Создаем сектора рулетки
+            const sectors = [
+                { color: 'roulette-green', number: '0', angle: 0 },
+                { color: 'roulette-red', number: '32', angle: 15 },
+                { color: 'roulette-black', number: '15', angle: 30 },
+                { color: 'roulette-red', number: '19', angle: 45 },
+                { color: 'roulette-black', number: '4', angle: 60 },
+                { color: 'roulette-red', number: '21', angle: 75 },
+                { color: 'roulette-black', number: '2', angle: 90 },
+                { color: 'roulette-red', number: '25', angle: 105 },
+                { color: 'roulette-black', number: '17', angle: 120 },
+                { color: 'roulette-red', number: '34', angle: 135 },
+                { color: 'roulette-black', number: '6', angle: 150 },
+                { color: 'roulette-red', number: '27', angle: 165 },
+                { color: 'roulette-black', number: '13', angle: 180 },
+                { color: 'roulette-red', number: '36', angle: 195 },
+                { color: 'roulette-black', number: '11', angle: 210 },
+                { color: 'roulette-red', number: '30', angle: 225 },
+                { color: 'roulette-black', number: '8', angle: 240 },
+                { color: 'roulette-red', number: '23', angle: 255 },
+                { color: 'roulette-black', number: '10', angle: 270 },
+                { color: 'roulette-red', number: '5', angle: 285 },
+                { color: 'roulette-black', number: '24', angle: 300 },
+                { color: 'roulette-red', number: '16', angle: 315 },
+                { color: 'roulette-black', number: '33', angle: 330 },
+                { color: 'roulette-red', number: '1', angle: 345 }
             ];
             
-            pinPositions.forEach(pos => {
-                const pin = document.createElement('div');
-                pin.className = 'plinko-pin';
-                pin.style.left = `${pos[0]}px`;
-                pin.style.top = `${pos[1]}px`;
-                board.appendChild(pin);
+            sectors.forEach(sector => {
+                const sectorElement = document.createElement('div');
+                sectorElement.className = `roulette-sector ${sector.color}`;
+                sectorElement.textContent = sector.number;
+                sectorElement.style.transform = `rotate(${sector.angle}deg) skewY(-60deg)`;
+                wheel.appendChild(sectorElement);
             });
             
-            const ball = document.createElement('div');
-            ball.className = 'plinko-ball';
+            const center = document.createElement('div');
+            center.className = 'roulette-center';
+            wheel.appendChild(center);
             
-            pattern.appendChild(board);
-            pattern.appendChild(ball);
+            const pointer = document.createElement('div');
+            pointer.className = 'roulette-pointer';
+            wheel.appendChild(pointer);
+            
+            pattern.appendChild(wheel);
             return pattern;
         }
     </script>
