@@ -47,6 +47,10 @@
             0%, 100% { letter-spacing: 1px; }
             50% { letter-spacing: 4px; }
         }
+        @keyframes userHighlight {
+            0%, 100% { background-color: rgba(30, 30, 30, 0.7); }
+            50% { background-color: rgba(66, 133, 244, 0.3); }
+        }
         .buttons-container {
             display: flex;
             margin: 20px;
@@ -152,7 +156,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: #1e1e1e;
         }
         .game-card:hover {
             transform: translateY(-5px);
@@ -173,10 +176,83 @@
             font-size: 16px;
             z-index: 2;
         }
+        .game-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .miner-pattern {
+            background: linear-gradient(135deg, #1e88e5, #64b5f6);
+        }
+        .miner-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(5, 1fr);
+            gap: 4px;
+            width: 120px;
+            height: 120px;
+            padding: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+        .miner-cell {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        .miner-bomb {
+            background: rgba(239, 83, 80, 0.7);
+        }
+        .miner-crystal {
+            background: rgba(38, 198, 218, 0.7);
+        }
+        .ladder-pattern {
+            background: linear-gradient(135deg, #2e7d32, #66bb6a);
+        }
+        .ladder-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(5, 1fr);
+            gap: 4px;
+            width: 120px;
+            height: 120px;
+            padding: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+        .ladder-cell {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        .ladder-bomb {
+            background: rgba(239, 83, 80, 0.7);
+        }
+        .ladder-check {
+            background: rgba(38, 198, 218, 0.7);
+        }
+        .roulette-card {
+            background: linear-gradient(135deg, #ff6d00, #ff3d00);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
         .game-number {
             font-size: 48px;
             font-weight: bold;
-            color: #4285F4;
+            color: white;
         }
         .auth-screen {
             position: fixed;
@@ -253,17 +329,27 @@
         }
         .leaderboard-header {
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
             align-items: center;
             width: 100%;
             margin-bottom: 20px;
+            position: relative;
         }
         .leaderboard-title {
-            font-size: 24px;
+            font-size: 28px;
             font-weight: bold;
             color: #FFD700;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .trophy-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
         }
         .close-leaderboard {
+            position: absolute;
+            top: 0;
+            right: 0;
             font-size: 30px;
             cursor: pointer;
             color: white;
@@ -272,8 +358,8 @@
             display: flex;
             align-items: center;
             width: 100%;
-            padding: 10px 15px;
-            margin-bottom: 10px;
+            padding: 12px 15px;
+            margin-bottom: 8px;
             background: rgba(30, 30, 30, 0.7);
             border-radius: 8px;
         }
@@ -283,18 +369,52 @@
             margin-right: 15px;
             width: 30px;
             text-align: center;
+            position: relative;
         }
         .position-1 {
             color: #FFD700;
-            text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+            text-shadow: 0 0 8px rgba(255, 215, 0, 0.7);
+        }
+        .position-1::before {
+            content: "";
+            position: absolute;
+            top: -10px;
+            left: -5px;
+            right: -5px;
+            bottom: -10px;
+            border: 2px solid #FFD700;
+            border-radius: 50%;
+            opacity: 0.7;
         }
         .position-2 {
             color: #C0C0C0;
             text-shadow: 0 0 5px rgba(192, 192, 192, 0.5);
         }
+        .position-2::before {
+            content: "";
+            position: absolute;
+            top: -5px;
+            left: -3px;
+            right: -3px;
+            bottom: -5px;
+            border: 1px solid #C0C0C0;
+            border-radius: 50%;
+            opacity: 0.7;
+        }
         .position-3 {
             color: #CD7F32;
-            text-shadow: 0 0 5px rgba(205, 127, 50, 0.5);
+            text-shadow: 0 0 3px rgba(205, 127, 50, 0.5);
+        }
+        .position-3::before {
+            content: "";
+            position: absolute;
+            top: -3px;
+            left: -2px;
+            right: -2px;
+            bottom: -3px;
+            border: 1px solid #CD7F32;
+            border-radius: 50%;
+            opacity: 0.7;
         }
         .position-other {
             color: #666;
@@ -306,14 +426,10 @@
         .leaderboard-balance {
             font-weight: bold;
             color: #34A853;
-            margin-right: 10px;
+            margin-right: 5px;
         }
-        .you-badge {
-            background: #4285F4;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 14px;
+        .user-highlight {
+            animation: userHighlight 2s infinite;
         }
         .loader {
             width: 48px;
@@ -408,6 +524,7 @@
 
     <div class="leaderboard-screen" id="leaderboardScreen">
         <div class="leaderboard-header">
+            <div class="trophy-icon">🏆</div>
             <div class="leaderboard-title">ЛидерБорд</div>
             <div class="close-leaderboard" id="closeLeaderboard">×</div>
         </div>
@@ -462,6 +579,7 @@
         
         let userId = null;
         let userName = null;
+        let leaderboardInterval = null;
         const transitionScreen = document.getElementById('transitionScreen');
         const loader = document.getElementById('loader');
         const checkmark = document.getElementById('checkmark');
@@ -495,6 +613,7 @@
             leaderboardButton.addEventListener('click', showLeaderboard);
             closeLeaderboard.addEventListener('click', () => {
                 leaderboardScreen.style.display = 'none';
+                clearInterval(leaderboardInterval);
             });
             
             // Пытаемся загрузить Telegram WebApp
@@ -684,21 +803,36 @@
 
         // Создание карточек игр
         function createGameCards() {
+            const games = [
+                { id: 'miner', name: 'Минёр' },
+                { id: 'ladder', name: 'Лесенка' },
+                { id: 'roulette1', name: 'Рулетка' },
+                { id: 'roulette2', name: 'Рулетка' }
+            ];
+            
             gamesGrid.innerHTML = '';
             
-            // Создаем две карточки для рулетки
-            for (let i = 1; i <= 2; i++) {
+            games.forEach(game => {
                 const gameCard = document.createElement('div');
                 gameCard.className = 'game-card';
                 
-                const number = document.createElement('div');
-                number.className = 'game-number';
-                number.textContent = i;
-                gameCard.appendChild(number);
+                if (game.id === 'miner') {
+                    const pattern = createMinerPattern();
+                    gameCard.appendChild(pattern);
+                } else if (game.id === 'ladder') {
+                    const pattern = createLadderPattern();
+                    gameCard.appendChild(pattern);
+                } else {
+                    gameCard.classList.add('roulette-card');
+                    const number = document.createElement('div');
+                    number.className = 'game-number';
+                    number.textContent = game.id === 'roulette1' ? '1' : '2';
+                    gameCard.appendChild(number);
+                }
                 
                 const gameName = document.createElement('div');
                 gameName.className = 'game-name';
-                gameName.textContent = 'Рулетка';
+                gameName.textContent = game.name;
                 gameCard.appendChild(gameName);
                 
                 gameCard.addEventListener('click', () => {
@@ -706,11 +840,61 @@
                         showAuthScreen();
                         return;
                     }
-                    openGame('roulette');
+                    openGame(game.id.includes('roulette') ? 'roulette' : game.id);
                 });
                 
                 gamesGrid.appendChild(gameCard);
+            });
+        }
+
+        // Создание паттерна для игры "Минёр"
+        function createMinerPattern() {
+            const pattern = document.createElement('div');
+            pattern.className = 'game-pattern miner-pattern';
+            
+            const grid = document.createElement('div');
+            grid.className = 'miner-grid';
+            
+            const bombPositions = [3, 7, 12, 19, 23];
+            const crystalPositions = [1, 9, 11, 15, 21];
+            
+            for (let i = 0; i < 25; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'miner-cell';
+                
+                if (bombPositions.includes(i)) cell.classList.add('miner-bomb');
+                else if (crystalPositions.includes(i)) cell.classList.add('miner-crystal');
+                
+                grid.appendChild(cell);
             }
+            
+            pattern.appendChild(grid);
+            return pattern;
+        }
+
+        // Создание паттерна для игры "Лесенка"
+        function createLadderPattern() {
+            const pattern = document.createElement('div');
+            pattern.className = 'game-pattern ladder-pattern';
+            
+            const grid = document.createElement('div');
+            grid.className = 'ladder-grid';
+            
+            const bombPositions = [2, 5, 9, 12];
+            const checkPositions = [1, 4, 7, 11, 14];
+            
+            for (let i = 0; i < 15; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'ladder-cell';
+                
+                if (bombPositions.includes(i)) cell.classList.add('ladder-bomb');
+                else if (checkPositions.includes(i)) cell.classList.add('ladder-check');
+                
+                grid.appendChild(cell);
+            }
+            
+            pattern.appendChild(grid);
+            return pattern;
         }
 
         // Открытие игры
@@ -726,8 +910,17 @@
         }
 
         // Показать лидерборд
-        async function showLeaderboard() {
+        function showLeaderboard() {
             leaderboardScreen.style.display = 'flex';
+            loadLeaderboard();
+            
+            // Обновляем лидерборд каждые 5 секунд
+            clearInterval(leaderboardInterval);
+            leaderboardInterval = setInterval(loadLeaderboard, 5000);
+        }
+
+        // Загрузка данных лидерборда
+        async function loadLeaderboard() {
             leaderboardContent.innerHTML = '<div style="text-align: center;">Загрузка...</div>';
             
             try {
@@ -739,7 +932,7 @@
                     users.push({
                         id: childSnapshot.key,
                         name: userData.name || 'Аноним',
-                        balance: userData.balance || 0
+                        balance: Math.round(userData.balance || 0)
                     });
                 });
                 
@@ -753,7 +946,7 @@
                 users.forEach((user, index) => {
                     const position = index + 1;
                     const item = document.createElement('div');
-                    item.className = 'leaderboard-item';
+                    item.className = `leaderboard-item ${user.id === userId ? 'user-highlight' : ''}`;
                     
                     // Позиция
                     const posElement = document.createElement('div');
@@ -770,16 +963,8 @@
                     // Баланс
                     const balanceElement = document.createElement('div');
                     balanceElement.className = 'leaderboard-balance';
-                    balanceElement.textContent = user.balance;
+                    balanceElement.textContent = `${user.balance}р`;
                     item.appendChild(balanceElement);
-                    
-                    // Метка "Это ты" для текущего пользователя
-                    if (user.id === userId) {
-                        const youElement = document.createElement('div');
-                        youElement.className = 'you-badge';
-                        youElement.textContent = 'Это ты';
-                        item.appendChild(youElement);
-                    }
                     
                     leaderboardContent.appendChild(item);
                 });
