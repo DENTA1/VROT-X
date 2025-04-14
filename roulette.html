@@ -3,8 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Plinko Game</title>
+    <title>Plinko Casino</title>
     <style>
+        :root {
+            --primary-color: #2a2a4a;
+            --secondary-color: #4cc9f0;
+            --accent-color: #f72585;
+            --dark-color: #1a1a2e;
+            --light-color: #e2e2e2;
+        }
+        
         * {
             margin: 0;
             padding: 0;
@@ -13,8 +21,8 @@
         }
         
         body {
-            font-family: Arial, sans-serif;
-            background-color: #1a1a2e;
+            font-family: 'Arial', sans-serif;
+            background-color: var(--dark-color);
             color: white;
             overflow: hidden;
             touch-action: manipulation;
@@ -26,42 +34,112 @@
         .header {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             padding: 10px 15px;
-            background-color: #16213e;
+            background-color: var(--primary-color);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
         }
         
         .back-btn {
             color: white;
             text-decoration: none;
             font-size: 14px;
-            padding: 4px 8px;
+            padding: 6px 12px;
             border-radius: 4px;
             background-color: #0f3460;
+            display: flex;
+            align-items: center;
         }
         
-        .game-wrapper {
-            width: 100%;
-            height: calc(100% - 90px);
+        .back-btn i {
+            margin-right: 5px;
+        }
+        
+        .settings-panel {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .difficulty-selector, .rows-selector {
+            position: relative;
+        }
+        
+        .selector-btn {
+            background-color: var(--primary-color);
+            border: 1px solid var(--secondary-color);
+            color: white;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        
+        .selector-btn i {
+            margin-left: 5px;
+        }
+        
+        .dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: var(--primary-color);
+            border: 1px solid var(--secondary-color);
+            border-radius: 4px;
+            padding: 5px;
+            z-index: 100;
+            display: none;
+            min-width: 100px;
+        }
+        
+        .dropdown.show {
+            display: block;
+        }
+        
+        .dropdown-item {
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 12px;
+            border-radius: 3px;
+        }
+        
+        .dropdown-item:hover {
+            background-color: var(--secondary-color);
+            color: var(--dark-color);
+        }
+        
+        .game-area {
+            display: flex;
+            flex-direction: column;
+            height: calc(100% - 110px);
+            padding: 10px;
+        }
+        
+        .game-container-wrapper {
+            flex: 1;
             display: flex;
             justify-content: center;
-            padding: 5px;
+            position: relative;
         }
         
         .game-container {
             position: relative;
-            width: 95%;
+            width: 100%;
+            max-width: 400px;
             height: 100%;
-            background-color: #1a1a2e;
-            overflow: hidden;
-            border: 2px solid #4cc9f0;
+            background-color: rgba(26, 26, 46, 0.7);
+            border: 2px solid var(--secondary-color);
             border-radius: 8px;
+            overflow: hidden;
         }
         
         .peg {
             position: absolute;
-            width: 3px;
-            height: 3px;
-            background-color: #4cc9f0;
+            width: 4px;
+            height: 4px;
+            background-color: var(--secondary-color);
             border-radius: 50%;
             transform: translate(-50%, -50%);
             z-index: 1;
@@ -69,73 +147,135 @@
         
         .ball {
             position: absolute;
-            width: 5px;
-            height: 5px;
-            background: radial-gradient(circle at 30% 30%, #fff, #f72585);
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle at 30% 30%, #fff, var(--accent-color));
             border-radius: 50%;
             transform: translate(-50%, -50%);
-            box-shadow: 0 0 3px rgba(247, 37, 133, 0.7);
+            box-shadow: 0 0 5px rgba(247, 37, 133, 0.7);
             z-index: 2;
         }
         
-        .bucket {
+        .buckets-container {
             position: absolute;
             bottom: 0;
-            height: 20px;
+            width: 100%;
+            height: 20%;
+            display: flex;
+            z-index: 3;
+        }
+        
+        .bucket {
+            flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
             font-weight: bold;
-            font-size: 8px;
+            font-size: 10px;
             color: white;
             background-color: rgba(15, 52, 96, 0.7);
-            border: 1px solid #4cc9f0;
-            z-index: 3;
+            border-top: 2px solid var(--secondary-color);
+            position: relative;
         }
         
-        .bucket-center {
-            border-left: none;
-            border-right: none;
+        .bucket:not(:last-child) {
+            border-right: 1px dashed rgba(76, 201, 240, 0.3);
         }
         
         .controls {
             display: flex;
             justify-content: center;
-            padding: 8px;
-            background-color: #16213e;
+            padding: 10px;
+            background-color: var(--primary-color);
         }
         
         .drop-btn {
-            padding: 8px 16px;
-            font-size: 12px;
-            background: linear-gradient(135deg, #f72585, #7209b7);
+            padding: 10px 25px;
+            font-size: 14px;
+            background: linear-gradient(135deg, var(--accent-color), #7209b7);
             color: white;
             border: none;
-            border-radius: 15px;
+            border-radius: 20px;
             cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         
-        .result {
+        .result-display {
             text-align: center;
-            padding: 6px;
-            font-size: 12px;
+            padding: 8px;
+            font-size: 14px;
             font-weight: bold;
-            color: #4cc9f0;
-            height: 15px;
-            background-color: #16213e;
+            color: var(--secondary-color);
+            background-color: var(--primary-color);
+            border-top: 1px solid rgba(76, 201, 240, 0.3);
+        }
+        
+        /* Иконки из Font Awesome */
+        .fa {
+            display: inline-block;
+            font-style: normal;
+            font-variant: normal;
+            text-rendering: auto;
+            line-height: 1;
+            font-size: 12px;
+        }
+        
+        .fa-chevron-left:before {
+            content: "\f053";
+        }
+        
+        .fa-caret-down:before {
+            content: "\f0d7";
+        }
+        
+        .fa-sliders-h:before {
+            content: "\f1de";
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <a href="index.html" class="back-btn">Назад</a>
-        <div class="result" id="result"></div>
+        <a href="index.html" class="back-btn">
+            <i class="fa"></i> Назад
+        </a>
+        <div class="settings-panel">
+            <div class="difficulty-selector">
+                <button class="selector-btn" id="difficultyBtn">
+                    Сложность <i class="fa"></i>
+                </button>
+                <div class="dropdown" id="difficultyDropdown">
+                    <div class="dropdown-item" data-level="easy">Легко</div>
+                    <div class="dropdown-item" data-level="medium">Средне</div>
+                    <div class="dropdown-item" data-level="hard">Сложно</div>
+                </div>
+            </div>
+            <div class="rows-selector">
+                <button class="selector-btn" id="rowsBtn">
+                    Ряды <i class="fa"></i>
+                </button>
+                <div class="dropdown" id="rowsDropdown">
+                    <div class="dropdown-item" data-rows="6">6 рядов</div>
+                    <div class="dropdown-item" data-rows="8">8 рядов</div>
+                    <div class="dropdown-item" data-rows="10">10 рядов</div>
+                    <div class="dropdown-item" data-rows="12">12 рядов</div>
+                    <div class="dropdown-item" data-rows="14">14 рядов</div>
+                </div>
+            </div>
+        </div>
     </div>
     
-    <div class="game-wrapper">
-        <div class="game-container" id="gameContainer"></div>
+    <div class="game-area">
+        <div class="game-container-wrapper">
+            <div class="game-container" id="gameContainer">
+                <div class="buckets-container" id="bucketsContainer"></div>
+            </div>
+        </div>
     </div>
+    
+    <div class="result-display" id="resultDisplay">Запустите шарик</div>
     
     <div class="controls">
         <button class="drop-btn" id="dropBall">Запустить</button>
@@ -144,78 +284,188 @@
     <script>
         // Инициализация игры
         const gameContainer = document.getElementById('gameContainer');
+        const bucketsContainer = document.getElementById('bucketsContainer');
         const dropBallBtn = document.getElementById('dropBall');
-        const resultDisplay = document.getElementById('result');
+        const resultDisplay = document.getElementById('resultDisplay');
         
-        // Размеры контейнера
-        const containerWidth = gameContainer.offsetWidth;
-        const containerHeight = gameContainer.offsetHeight;
+        // Элементы настроек
+        const difficultyBtn = document.getElementById('difficultyBtn');
+        const difficultyDropdown = document.getElementById('difficultyDropdown');
+        const rowsBtn = document.getElementById('rowsBtn');
+        const rowsDropdown = document.getElementById('rowsDropdown');
         
-        // Коэффициенты (симметричные, увеличиваются к краям)
-        const multipliers = [10, 7, 5, 3, 2, 1.5, 1.2, 1, 1.2, 1.5, 2, 3, 5, 7, 10];
-        const bucketCount = multipliers.length;
-        const bucketWidth = containerWidth / bucketCount;
-        
-        // Создание ячеек с коэффициентами
-        for (let i = 0; i < bucketCount; i++) {
-            const bucket = document.createElement('div');
-            bucket.className = 'bucket';
-            if (i > 0 && i < bucketCount - 1) bucket.classList.add('bucket-center');
-            bucket.style.width = `${bucketWidth}px`;
-            bucket.style.left = `${i * bucketWidth}px`;
-            bucket.textContent = `x${multipliers[i]}`;
-            gameContainer.appendChild(bucket);
-        }
-        
-        // Создание плотного симметричного поля с препятствиями
-        const pegRows = 10;
-        const pegVerticalSpacing = (containerHeight - 60) / pegRows;
-        const centerX = containerWidth / 2;
-        
-        for (let row = 0; row < pegRows; row++) {
-            // Увеличенное количество препятствий в ряду для плотности
-            const pegsInRow = 7 + Math.floor(row * 0.8);
-            const pegSpacing = containerWidth / (pegsInRow + 1);
-            
-            // Смещение для создания симметричного узора
-            const offset = row % 2 === 0 ? pegSpacing / 2 : 0;
-            
-            for (let col = 0; col < pegsInRow; col++) {
-                const peg = document.createElement('div');
-                peg.className = 'peg';
-                
-                // Симметричное расположение
-                const x = offset + col * pegSpacing;
-                const y = 20 + row * pegVerticalSpacing;
-                
-                peg.style.left = `${x}px`;
-                peg.style.top = `${y}px`;
-                gameContainer.appendChild(peg);
-                
-                // Зеркальное отражение для симметрии
-                if (x < centerX) {
-                    const mirrorPeg = document.createElement('div');
-                    mirrorPeg.className = 'peg';
-                    mirrorPeg.style.left = `${containerWidth - x}px`;
-                    mirrorPeg.style.top = `${y}px`;
-                    gameContainer.appendChild(mirrorPeg);
-                }
-            }
-        }
+        // Настройки игры по умолчанию
+        let settings = {
+            difficulty: 'medium',
+            rows: 10,
+            ballSize: 8,
+            pegSize: 4
+        };
         
         // Физические параметры
         const gravity = 0.3;
         const friction = 0.98;
         const bounce = 0.85;
-        const pegRadius = 1.5;
-        const ballRadius = 2.5;
         
         // Массив активных шариков
         const balls = [];
         let lastDropTime = 0;
         const dropCooldown = 200; // 0.2s в миллисекундах
         
-        // Функция создания нового шарика
+        // Коэффициенты для разных уровней сложности
+        const difficultyMultipliers = {
+            easy: {
+                center: [1, 1.2, 1.5, 2],
+                edge: [3, 5, 7, 10]
+            },
+            medium: {
+                center: [1, 1.1, 1.3, 1.6],
+                edge: [2, 3, 5, 8, 12]
+            },
+            hard: {
+                center: [0.5, 0.8, 1, 1.2],
+                edge: [2, 4, 7, 10, 15]
+            }
+        };
+        
+        // Инициализация выпадающих меню
+        function initDropdowns() {
+            // Обработчики для кнопок
+            difficultyBtn.addEventListener('click', () => {
+                difficultyDropdown.classList.toggle('show');
+                rowsDropdown.classList.remove('show');
+            });
+            
+            rowsBtn.addEventListener('click', () => {
+                rowsDropdown.classList.toggle('show');
+                difficultyDropdown.classList.remove('show');
+            });
+            
+            // Обработчики для элементов dropdown
+            document.querySelectorAll('#difficultyDropdown .dropdown-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    settings.difficulty = item.dataset.level;
+                    difficultyBtn.textContent = `Сложность: ${item.textContent} `;
+                    difficultyBtn.innerHTML += '<i class="fa"></i>';
+                    difficultyDropdown.classList.remove('show');
+                    initGame();
+                });
+            });
+            
+            document.querySelectorAll('#rowsDropdown .dropdown-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    settings.rows = parseInt(item.dataset.rows);
+                    rowsBtn.textContent = `Ряды: ${item.textContent} `;
+                    rowsBtn.innerHTML += '<i class="fa"></i>';
+                    rowsDropdown.classList.remove('show');
+                    initGame();
+                });
+            });
+            
+            // Закрытие dropdown при клике вне его
+            window.addEventListener('click', (e) => {
+                if (!difficultyBtn.contains(e.target)) {
+                    difficultyDropdown.classList.remove('show');
+                }
+                if (!rowsBtn.contains(e.target)) {
+                    rowsDropdown.classList.remove('show');
+                }
+            });
+            
+            // Установка начальных значений
+            document.querySelector(`#difficultyDropdown .dropdown-item[data-level="${settings.difficulty}"]`).click();
+            document.querySelector(`#rowsDropdown .dropdown-item[data-rows="${settings.rows}"]`).click();
+        }
+        
+        // Генерация коэффициентов на основе настроек
+        function generateMultipliers() {
+            const { center, edge } = difficultyMultipliers[settings.difficulty];
+            const multipliers = [];
+            
+            // Создаем симметричный массив коэффициентов
+            for (let i = 0; i < Math.floor(settings.rows / 2); i++) {
+                if (i < center.length) {
+                    multipliers.unshift(center[Math.min(i, center.length - 1)]);
+                    multipliers.push(center[Math.min(i, center.length - 1)]);
+                } else {
+                    const edgeIndex = Math.min(i - center.length, edge.length - 1);
+                    multipliers.unshift(edge[edgeIndex]);
+                    multipliers.push(edge[edgeIndex]);
+                }
+            }
+            
+            // Для нечетного количества добавляем центральный элемент
+            if (settings.rows % 2 !== 0) {
+                multipliers.splice(Math.floor(multipliers.length / 2), 0, center[0]);
+            }
+            
+            return multipliers;
+        }
+        
+        // Создание игрового поля
+        function initGame() {
+            // Очищаем контейнеры
+            gameContainer.innerHTML = '';
+            bucketsContainer.innerHTML = '';
+            
+            // Создаем заново buckets container
+            gameContainer.appendChild(bucketsContainer);
+            
+            // Генерируем коэффициенты
+            const multipliers = generateMultipliers();
+            
+            // Создаем ячейки
+            multipliers.forEach((mult, index) => {
+                const bucket = document.createElement('div');
+                bucket.className = 'bucket';
+                bucket.textContent = `x${mult}`;
+                bucketsContainer.appendChild(bucket);
+            });
+            
+            // Размеры контейнера
+            const containerWidth = gameContainer.offsetWidth;
+            const containerHeight = gameContainer.offsetHeight;
+            const bucketHeight = bucketsContainer.offsetHeight;
+            const playAreaHeight = containerHeight - bucketHeight;
+            
+            // Создаем препятствия
+            const pegRows = Math.floor(playAreaHeight / 20); // Примерное количество рядов
+            const pegVerticalSpacing = playAreaHeight / pegRows;
+            const centerX = containerWidth / 2;
+            
+            for (let row = 0; row < pegRows; row++) {
+                // Количество препятствий в ряду
+                const pegsInRow = 5 + Math.floor(row * 0.6);
+                const pegSpacing = containerWidth / (pegsInRow + 1);
+                
+                // Смещение для шахматного порядка
+                const offset = row % 2 === 0 ? pegSpacing / 2 : 0;
+                
+                for (let col = 0; col < pegsInRow; col++) {
+                    const peg = document.createElement('div');
+                    peg.className = 'peg';
+                    
+                    // Позиция препятствия
+                    const x = offset + col * pegSpacing;
+                    const y = 10 + row * pegVerticalSpacing;
+                    
+                    peg.style.left = `${x}px`;
+                    peg.style.top = `${y}px`;
+                    gameContainer.appendChild(peg);
+                    
+                    // Зеркальное отражение для симметрии
+                    if (x < centerX) {
+                        const mirrorPeg = document.createElement('div');
+                        mirrorPeg.className = 'peg';
+                        mirrorPeg.style.left = `${containerWidth - x}px`;
+                        mirrorPeg.style.top = `${y}px`;
+                        gameContainer.appendChild(mirrorPeg);
+                    }
+                }
+            }
+        }
+        
+        // Создание нового шарика
         function createBall() {
             const now = Date.now();
             if (now - lastDropTime < dropCooldown) return;
@@ -223,15 +473,17 @@
             
             const ball = document.createElement('div');
             ball.className = 'ball';
+            ball.style.width = `${settings.ballSize}px`;
+            ball.style.height = `${settings.ballSize}px`;
             
             // Старт из центра с небольшим случайным отклонением
-            const startX = containerWidth / 2 + (Math.random() - 0.5) * 20;
+            const startX = gameContainer.offsetWidth / 2 + (Math.random() - 0.5) * 20;
             ball.style.left = `${startX}px`;
             ball.style.top = '10px';
             
             gameContainer.appendChild(ball);
             
-            // Начальная скорость с небольшим случайным отклонением
+            // Начальная скорость
             const velocity = {
                 x: (Math.random() - 0.5) * 1.0,
                 y: 0
@@ -252,9 +504,11 @@
             return state;
         }
         
-        // Оптимизированная проверка столкновений
+        // Проверка столкновений
         function checkCollisions(ball) {
             const pegs = document.querySelectorAll('.peg');
+            const ballRadius = settings.ballSize / 2;
+            const pegRadius = settings.pegSize / 2;
             const minDist = ballRadius + pegRadius;
             const minDistSq = minDist * minDist;
             
@@ -275,27 +529,33 @@
                     ball.vx -= 2 * dotProduct * nx * bounce;
                     ball.vy -= 2 * dotProduct * ny * bounce;
                     
-                    // Коррекция позиции
+                                        // Коррекция позиции
                     const overlap = minDist - distance;
                     ball.x += nx * overlap * 0.7;
                     ball.y += ny * overlap * 0.7;
                 }
             });
         }
-        
+
         // Проверка попадания в ячейку
         function checkBucketCollision(ball) {
-            if (ball.y > containerHeight - 20 && ball.vy > 0) {
-                const bucketIndex = Math.min(bucketCount - 1, Math.floor(ball.x / bucketWidth));
-                const multiplier = multipliers[bucketIndex];
+            const buckets = document.querySelectorAll('.bucket');
+            const ballRadius = settings.ballSize / 2;
+            const containerHeight = gameContainer.offsetHeight;
+            const bucketHeight = bucketsContainer.offsetHeight;
+            
+            if (ball.y > containerHeight - bucketHeight - ballRadius && ball.vy > 0) {
+                const bucketWidth = gameContainer.offsetWidth / buckets.length;
+                const bucketIndex = Math.min(buckets.length - 1, Math.floor(ball.x / bucketWidth));
+                const multiplier = buckets[bucketIndex].textContent.replace('x', '');
                 
                 resultDisplay.textContent = `Выигрыш: x${multiplier}`;
                 return true;
             }
             return false;
         }
-        
-        // Проверка и исправление "застрявших" шариков
+
+        // Проверка "застрявших" шариков
         function checkStuckBalls() {
             const now = Date.now();
             const stuckThreshold = 1000; // 1 секунда без движения
@@ -326,7 +586,7 @@
                 }
             }
         }
-        
+
         // Основной игровой цикл
         function gameLoop() {
             const now = Date.now();
@@ -357,11 +617,12 @@
                 }
                 
                 // Границы поля
+                const ballRadius = settings.ballSize / 2;
                 if (ball.x < ballRadius) {
                     ball.x = ballRadius;
                     ball.vx = -ball.vx * bounce;
-                } else if (ball.x > containerWidth - ballRadius) {
-                    ball.x = containerWidth - ballRadius;
+                } else if (ball.x > gameContainer.offsetWidth - ballRadius) {
+                    ball.x = gameContainer.offsetWidth - ballRadius;
                     ball.vx = -ball.vx * bounce;
                 }
                 
@@ -382,7 +643,7 @@
                 }
                 
                 // Удаление вылетевших шариков
-                if (ball.y > containerHeight + 20) {
+                if (ball.y > gameContainer.offsetHeight + 20) {
                     gameContainer.removeChild(ball.element);
                     balls.splice(i, 1);
                 }
@@ -390,11 +651,15 @@
             
             requestAnimationFrame(gameLoop);
         }
-        
+
         // Обработчики событий
         dropBallBtn.addEventListener('click', createBall);
         
+        // Инициализация dropdown меню
+        initDropdowns();
+        
         // Запуск игры
+        initGame();
         gameLoop();
     </script>
 </body>
