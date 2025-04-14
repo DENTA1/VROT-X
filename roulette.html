@@ -26,25 +26,25 @@
         .header {
             display: flex;
             justify-content: space-between;
-            padding: 12px 15px;
+            padding: 10px 15px;
             background-color: #16213e;
         }
         
         .back-btn {
             color: white;
             text-decoration: none;
-            font-size: 16px;
-            padding: 5px 10px;
-            border-radius: 5px;
+            font-size: 14px;
+            padding: 4px 8px;
+            border-radius: 4px;
             background-color: #0f3460;
         }
         
         .game-wrapper {
             width: 100%;
-            height: calc(100% - 110px);
+            height: calc(100% - 90px);
             display: flex;
             justify-content: center;
-            padding: 10px;
+            padding: 5px;
         }
         
         .game-container {
@@ -54,13 +54,13 @@
             background-color: #1a1a2e;
             overflow: hidden;
             border: 2px solid #4cc9f0;
-            border-radius: 10px;
+            border-radius: 8px;
         }
         
         .peg {
             position: absolute;
-            width: 4px;
-            height: 4px;
+            width: 3px;
+            height: 3px;
             background-color: #4cc9f0;
             border-radius: 50%;
             transform: translate(-50%, -50%);
@@ -69,55 +69,60 @@
         
         .ball {
             position: absolute;
-            width: 10px;
-            height: 10px;
+            width: 5px;
+            height: 5px;
             background: radial-gradient(circle at 30% 30%, #fff, #f72585);
             border-radius: 50%;
             transform: translate(-50%, -50%);
-            box-shadow: 0 0 5px rgba(247, 37, 133, 0.7);
+            box-shadow: 0 0 3px rgba(247, 37, 133, 0.7);
             z-index: 2;
         }
         
         .bucket {
             position: absolute;
             bottom: 0;
-            height: 25px;
+            height: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
             font-weight: bold;
-            font-size: 10px;
+            font-size: 8px;
             color: white;
-            border-top: 2px solid #4cc9f0;
             background-color: rgba(15, 52, 96, 0.7);
+            border: 1px solid #4cc9f0;
             z-index: 3;
+        }
+        
+        .bucket-center {
+            border-left: none;
+            border-right: none;
         }
         
         .controls {
             display: flex;
             justify-content: center;
-            padding: 10px;
+            padding: 8px;
             background-color: #16213e;
         }
         
         .drop-btn {
-            padding: 10px 20px;
-            font-size: 14px;
+            padding: 8px 16px;
+            font-size: 12px;
             background: linear-gradient(135deg, #f72585, #7209b7);
             color: white;
             border: none;
-            border-radius: 20px;
+            border-radius: 15px;
             cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
         
         .result {
             text-align: center;
-            padding: 8px;
-            font-size: 14px;
+            padding: 6px;
+            font-size: 12px;
             font-weight: bold;
             color: #4cc9f0;
-            height: 18px;
+            height: 15px;
             background-color: #16213e;
         }
     </style>
@@ -155,20 +160,21 @@
         for (let i = 0; i < bucketCount; i++) {
             const bucket = document.createElement('div');
             bucket.className = 'bucket';
+            if (i > 0 && i < bucketCount - 1) bucket.classList.add('bucket-center');
             bucket.style.width = `${bucketWidth}px`;
             bucket.style.left = `${i * bucketWidth}px`;
             bucket.textContent = `x${multipliers[i]}`;
             gameContainer.appendChild(bucket);
         }
         
-        // Создание симметричного поля с препятствиями
-        const pegRows = 12;
-        const pegVerticalSpacing = (containerHeight - 80) / pegRows;
+        // Создание плотного симметричного поля с препятствиями
+        const pegRows = 10;
+        const pegVerticalSpacing = (containerHeight - 60) / pegRows;
         const centerX = containerWidth / 2;
         
         for (let row = 0; row < pegRows; row++) {
-            // Количество препятствий в ряду увеличивается к низу
-            const pegsInRow = 5 + Math.floor(row * 0.6);
+            // Увеличенное количество препятствий в ряду для плотности
+            const pegsInRow = 7 + Math.floor(row * 0.8);
             const pegSpacing = containerWidth / (pegsInRow + 1);
             
             // Смещение для создания симметричного узора
@@ -180,7 +186,7 @@
                 
                 // Симметричное расположение
                 const x = offset + col * pegSpacing;
-                const y = 30 + row * pegVerticalSpacing;
+                const y = 20 + row * pegVerticalSpacing;
                 
                 peg.style.left = `${x}px`;
                 peg.style.top = `${y}px`;
@@ -198,16 +204,16 @@
         }
         
         // Физические параметры
-        const gravity = 0.25;
+        const gravity = 0.3;
         const friction = 0.98;
         const bounce = 0.85;
-        const pegRadius = 2;
-        const ballRadius = 5;
+        const pegRadius = 1.5;
+        const ballRadius = 2.5;
         
         // Массив активных шариков
         const balls = [];
         let lastDropTime = 0;
-        const dropCooldown = 50; // 0.05s в миллисекундах
+        const dropCooldown = 200; // 0.2s в миллисекундах
         
         // Функция создания нового шарика
         function createBall() {
@@ -219,26 +225,27 @@
             ball.className = 'ball';
             
             // Старт из центра с небольшим случайным отклонением
-            const startX = containerWidth / 2 + (Math.random() - 0.5) * 30;
+            const startX = containerWidth / 2 + (Math.random() - 0.5) * 20;
             ball.style.left = `${startX}px`;
-            ball.style.top = '15px';
+            ball.style.top = '10px';
             
             gameContainer.appendChild(ball);
             
             // Начальная скорость с небольшим случайным отклонением
             const velocity = {
-                x: (Math.random() - 0.5) * 1.2,
+                x: (Math.random() - 0.5) * 1.0,
                 y: 0
             };
             
             const state = {
                 element: ball,
                 x: startX,
-                y: 15,
+                y: 10,
                 vx: velocity.x,
                 vy: velocity.y,
                 active: true,
-                lastMoveTime: now
+                lastMoveTime: now,
+                stuckCount: 0
             };
             
             balls.push(state);
@@ -278,7 +285,7 @@
         
         // Проверка попадания в ячейку
         function checkBucketCollision(ball) {
-            if (ball.y > containerHeight - 25 && ball.vy > 0) {
+            if (ball.y > containerHeight - 20 && ball.vy > 0) {
                 const bucketIndex = Math.min(bucketCount - 1, Math.floor(ball.x / bucketWidth));
                 const multiplier = multipliers[bucketIndex];
                 
@@ -288,19 +295,33 @@
             return false;
         }
         
-        // Проверка "застрявших" шариков
+        // Проверка и исправление "застрявших" шариков
         function checkStuckBalls() {
             const now = Date.now();
             const stuckThreshold = 1000; // 1 секунда без движения
             
-            for (let i = balls.length - 1; i >= 0; i--) {
+            for (let i = 0; i < balls.length; i++) {
                 const ball = balls[i];
+                
+                // Если шарик почти не двигается
+                if (Math.abs(ball.vx) < 0.01 && Math.abs(ball.vy) < 0.01) {
+                    ball.stuckCount++;
+                    
+                    // Если шарик застрял более чем на 10 кадров
+                    if (ball.stuckCount > 10) {
+                        // Придаем толчок вниз
+                        ball.vy = 0.5;
+                        ball.stuckCount = 0;
+                    }
+                } else {
+                    ball.stuckCount = 0;
+                }
                 
                 // Если шарик не двигался дольше порогового значения
                 if (now - ball.lastMoveTime > stuckThreshold) {
-                    // Придаем небольшой толчок
-                    ball.vx = (Math.random() - 0.5) * 0.5;
-                    ball.vy = -0.3;
+                    // Принудительно перемещаем вниз
+                    ball.y += 2;
+                    ball.vy = 0.5;
                     ball.lastMoveTime = now;
                 }
             }
@@ -331,7 +352,7 @@
                 ball.y += ball.vy;
                 
                 // Если позиция изменилась, обновляем время последнего движения
-                if (Math.abs(oldX - ball.x) > 0.1 || Math.abs(oldY - ball.y) > 0.1) {
+                if (Math.abs(oldX - ball.x) > 0.01 || Math.abs(oldY - ball.y) > 0.01) {
                     ball.lastMoveTime = now;
                 }
                 
@@ -357,11 +378,11 @@
                     setTimeout(() => {
                         gameContainer.removeChild(ball.element);
                         balls.splice(i, 1);
-                    }, 200);
+                    }, 150);
                 }
                 
                 // Удаление вылетевших шариков
-                if (ball.y > containerHeight + 30) {
+                if (ball.y > containerHeight + 20) {
                     gameContainer.removeChild(ball.element);
                     balls.splice(i, 1);
                 }
