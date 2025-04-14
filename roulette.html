@@ -529,7 +529,7 @@
                     ball.vx -= 2 * dotProduct * nx * bounce;
                     ball.vy -= 2 * dotProduct * ny * bounce;
                     
-                                        // Коррекция позиции
+                    // Коррекция позиции
                     const overlap = minDist - distance;
                     ball.x += nx * overlap * 0.7;
                     ball.y += ny * overlap * 0.7;
