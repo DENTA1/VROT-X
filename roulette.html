@@ -1,1 +1,559 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Рулетка | Казино</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #1a1a1a;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+        }
 
+        .header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+
+        .back-button {
+            background-color: #333;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .balance {
+            background-color: #333;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .wheel-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin-bottom: 30px;
+        }
+
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            transition: transform 5s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+        }
+
+        .wheel-section {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            transform-origin: bottom right;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            padding-bottom: 40px;
+            font-weight: bold;
+        }
+
+        .pointer {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 30px solid red;
+            z-index: 10;
+        }
+
+        .bet-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+            width: 80%;
+            max-width: 300px;
+        }
+
+        .bet-amount {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            width: 100%;
+        }
+
+        .bet-input {
+            flex-grow: 1;
+            padding: 10px;
+            font-size: 16px;
+            text-align: center;
+            border: none;
+            border-radius: 5px;
+            margin: 0 10px;
+        }
+
+        .bet-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .bet-button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .color-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .color-button {
+            flex: 1;
+            max-width: 100px;
+            padding: 15px 0;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .color-button::after {
+            content: attr(data-multiplier);
+            position: absolute;
+            right: 10px;
+            color: #ccc;
+            font-size: 14px;
+        }
+
+        .red {
+            background-color: #ff4444;
+        }
+
+        .black {
+            background-color: #333;
+        }
+
+        .green {
+            background-color: #44aa44;
+        }
+
+        .timer {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .result-message {
+            font-size: 20px;
+            margin-top: 20px;
+            text-align: center;
+            min-height: 30px;
+        }
+
+        .win {
+            color: #4CAF50;
+        }
+
+        .lose {
+            color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <button class="back-button" id="backButton">Назад</button>
+        <div class="balance" id="balance">0 ₽</div>
+    </div>
+
+    <div class="game-container">
+        <div class="wheel-container">
+            <div class="pointer"></div>
+            <div class="wheel" id="wheel"></div>
+        </div>
+
+        <div class="timer" id="timer">10</div>
+
+        <div class="bet-controls">
+            <div class="bet-amount">
+                <button class="bet-button" id="minBet">Min</button>
+                <button class="bet-button" id="minusBet">-1</button>
+                <input type="number" class="bet-input" id="betInput" value="1" min="1">
+                <button class="bet-button" id="plusBet">+1</button>
+                <button class="bet-button" id="maxBet">Max</button>
+            </div>
+            <div class="bet-buttons">
+                <button class="bet-button" id="add5">+5</button>
+                <button class="bet-button" id="add10">+10</button>
+            </div>
+        </div>
+
+        <div class="color-buttons">
+            <button class="color-button red" id="redButton" data-multiplier="x2">Красное</button>
+            <button class="color-button green" id="greenButton" data-multiplier="x22">Зелёное</button>
+            <button class="color-button black" id="blackButton" data-multiplier="x2">Чёрное</button>
+        </div>
+
+        <div class="result-message" id="resultMessage"></div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+    
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCMos6Y7C-krTLuKCI4VJG-TFLo6QI--k8",
+            authDomain: "vrot-x-7a48f.firebaseapp.com",
+            databaseURL: "https://vrot-x-7a48f-default-rtdb.firebaseio.com",
+            projectId: "vrot-x-7a48f",
+            storageBucket: "vrot-x-7a48f.firebasestorage.app",
+            messagingSenderId: "622297225288",
+            appId: "1:622297225288:web:5df6a5b02ffddedd96e07d"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Game variables
+        let balance = 0;
+        let currentBet = 1;
+        let bets = {
+            red: 0,
+            green: 0,
+            black: 0
+        };
+        let gameState = 'betting'; // 'betting', 'spinning', 'result'
+        let timer = 10;
+        let timerInterval;
+        let userId = '';
+
+        // DOM elements
+        const wheel = document.getElementById('wheel');
+        const betInput = document.getElementById('betInput');
+        const balanceDisplay = document.getElementById('balance');
+        const timerDisplay = document.getElementById('timer');
+        const resultMessage = document.getElementById('resultMessage');
+        const backButton = document.getElementById('backButton');
+
+        // Color buttons
+        const redButton = document.getElementById('redButton');
+        const greenButton = document.getElementById('greenButton');
+        const blackButton = document.getElementById('blackButton');
+
+        // Bet amount buttons
+        const minBet = document.getElementById('minBet');
+        const maxBet = document.getElementById('maxBet');
+        const plusBet = document.getElementById('plusBet');
+        const minusBet = document.getElementById('minusBet');
+        const add5 = document.getElementById('add5');
+        const add10 = document.getElementById('add10');
+
+        // Wheel sections
+        const wheelSections = [
+            { color: 'green', value: '0' },
+            { color: 'red', value: '1' },
+            { color: 'black', value: '2' },
+            { color: 'red', value: '3' },
+            { color: 'black', value: '4' },
+            { color: 'red', value: '5' },
+            { color: 'black', value: '6' },
+            { color: 'red', value: '7' },
+            { color: 'black', value: '8' },
+            { color: 'red', value: '9' },
+            { color: 'black', value: '10' },
+            { color: 'red', value: '11' },
+            { color: 'black', value: '12' },
+            { color: 'red', value: '13' },
+            { color: 'black', value: '14' }
+        ];
+
+        // Initialize the game
+        function initGame() {
+            createWheel();
+            setupEventListeners();
+            getUserIdFromCookie();
+            startBettingTimer();
+        }
+
+        // Create wheel sections
+        function createWheel() {
+            wheel.innerHTML = '';
+            const sectionAngle = 360 / wheelSections.length;
+            
+            wheelSections.forEach((section, index) => {
+                const sectionElement = document.createElement('div');
+                sectionElement.className = `wheel-section ${section.color}`;
+                sectionElement.textContent = section.value;
+                sectionElement.style.transform = `rotate(${index * sectionAngle}deg)`;
+                wheel.appendChild(sectionElement);
+            });
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            // Bet amount controls
+            minBet.addEventListener('click', () => {
+                currentBet = 1;
+                updateBetInput();
+            });
+
+            maxBet.addEventListener('click', () => {
+                currentBet = Math.max(1, Math.floor(balance));
+                updateBetInput();
+            });
+
+            plusBet.addEventListener('click', () => {
+                currentBet = Math.max(1, currentBet + 1);
+                updateBetInput();
+            });
+
+            minusBet.addEventListener('click', () => {
+                currentBet = Math.max(1, currentBet - 1);
+                updateBetInput();
+            });
+
+            add5.addEventListener('click', () => {
+                currentBet = Math.max(1, currentBet + 5);
+                updateBetInput();
+            });
+
+            add10.addEventListener('click', () => {
+                currentBet = Math.max(1, currentBet + 10);
+                updateBetInput();
+            });
+
+            betInput.addEventListener('change', () => {
+                currentBet = Math.max(1, parseInt(betInput.value) || 1);
+                updateBetInput();
+            });
+
+            // Color buttons
+            redButton.addEventListener('click', () => placeBet('red'));
+            greenButton.addEventListener('click', () => placeBet('green'));
+            blackButton.addEventListener('click', () => placeBet('black'));
+
+            // Back button
+            backButton.addEventListener('click', () => {
+                window.location.href = 'index.html';
+            });
+        }
+
+        // Update bet input field
+        function updateBetInput() {
+            betInput.value = currentBet;
+        }
+
+        // Place a bet
+        function placeBet(color) {
+            if (gameState !== 'betting') return;
+            if (currentBet > balance) {
+                alert('Недостаточно средств');
+                return;
+            }
+
+            bets[color] += currentBet;
+            balance -= currentBet;
+            updateBalance();
+
+            // Visual feedback
+            const button = document.getElementById(`${color}Button`);
+            button.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                button.style.transform = 'scale(1)';
+            }, 100);
+        }
+
+        // Start betting timer
+        function startBettingTimer() {
+            timer = 10;
+            timerDisplay.textContent = timer;
+            gameState = 'betting';
+            enableBettingControls(true);
+
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timer--;
+                timerDisplay.textContent = timer;
+
+                if (timer <= 0) {
+                    clearInterval(timerInterval);
+                    startSpinning();
+                }
+            }, 1000);
+        }
+
+        // Start wheel spinning
+        function startSpinning() {
+            gameState = 'spinning';
+            enableBettingControls(false);
+            resultMessage.textContent = '';
+            resultMessage.className = 'result-message';
+
+            // Calculate random spin (5-10 full rotations plus random stop)
+            const spinAngle = 1800 + Math.floor(Math.random() * 1800);
+            const finalAngle = spinAngle % 360;
+            const winningIndex = Math.floor((360 - finalAngle) / (360 / wheelSections.length)) % wheelSections.length;
+            const winningSection = wheelSections[winningIndex];
+
+            wheel.style.transform = `rotate(${spinAngle}deg)`;
+
+            setTimeout(() => {
+                showResult(winningSection);
+            }, 5000);
+        }
+
+        // Show game result
+        function showResult(winningSection) {
+            gameState = 'result';
+            const winColor = winningSection.color;
+            let winAmount = 0;
+
+            if (winColor === 'red') {
+                winAmount = bets.red * 2;
+                resultMessage.textContent = `Выпало красное ${winningSection.value}!`;
+            } else if (winColor === 'black') {
+                winAmount = bets.black * 2;
+                resultMessage.textContent = `Выпало чёрное ${winningSection.value}!`;
+            } else if (winColor === 'green') {
+                winAmount = bets.green * 22;
+                resultMessage.textContent = `Выпало зелёное ${winningSection.value}!`;
+            }
+
+            if (winAmount > 0) {
+                balance += winAmount;
+                resultMessage.className = 'result-message win';
+                resultMessage.textContent += ` Вы выиграли ${winAmount} ₽!`;
+            } else {
+                resultMessage.className = 'result-message lose';
+                resultMessage.textContent += ' Вы проиграли.';
+            }
+
+            updateBalance();
+            resetBets();
+
+            // Start new round after 3 seconds
+            setTimeout(() => {
+                startBettingTimer();
+            }, 3000);
+        }
+
+        // Enable/disable betting controls
+        function enableBettingControls(enable) {
+            const controls = [redButton, greenButton, blackButton, minBet, maxBet, plusBet, minusBet, add5, add10];
+            controls.forEach(control => {
+                if (enable) {
+                    control.classList.remove('disabled');
+                    control.disabled = false;
+                } else {
+                    control.classList.add('disabled');
+                    control.disabled = true;
+                }
+            });
+        }
+
+        // Reset all bets
+        function resetBets() {
+            bets = {
+                red: 0,
+                green: 0,
+                black: 0
+            };
+        }
+
+        // Update balance display
+        function updateBalance() {
+            balanceDisplay.textContent = `${balance} ₽`;
+            saveBalanceToDatabase();
+        }
+
+        // Get user ID from cookie
+        function getUserIdFromCookie() {
+            const cookies = document.cookie.split(';');
+            for (const cookie of cookies) {
+                const [name, value] = cookie.trim().split('=');
+                if (name === 'tg_user_id') {
+                    userId = value;
+                    loadUserBalance();
+                    return;
+                }
+            }
+            
+            // If no cookie found, use a default ID (for testing)
+            userId = 'default_user';
+            balance = 1000;
+            updateBalance();
+        }
+
+        // Load user balance from Firebase
+        function loadUserBalance() {
+            if (!userId) return;
+
+            database.ref(`users/${userId}/balance`).on('value', (snapshot) => {
+                const dbBalance = snapshot.val();
+                if (dbBalance !== null) {
+                    balance = dbBalance;
+                    updateBalance();
+                } else {
+                    // If user doesn't exist, create with default balance
+                    balance = 1000;
+                    saveBalanceToDatabase();
+                }
+            });
+        }
+
+        // Save balance to Firebase
+        function saveBalanceToDatabase() {
+            if (!userId) return;
+            database.ref(`users/${userId}`).set({
+                balance: balance
+            });
+        }
+
+        // Initialize the game when page loads
+        window.onload = initGame;
+    </script>
+</body>
+</html>
