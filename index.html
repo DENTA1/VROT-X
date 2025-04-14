@@ -27,10 +27,25 @@
             z-index: 1000;
         }
         .logo {
-            color: #4285F4;
             font-size: 24px;
             font-weight: bold;
             letter-spacing: 1px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .logo span {
+            display: inline-block;
+            transition: color 0.3s;
+        }
+        @keyframes logoAnimation {
+            0%, 100% { color: white; }
+            16.6% { color: #64b5f6; }
+        }
+        @keyframes oAnimation {
+            0%, 100% { letter-spacing: 1px; }
+            50% { letter-spacing: 4px; }
         }
         .account-button {
             background: #1e1e1e;
@@ -325,20 +340,15 @@
             position: relative;
             overflow: hidden;
             box-shadow: 0 0 10px rgba(0,0,0,0.5);
-            transform: rotate(0deg);
-            transition: transform 0.5s;
         }
         .roulette-sector {
             position: absolute;
             width: 50%;
             height: 50%;
             transform-origin: bottom right;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: bold;
-            color: white;
+            left: 50%;
+            top: 0;
+            transform: translateX(-50%) rotate(0deg) skewY(-60deg);
         }
         .roulette-green {
             background: #2e7d32;
@@ -391,7 +401,14 @@
 </head>
 <body>
     <div class="header">
-        <div class="logo">VROT-X</div>
+        <div class="logo" id="logo">
+            <span id="logoV">V</span>
+            <span id="logoR">R</span>
+            <span id="logoO">O</span>
+            <span id="logoT">T</span>
+            <span id="logoDash">-</span>
+            <span id="logoX">X</span>
+        </div>
     </div>
 
     <div class="transition-screen" id="transitionScreen">
@@ -471,8 +488,20 @@
         const telegramAuthButton = document.getElementById('telegramAuthButton');
         const accountButton = document.getElementById('accountButton');
 
+        // Элементы логотипа для анимации
+        const logoV = document.getElementById('logoV');
+        const logoR = document.getElementById('logoR');
+        const logoO = document.getElementById('logoO');
+        const logoT = document.getElementById('logoT');
+        const logoDash = document.getElementById('logoDash');
+        const logoX = document.getElementById('logoX');
+        const logoElement = document.getElementById('logo');
+
         // Инициализация при загрузке страницы
         document.addEventListener('DOMContentLoaded', async () => {
+            // Запускаем анимацию логотипа
+            startLogoAnimation();
+            
             // Пытаемся загрузить Telegram WebApp
             try {
                 await loadTelegramScript();
@@ -504,6 +533,42 @@
             // Назначаем обработчик для кнопки профиля
             accountButton.addEventListener('click', goToProfile);
         });
+
+        // Анимация логотипа
+        function startLogoAnimation() {
+            // Анимация подсветки букв по очереди
+            function highlightLetters() {
+                setTimeout(() => { logoV.style.color = '#64b5f6'; }, 0);
+                setTimeout(() => { logoR.style.color = '#64b5f6'; }, 300);
+                setTimeout(() => { logoO.style.color = '#64b5f6'; }, 600);
+                setTimeout(() => { logoT.style.color = '#64b5f6'; }, 900);
+                setTimeout(() => { logoDash.style.color = '#64b5f6'; }, 1200);
+                setTimeout(() => { logoX.style.color = '#64b5f6'; }, 1500);
+                
+                setTimeout(() => { logoX.style.color = 'white'; }, 1800);
+                setTimeout(() => { logoDash.style.color = 'white'; }, 2100);
+                setTimeout(() => { logoT.style.color = 'white'; }, 2400);
+                setTimeout(() => { logoO.style.color = 'white'; }, 2700);
+                setTimeout(() => { logoR.style.color = 'white'; }, 3000);
+                setTimeout(() => { logoV.style.color = 'white'; }, 3300);
+                
+                setTimeout(() => {
+                    // Анимация увеличения буквы O
+                    logoElement.style.animation = 'oAnimation 4s infinite';
+                    setTimeout(() => {
+                        logoO.textContent = 'OOOO';
+                        setTimeout(() => {
+                            logoO.textContent = 'O';
+                            logoElement.style.animation = 'none';
+                            // Запускаем цикл заново
+                            setTimeout(highlightLetters, 1000);
+                        }, 2000);
+                    }, 1000);
+                }, 3300);
+            }
+            
+            highlightLetters();
+        }
 
         // Загрузка Telegram WebApp API
         function loadTelegramScript() {
@@ -761,38 +826,22 @@
             const wheel = document.createElement('div');
             wheel.className = 'roulette-wheel';
             
-            // Создаем сектора рулетки
+            // Создаем 9 секторов (4 черных, 4 красных, 1 зеленый)
             const sectors = [
-                { color: 'roulette-green', number: '0', angle: 0 },
-                { color: 'roulette-red', number: '32', angle: 15 },
-                { color: 'roulette-black', number: '15', angle: 30 },
-                { color: 'roulette-red', number: '19', angle: 45 },
-                { color: 'roulette-black', number: '4', angle: 60 },
-                { color: 'roulette-red', number: '21', angle: 75 },
-                { color: 'roulette-black', number: '2', angle: 90 },
-                { color: 'roulette-red', number: '25', angle: 105 },
-                { color: 'roulette-black', number: '17', angle: 120 },
-                { color: 'roulette-red', number: '34', angle: 135 },
-                { color: 'roulette-black', number: '6', angle: 150 },
-                { color: 'roulette-red', number: '27', angle: 165 },
-                { color: 'roulette-black', number: '13', angle: 180 },
-                { color: 'roulette-red', number: '36', angle: 195 },
-                { color: 'roulette-black', number: '11', angle: 210 },
-                { color: 'roulette-red', number: '30', angle: 225 },
-                { color: 'roulette-black', number: '8', angle: 240 },
-                { color: 'roulette-red', number: '23', angle: 255 },
-                { color: 'roulette-black', number: '10', angle: 270 },
-                { color: 'roulette-red', number: '5', angle: 285 },
-                { color: 'roulette-black', number: '24', angle: 300 },
-                { color: 'roulette-red', number: '16', angle: 315 },
-                { color: 'roulette-black', number: '33', angle: 330 },
-                { color: 'roulette-red', number: '1', angle: 345 }
+                { color: 'roulette-black', angle: 0 },
+                { color: 'roulette-red', angle: 40 },
+                { color: 'roulette-black', angle: 80 },
+                { color: 'roulette-red', angle: 120 },
+                { color: 'roulette-green', angle: 160 },
+                { color: 'roulette-red', angle: 200 },
+                { color: 'roulette-black', angle: 240 },
+                { color: 'roulette-red', angle: 280 },
+                { color: 'roulette-black', angle: 320 }
             ];
             
-            sectors.forEach(sector => {
+            sectors.forEach((sector, index) => {
                 const sectorElement = document.createElement('div');
                 sectorElement.className = `roulette-sector ${sector.color}`;
-                sectorElement.textContent = sector.number;
                 sectorElement.style.transform = `rotate(${sector.angle}deg) skewY(-60deg)`;
                 wheel.appendChild(sectorElement);
             });
