@@ -26,31 +26,41 @@
         .header {
             display: flex;
             justify-content: space-between;
-            padding: 15px;
+            padding: 12px 15px;
             background-color: #16213e;
         }
         
         .back-btn {
             color: white;
             text-decoration: none;
-            font-size: 18px;
+            font-size: 16px;
             padding: 5px 10px;
             border-radius: 5px;
             background-color: #0f3460;
         }
         
+        .game-wrapper {
+            width: 100%;
+            height: calc(100% - 110px);
+            display: flex;
+            justify-content: center;
+            padding: 10px;
+        }
+        
         .game-container {
             position: relative;
-            width: 100%;
-            height: calc(100% - 120px);
+            width: 95%;
+            height: 100%;
             background-color: #1a1a2e;
             overflow: hidden;
+            border: 2px solid #4cc9f0;
+            border-radius: 10px;
         }
         
         .peg {
             position: absolute;
-            width: 6px;
-            height: 6px;
+            width: 4px;
+            height: 4px;
             background-color: #4cc9f0;
             border-radius: 50%;
             transform: translate(-50%, -50%);
@@ -59,24 +69,24 @@
         
         .ball {
             position: absolute;
-            width: 14px;
-            height: 14px;
+            width: 10px;
+            height: 10px;
             background: radial-gradient(circle at 30% 30%, #fff, #f72585);
             border-radius: 50%;
             transform: translate(-50%, -50%);
-            box-shadow: 0 0 8px rgba(247, 37, 133, 0.7);
+            box-shadow: 0 0 5px rgba(247, 37, 133, 0.7);
             z-index: 2;
         }
         
         .bucket {
             position: absolute;
             bottom: 0;
-            height: 30px;
+            height: 25px;
             display: flex;
             justify-content: center;
             align-items: center;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 10px;
             color: white;
             border-top: 2px solid #4cc9f0;
             background-color: rgba(15, 52, 96, 0.7);
@@ -86,45 +96,29 @@
         .controls {
             display: flex;
             justify-content: center;
-            padding: 15px;
+            padding: 10px;
             background-color: #16213e;
         }
         
         .drop-btn {
-            padding: 12px 25px;
-            font-size: 16px;
+            padding: 10px 20px;
+            font-size: 14px;
             background: linear-gradient(135deg, #f72585, #7209b7);
             color: white;
             border: none;
-            border-radius: 25px;
+            border-radius: 20px;
             cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
         }
         
         .result {
             text-align: center;
-            padding: 10px;
-            font-size: 16px;
+            padding: 8px;
+            font-size: 14px;
             font-weight: bold;
             color: #4cc9f0;
-            height: 20px;
+            height: 18px;
             background-color: #16213e;
-        }
-        
-        @media (max-width: 400px) {
-            .peg {
-                width: 5px;
-                height: 5px;
-            }
-            
-            .ball {
-                width: 12px;
-                height: 12px;
-            }
-            
-            .bucket {
-                font-size: 10px;
-            }
         }
     </style>
 </head>
@@ -134,7 +128,9 @@
         <div class="result" id="result"></div>
     </div>
     
-    <div class="game-container" id="gameContainer"></div>
+    <div class="game-wrapper">
+        <div class="game-container" id="gameContainer"></div>
+    </div>
     
     <div class="controls">
         <button class="drop-btn" id="dropBall">Запустить</button>
@@ -151,7 +147,7 @@
         const containerHeight = gameContainer.offsetHeight;
         
         // Коэффициенты (симметричные, увеличиваются к краям)
-        const multipliers = [10, 5, 3, 2, 1.5, 1.2, 1, 1.2, 1.5, 2, 3, 5, 10];
+        const multipliers = [10, 7, 5, 3, 2, 1.5, 1.2, 1, 1.2, 1.5, 2, 3, 5, 7, 10];
         const bucketCount = multipliers.length;
         const bucketWidth = containerWidth / bucketCount;
         
@@ -166,13 +162,13 @@
         }
         
         // Создание симметричного поля с препятствиями
-        const pegRows = 14;
-        const pegVerticalSpacing = (containerHeight - 100) / pegRows;
+        const pegRows = 12;
+        const pegVerticalSpacing = (containerHeight - 80) / pegRows;
         const centerX = containerWidth / 2;
         
         for (let row = 0; row < pegRows; row++) {
             // Количество препятствий в ряду увеличивается к низу
-            const pegsInRow = 5 + Math.floor(row * 0.7);
+            const pegsInRow = 5 + Math.floor(row * 0.6);
             const pegSpacing = containerWidth / (pegsInRow + 1);
             
             // Смещение для создания симметричного узора
@@ -184,7 +180,7 @@
                 
                 // Симметричное расположение
                 const x = offset + col * pegSpacing;
-                const y = 40 + row * pegVerticalSpacing;
+                const y = 30 + row * pegVerticalSpacing;
                 
                 peg.style.left = `${x}px`;
                 peg.style.top = `${y}px`;
@@ -202,40 +198,47 @@
         }
         
         // Физические параметры
-        const gravity = 0.3;
+        const gravity = 0.25;
         const friction = 0.98;
         const bounce = 0.85;
-        const pegRadius = 3;
-        const ballRadius = 7;
+        const pegRadius = 2;
+        const ballRadius = 5;
         
         // Массив активных шариков
         const balls = [];
+        let lastDropTime = 0;
+        const dropCooldown = 50; // 0.05s в миллисекундах
         
         // Функция создания нового шарика
         function createBall() {
+            const now = Date.now();
+            if (now - lastDropTime < dropCooldown) return;
+            lastDropTime = now;
+            
             const ball = document.createElement('div');
             ball.className = 'ball';
             
             // Старт из центра с небольшим случайным отклонением
-            const startX = containerWidth / 2 + (Math.random() - 0.5) * 40;
+            const startX = containerWidth / 2 + (Math.random() - 0.5) * 30;
             ball.style.left = `${startX}px`;
-            ball.style.top = '20px';
+            ball.style.top = '15px';
             
             gameContainer.appendChild(ball);
             
             // Начальная скорость с небольшим случайным отклонением
             const velocity = {
-                x: (Math.random() - 0.5) * 1.5,
+                x: (Math.random() - 0.5) * 1.2,
                 y: 0
             };
             
             const state = {
                 element: ball,
                 x: startX,
-                y: 20,
+                y: 15,
                 vx: velocity.x,
                 vy: velocity.y,
-                active: true
+                active: true,
+                lastMoveTime: now
             };
             
             balls.push(state);
@@ -275,7 +278,7 @@
         
         // Проверка попадания в ячейку
         function checkBucketCollision(ball) {
-            if (ball.y > containerHeight - 30 && ball.vy > 0) {
+            if (ball.y > containerHeight - 25 && ball.vy > 0) {
                 const bucketIndex = Math.min(bucketCount - 1, Math.floor(ball.x / bucketWidth));
                 const multiplier = multipliers[bucketIndex];
                 
@@ -285,8 +288,31 @@
             return false;
         }
         
+        // Проверка "застрявших" шариков
+        function checkStuckBalls() {
+            const now = Date.now();
+            const stuckThreshold = 1000; // 1 секунда без движения
+            
+            for (let i = balls.length - 1; i >= 0; i--) {
+                const ball = balls[i];
+                
+                // Если шарик не двигался дольше порогового значения
+                if (now - ball.lastMoveTime > stuckThreshold) {
+                    // Придаем небольшой толчок
+                    ball.vx = (Math.random() - 0.5) * 0.5;
+                    ball.vy = -0.3;
+                    ball.lastMoveTime = now;
+                }
+            }
+        }
+        
         // Основной игровой цикл
         function gameLoop() {
+            const now = Date.now();
+            
+            // Проверяем застрявшие шарики
+            checkStuckBalls();
+            
             for (let i = balls.length - 1; i >= 0; i--) {
                 const ball = balls[i];
                 
@@ -297,8 +323,17 @@
                 ball.vx *= friction;
                 ball.vy *= friction;
                 
+                // Сохраняем старую позицию для проверки движения
+                const oldX = ball.x;
+                const oldY = ball.y;
+                
                 ball.x += ball.vx;
                 ball.y += ball.vy;
+                
+                // Если позиция изменилась, обновляем время последнего движения
+                if (Math.abs(oldX - ball.x) > 0.1 || Math.abs(oldY - ball.y) > 0.1) {
+                    ball.lastMoveTime = now;
+                }
                 
                 // Границы поля
                 if (ball.x < ballRadius) {
@@ -322,11 +357,11 @@
                     setTimeout(() => {
                         gameContainer.removeChild(ball.element);
                         balls.splice(i, 1);
-                    }, 300);
+                    }, 200);
                 }
                 
                 // Удаление вылетевших шариков
-                if (ball.y > containerHeight + 50) {
+                if (ball.y > containerHeight + 30) {
                     gameContainer.removeChild(ball.element);
                     balls.splice(i, 1);
                 }
@@ -340,11 +375,6 @@
         
         // Запуск игры
         gameLoop();
-        
-        // Адаптация к изменению размера экрана
-        window.addEventListener('resize', () => {
-            // Можно добавить логику пересчета позиций при повороте экрана
-        });
     </script>
 </body>
 </html>
