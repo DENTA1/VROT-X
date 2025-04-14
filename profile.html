@@ -221,94 +221,6 @@
             margin: 0 auto;
         }
 
-        /* Лидерборд стили */
-        .leaderboard-container {
-            width: 100%;
-            max-width: 600px;
-            background: #1e1e1e;
-            border-radius: 10px;
-            padding: 20px;
-            margin-top: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-        }
-
-        .leaderboard-title {
-            text-align: center;
-            font-size: 20px;
-            margin-bottom: 15px;
-            color: #4285F4;
-            font-weight: bold;
-        }
-
-        .leaderboard-list {
-            list-style: none;
-        }
-
-        .leaderboard-item {
-            display: flex;
-            align-items: center;
-            padding: 10px 15px;
-            margin-bottom: 8px;
-            background: #252525;
-            border-radius: 5px;
-            transition: all 0.2s;
-        }
-
-        .leaderboard-item:hover {
-            background: #2d2d2d;
-            transform: translateX(5px);
-        }
-
-        .leader-position {
-            font-weight: bold;
-            width: 30px;
-            text-align: center;
-            margin-right: 15px;
-            font-size: 18px;
-        }
-
-        .position-1 {
-            color: gold;
-            text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
-        }
-
-        .position-2 {
-            color: silver;
-            text-shadow: 0 0 5px rgba(192, 192, 192, 0.5);
-        }
-
-        .position-3 {
-            color: #cd7f32; /* бронза */
-            text-shadow: 0 0 5px rgba(205, 127, 50, 0.5);
-        }
-
-        .position-other {
-            color: #aaa;
-        }
-
-        .leader-info {
-            flex-grow: 1;
-        }
-
-        .leader-name {
-            font-weight: bold;
-            color: white;
-        }
-
-        .leader-id {
-            font-size: 12px;
-            color: #777;
-            margin-left: 5px;
-        }
-
-        .leader-balance {
-            color: #4285F4;
-            font-weight: bold;
-            min-width: 80px;
-            text-align: right;
-        }
-
-        /* Остальные стили */
         .notification {
             position: fixed;
             top: 20px;
@@ -427,7 +339,7 @@
 
     <div class="profile-content" id="profileContent" style="display: none;">
         <div class="avatar-container">
-            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTEyLDJBMTAsMTAgMCAwLDAgMiwxMkExMCwxMCAwIDAsMCAxMiwyMkExMCwxMCAwIDAsMCAyMiwxMkExMCwxMCAwIDAsMCAxMiwyTTEyLDRBNywyIDAgMCwxIDE5LDExQTcsNyAwIDAsMSAxMiwxOEE3LDcgMCAwLDEgNSwxMUE3LDcgMCAwLDEgMTIsNE0xMiw2QTUsNSAwIDAsMCA3LDExQTUsNSAwIDAsMCAxMiwxNkE1LDUgMCAwLDAgMTcsMTFBNSw1IDAgMCwwIDEyLDZNMTIsOEEzLDMgMCAwLDEgMTUsMTFBNCw0IDAgMCwxIDEyLDE1QTQsNCAwIDAsMSA5LDExQTMsMyAwIDAsMSAxMiw4WiIgZmlsbD0id2hpdGUiLz48L3N2Zz4=" 
+            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTEyLDJBMTAsMTAgMCAwLDAgMiwxMkExMCwxMCAwIDAsMCAxMiwyMkExMCwxMCAwIDAsMCAyMiwxMkExMCwxMCAwIDAsMCAxMiwyTTEyLDRBNywyIDAgMCwxIDE5LDExQTcsNyAwIDAsMSAxMiwxOEE3LDcgMCAwLDEgNSwxMVE3LDcgMCAwLDEgMTIsNE0xMiw2QTUsNSAwIDAsMCA3LDExQTUsNSAwIDAsMCAxMiwxNkE1LDUgMCAwLDAgMTcsMTFBNSw1IDAgMCwwIDEyLDZNMTIsOEEzLDMgMCAwLDEgMTUsMTFBNCw0IDAgMCwxIDEyLDE1QTQsNCAwIDAsMSA5LDExQTMsMyAwIDAsMSAxMiw4WiIgZmlsbD0id2hpdGUiLz48L3N2Zz4=" 
                  class="avatar-img" 
                  alt="Аватар" />
         </div>
@@ -454,15 +366,6 @@
                 <input type="text" class="promo-input" id="promoInput" placeholder="Введите промокод">
                 <button class="promo-button" id="promoButton">✓</button>
             </div>
-        </div>
-
-        <!-- Лидерборд -->
-        <div class="leaderboard-container">
-            <div class="leaderboard-title">ТОП ИГРОКОВ</div>
-            <ul class="leaderboard-list" id="leaderboardList">
-                <!-- Лидерборд будет загружен здесь -->
-                <div class="loader" id="leaderboardLoader"></div>
-            </ul>
         </div>
     </div>
 
@@ -549,8 +452,7 @@
                     
                     await database.ref('users/' + userId).update({
                         balance: newBalance,
-                        promo: true,
-                        last_active: new Date().toISOString()
+                        promo: true
                     });
                     
                     showNotification('success', 'Промокод активирован! +50₽');
@@ -581,9 +483,8 @@
                     }
                     
                     database.ref('users/' + userId).update({
-                        username: newName.trim().substring(0, 20),
-                        redact_name: true,
-                        last_active: new Date().toISOString()
+                        name: newName.trim().substring(0, 20),
+                        redact_name: true
                     }).then(() => {
                         usernameElement.textContent = newName.trim().substring(0, 20);
                         showNotification('success', 'Никнейм успешно изменен!');
@@ -593,63 +494,6 @@
                     });
                 }
             });
-        }
-
-        // Загрузка лидерборда
-        function loadLeaderboard() {
-            const leaderboardList = document.getElementById('leaderboardList');
-            const leaderboardLoader = document.getElementById('leaderboardLoader');
-            
-            database.ref('users').orderByChild('balance').limitToLast(10).once('value')
-                .then(snapshot => {
-                    const users = [];
-                    snapshot.forEach(childSnapshot => {
-                        users.push({
-                            id: childSnapshot.key,
-                            ...childSnapshot.val()
-                        });
-                    });
-                    
-                    // Сортируем по убыванию баланса
-                    users.sort((a, b) => (b.balance || 0) - (a.balance || 0));
-                    
-                    // Очищаем список
-                    leaderboardList.innerHTML = '';
-                    
-                    // Добавляем пользователей в лидерборд
-                    users.forEach((user, index) => {
-                        const positionClass = 
-                            index === 0 ? 'position-1' : 
-                            index === 1 ? 'position-2' : 
-                            index === 2 ? 'position-3' : 'position-other';
-                        
-                        const item = document.createElement('li');
-                        item.className = 'leaderboard-item';
-                        item.innerHTML = `
-                            <div class="leader-position ${positionClass}">${index + 1}</div>
-                            <div class="leader-info">
-                                <span class="leader-name">${user.username || 'Игрок'}</span>
-                                <span class="leader-id">ID: ${user.id}</span>
-                            </div>
-                            <div class="leader-balance">${(user.balance || 0).toFixed(2)} ₽</div>
-                        `;
-                        
-                        // Подсвечиваем текущего пользователя
-                        if (user.id === userId) {
-                            item.style.background = 'rgba(66, 133, 244, 0.2)';
-                            item.style.borderLeft = '3px solid #4285F4';
-                        }
-                        
-                        leaderboardList.appendChild(item);
-                    });
-                })
-                .catch(error => {
-                    console.error('Ошибка загрузки лидерборда:', error);
-                    leaderboardList.innerHTML = '<li style="color: #aaa; text-align: center;">Ошибка загрузки лидерборда</li>';
-                })
-                .finally(() => {
-                    leaderboardLoader.style.display = 'none';
-                });
         }
 
         // Загрузка данных пользователя
@@ -680,15 +524,12 @@
                     balanceAmount.style.display = 'inline';
                     balanceAmount.textContent = `${(userData.balance || 0).toFixed(2)} ₽`;
                     
-                    // Обновляем имя, если есть
-                    if (userData.username) {
-                        document.getElementById('username').textContent = userData.username;
+                    // Обновляем имя из поля name
+                    if (userData.name) {
+                        document.getElementById('username').textContent = userData.name;
                     }
                 }
             });
-            
-            // Загружаем лидерборд
-            loadLeaderboard();
         }
 
         function goBack() {
