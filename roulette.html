@@ -57,21 +57,10 @@
             margin-bottom: 20px;
         }
 
-        .wheel {
+        .wheel-img {
             width: 100%;
             height: 100%;
-            border-radius: 50%;
-            position: relative;
-            overflow: hidden;
             transition: transform 5s cubic-bezier(0.17, 0.67, 0.12, 0.99);
-        }
-
-        .wheel-section {
-            position: absolute;
-            width: 50%;
-            height: 50%;
-            transform-origin: bottom right;
-            box-sizing: border-box;
         }
 
         .pointer {
@@ -181,6 +170,8 @@
             text-align: center;
             min-height: 30px;
             display: none;
+            font-weight: bold;
+            text-transform: uppercase;
         }
 
         .result-red {
@@ -225,7 +216,7 @@
     <div class="game-container">
         <div class="wheel-container">
             <div class="pointer"></div>
-            <div class="wheel" id="wheel"></div>
+            <img src="https://i.imgur.com/JtQ5k9P.png" class="wheel-img" id="wheelImg" alt="Рулетка">
         </div>
 
         <div class="timer" id="timer">10</div>
@@ -288,9 +279,10 @@
         let timer = 10;
         let timerInterval;
         let userId = '';
+        let currentRotation = 0;
 
         // DOM elements
-        const wheel = document.getElementById('wheel');
+        const wheelImg = document.getElementById('wheelImg');
         const betInput = document.getElementById('betInput');
         const balanceDisplay = document.getElementById('balance');
         const timerDisplay = document.getElementById('timer');
@@ -308,44 +300,30 @@
         const plus5 = document.getElementById('plus5');
         const maxBet = document.getElementById('maxBet');
 
-        // Wheel sections
+        // Wheel sections angles (in degrees)
         const wheelSections = [
-            { color: 'green' },
-            { color: 'red' },
-            { color: 'black' },
-            { color: 'red' },
-            { color: 'black' },
-            { color: 'red' },
-            { color: 'black' },
-            { color: 'red' },
-            { color: 'black' },
-            { color: 'red' },
-            { color: 'black' },
-            { color: 'red' },
-            { color: 'black' },
-            { color: 'red' },
-            { color: 'black' }
+            { color: 'green', startAngle: 0, endAngle: 24 },   // Зеленый (0)
+            { color: 'red', startAngle: 24, endAngle: 48 },    // Красный (1)
+            { color: 'black', startAngle: 48, endAngle: 72 },  // Черный (2)
+            { color: 'red', startAngle: 72, endAngle: 96 },     // Красный (3)
+            { color: 'black', startAngle: 96, endAngle: 120 },  // Черный (4)
+            { color: 'red', startAngle: 120, endAngle: 144 },   // Красный (5)
+            { color: 'black', startAngle: 144, endAngle: 168 }, // Черный (6)
+            { color: 'red', startAngle: 168, endAngle: 192 },   // Красный (7)
+            { color: 'black', startAngle: 192, endAngle: 216 }, // Черный (8)
+            { color: 'red', startAngle: 216, endAngle: 240 },   // Красный (9)
+            { color: 'black', startAngle: 240, endAngle: 264 }, // Черный (10)
+            { color: 'red', startAngle: 264, endAngle: 288 },   // Красный (11)
+            { color: 'black', startAngle: 288, endAngle: 312 }, // Черный (12)
+            { color: 'red', startAngle: 312, endAngle: 336 },   // Красный (13)
+            { color: 'black', startAngle: 336, endAngle: 360 }  // Черный (14)
         ];
 
         // Initialize the game
         function initGame() {
-            createWheel();
             setupEventListeners();
             getUserIdFromCookie();
             startBettingTimer();
-        }
-
-        // Create wheel sections
-        function createWheel() {
-            wheel.innerHTML = '';
-            const sectionAngle = 360 / wheelSections.length;
-            
-            wheelSections.forEach((section, index) => {
-                const sectionElement = document.createElement('div');
-                sectionElement.className = `wheel-section ${section.color}`;
-                sectionElement.style.transform = `rotate(${index * sectionAngle}deg)`;
-                wheel.appendChild(sectionElement);
-            });
         }
 
         // Set up event listeners
@@ -441,14 +419,24 @@
             resultDisplay.style.display = 'none';
 
             // Calculate random spin (5-10 full rotations plus random stop)
-            const spinAngle = 1800 + Math.floor(Math.random() * 1800);
-            const finalAngle = spinAngle % 360;
-            const winningIndex = Math.floor((360 - finalAngle) / (360 / wheelSections.length)) % wheelSections.length;
-            const winningSection = wheelSections[winningIndex];
+            const spinRotations = 5 + Math.floor(Math.random() * 6); // 5-10 rotations
+            const spinDegrees = spinRotations * 360;
+            const winningAngle = Math.floor(Math.random() * 360);
+            
+            // Find which section contains the winning angle
+            const winningSection = wheelSections.find(section => 
+                winningAngle >= section.startAngle && winningAngle < section.endAngle
+            );
 
+            // Calculate final rotation (currentRotation + spinDegrees + offset to winning angle)
+            const finalRotation = currentRotation + spinDegrees + (360 - winningAngle);
+            
             // Apply spin animation
-            wheel.style.transition = 'transform 5s cubic-bezier(0.2, 0.8, 0.4, 1)';
-            wheel.style.transform = `rotate(${spinAngle}deg)`;
+            wheelImg.style.transition = 'transform 5s cubic-bezier(0.2, 0.8, 0.4, 1)';
+            wheelImg.style.transform = `rotate(${finalRotation}deg)`;
+            
+            // Update current rotation (normalized to 0-360 range)
+            currentRotation = finalRotation % 360;
 
             setTimeout(() => {
                 showResult(winningSection);
@@ -462,20 +450,20 @@
             let winAmount = 0;
 
             // Reset wheel transition for next spin
-            wheel.style.transition = 'none';
+            wheelImg.style.transition = 'none';
             
             // Display result
             resultDisplay.className = `result-display result-${winColor}`;
             
             if (winColor === 'red') {
                 winAmount = bets.red * 2;
-                resultDisplay.textContent = 'Красное';
+                resultDisplay.textContent = 'Выпало красное';
             } else if (winColor === 'black') {
                 winAmount = bets.black * 2;
-                resultDisplay.textContent = 'Чёрное';
+                resultDisplay.textContent = 'Выпало чёрное';
             } else if (winColor === 'green') {
                 winAmount = bets.green * 22;
-                resultDisplay.textContent = 'Зелёное';
+                resultDisplay.textContent = 'Выпало зелёное';
             }
 
             if (winAmount > 0) {
