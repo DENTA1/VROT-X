@@ -46,15 +46,15 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-top: 20px;
+            margin-top: 10px;
             width: 100%;
         }
 
         .wheel-container {
             position: relative;
-            width: 300px;
-            height: 300px;
-            margin-bottom: 30px;
+            width: 250px;
+            height: 250px;
+            margin-bottom: 20px;
         }
 
         .wheel {
@@ -71,12 +71,7 @@
             width: 50%;
             height: 50%;
             transform-origin: bottom right;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             box-sizing: border-box;
-            padding-bottom: 40px;
-            font-weight: bold;
         }
 
         .pointer {
@@ -88,77 +83,81 @@
             height: 0;
             border-left: 15px solid transparent;
             border-right: 15px solid transparent;
-            border-top: 30px solid red;
+            border-top: 30px solid gold;
             z-index: 10;
+        }
+
+        .bet-panel {
+            background-color: #333;
+            border-radius: 10px;
+            padding: 15px;
+            width: 90%;
+            max-width: 300px;
+            margin-bottom: 15px;
         }
 
         .bet-controls {
             display: flex;
-            flex-direction: column;
             align-items: center;
-            margin-bottom: 20px;
-            width: 80%;
-            max-width: 300px;
-        }
-
-        .bet-amount {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-            width: 100%;
+            margin-bottom: 10px;
         }
 
         .bet-input {
-            flex-grow: 1;
-            padding: 10px;
+            width: 60px;
+            padding: 8px;
             font-size: 16px;
             text-align: center;
             border: none;
             border-radius: 5px;
-            margin: 0 10px;
+            margin-right: 10px;
         }
 
-        .bet-buttons {
+        .bet-amount-buttons {
             display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
+            gap: 5px;
         }
 
-        .bet-button {
+        .bet-amount-button {
             padding: 5px 10px;
             border: none;
             border-radius: 5px;
             font-size: 14px;
             cursor: pointer;
+            background-color: #555;
+            color: white;
         }
 
         .color-buttons {
             display: flex;
-            justify-content: center;
-            gap: 15px;
-            width: 100%;
-            margin-bottom: 20px;
+            flex-direction: column;
+            gap: 10px;
+            width: 90%;
+            max-width: 300px;
+        }
+
+        .color-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
         }
 
         .color-button {
             flex: 1;
-            max-width: 100px;
-            padding: 15px 0;
+            padding: 12px 0;
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             font-weight: bold;
             cursor: pointer;
+            color: white;
+            text-align: center;
             position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
 
         .color-button::after {
             content: attr(data-multiplier);
             position: absolute;
             right: 10px;
-            color: #ccc;
+            color: rgba(255, 255, 255, 0.7);
             font-size: 14px;
         }
 
@@ -174,29 +173,46 @@
             background-color: #44aa44;
         }
 
+        .result-display {
+            font-size: 24px;
+            margin: 15px 0;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-align: center;
+            min-height: 30px;
+            display: none;
+        }
+
+        .result-red {
+            background-color: rgba(255, 68, 68, 0.2);
+            color: #ff4444;
+            border: 2px solid #ff4444;
+            display: block;
+        }
+
+        .result-black {
+            background-color: rgba(51, 51, 51, 0.2);
+            color: #333;
+            border: 2px solid #333;
+            display: block;
+        }
+
+        .result-green {
+            background-color: rgba(68, 170, 68, 0.2);
+            color: #44aa44;
+            border: 2px solid #44aa44;
+            display: block;
+        }
+
         .timer {
             font-size: 24px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            color: gold;
         }
 
         .disabled {
             opacity: 0.6;
             cursor: not-allowed;
-        }
-
-        .result-message {
-            font-size: 20px;
-            margin-top: 20px;
-            text-align: center;
-            min-height: 30px;
-        }
-
-        .win {
-            color: #4CAF50;
-        }
-
-        .lose {
-            color: #f44336;
         }
     </style>
 </head>
@@ -213,28 +229,31 @@
         </div>
 
         <div class="timer" id="timer">10</div>
+        <div class="result-display" id="resultDisplay"></div>
 
-        <div class="bet-controls">
-            <div class="bet-amount">
-                <button class="bet-button" id="minBet">Min</button>
-                <button class="bet-button" id="minusBet">-1</button>
-                <input type="number" class="bet-input" id="betInput" value="1" min="1">
-                <button class="bet-button" id="plusBet">+1</button>
-                <button class="bet-button" id="maxBet">Max</button>
-            </div>
-            <div class="bet-buttons">
-                <button class="bet-button" id="add5">+5</button>
-                <button class="bet-button" id="add10">+10</button>
+        <div class="bet-panel">
+            <div class="bet-controls">
+                <input type="number" class="bet-input" id="betInput" value="1.00" min="0.01" step="0.01">
+                <div class="bet-amount-buttons">
+                    <button class="bet-amount-button" id="minBet">MIN</button>
+                    <button class="bet-amount-button" id="plus1">+1</button>
+                    <button class="bet-amount-button" id="plus5">+5</button>
+                    <button class="bet-amount-button" id="maxBet">MAX</button>
+                </div>
             </div>
         </div>
 
         <div class="color-buttons">
-            <button class="color-button red" id="redButton" data-multiplier="x2">Красное</button>
-            <button class="color-button green" id="greenButton" data-multiplier="x22">Зелёное</button>
-            <button class="color-button black" id="blackButton" data-multiplier="x2">Чёрное</button>
+            <div class="color-row">
+                <button class="color-button red" id="redButton" data-multiplier="x2">Красное</button>
+            </div>
+            <div class="color-row">
+                <button class="color-button green" id="greenButton" data-multiplier="x22">Зелёное</button>
+            </div>
+            <div class="color-row">
+                <button class="color-button black" id="blackButton" data-multiplier="x2">Чёрное</button>
+            </div>
         </div>
-
-        <div class="result-message" id="resultMessage"></div>
     </div>
 
     <!-- Firebase SDK -->
@@ -259,7 +278,7 @@
 
         // Game variables
         let balance = 0;
-        let currentBet = 1;
+        let currentBet = 1.00;
         let bets = {
             red: 0,
             green: 0,
@@ -275,7 +294,7 @@
         const betInput = document.getElementById('betInput');
         const balanceDisplay = document.getElementById('balance');
         const timerDisplay = document.getElementById('timer');
-        const resultMessage = document.getElementById('resultMessage');
+        const resultDisplay = document.getElementById('resultDisplay');
         const backButton = document.getElementById('backButton');
 
         // Color buttons
@@ -285,29 +304,27 @@
 
         // Bet amount buttons
         const minBet = document.getElementById('minBet');
+        const plus1 = document.getElementById('plus1');
+        const plus5 = document.getElementById('plus5');
         const maxBet = document.getElementById('maxBet');
-        const plusBet = document.getElementById('plusBet');
-        const minusBet = document.getElementById('minusBet');
-        const add5 = document.getElementById('add5');
-        const add10 = document.getElementById('add10');
 
         // Wheel sections
         const wheelSections = [
-            { color: 'green', value: '0' },
-            { color: 'red', value: '1' },
-            { color: 'black', value: '2' },
-            { color: 'red', value: '3' },
-            { color: 'black', value: '4' },
-            { color: 'red', value: '5' },
-            { color: 'black', value: '6' },
-            { color: 'red', value: '7' },
-            { color: 'black', value: '8' },
-            { color: 'red', value: '9' },
-            { color: 'black', value: '10' },
-            { color: 'red', value: '11' },
-            { color: 'black', value: '12' },
-            { color: 'red', value: '13' },
-            { color: 'black', value: '14' }
+            { color: 'green' },
+            { color: 'red' },
+            { color: 'black' },
+            { color: 'red' },
+            { color: 'black' },
+            { color: 'red' },
+            { color: 'black' },
+            { color: 'red' },
+            { color: 'black' },
+            { color: 'red' },
+            { color: 'black' },
+            { color: 'red' },
+            { color: 'black' },
+            { color: 'red' },
+            { color: 'black' }
         ];
 
         // Initialize the game
@@ -326,7 +343,6 @@
             wheelSections.forEach((section, index) => {
                 const sectionElement = document.createElement('div');
                 sectionElement.className = `wheel-section ${section.color}`;
-                sectionElement.textContent = section.value;
                 sectionElement.style.transform = `rotate(${index * sectionAngle}deg)`;
                 wheel.appendChild(sectionElement);
             });
@@ -336,37 +352,28 @@
         function setupEventListeners() {
             // Bet amount controls
             minBet.addEventListener('click', () => {
-                currentBet = 1;
+                currentBet = 1.00;
                 updateBetInput();
             });
 
             maxBet.addEventListener('click', () => {
-                currentBet = Math.max(1, Math.floor(balance));
+                currentBet = Math.max(0.01, Math.floor(balance * 100) / 100);
                 updateBetInput();
             });
 
-            plusBet.addEventListener('click', () => {
-                currentBet = Math.max(1, currentBet + 1);
+            plus1.addEventListener('click', () => {
+                currentBet = Math.max(0.01, Math.round((currentBet + 1) * 100) / 100);
                 updateBetInput();
             });
 
-            minusBet.addEventListener('click', () => {
-                currentBet = Math.max(1, currentBet - 1);
-                updateBetInput();
-            });
-
-            add5.addEventListener('click', () => {
-                currentBet = Math.max(1, currentBet + 5);
-                updateBetInput();
-            });
-
-            add10.addEventListener('click', () => {
-                currentBet = Math.max(1, currentBet + 10);
+            plus5.addEventListener('click', () => {
+                currentBet = Math.max(0.01, Math.round((currentBet + 5) * 100) / 100);
                 updateBetInput();
             });
 
             betInput.addEventListener('change', () => {
-                currentBet = Math.max(1, parseInt(betInput.value) || 1);
+                currentBet = Math.max(0.01, parseFloat(betInput.value) || 1.00);
+                currentBet = Math.round(currentBet * 100) / 100;
                 updateBetInput();
             });
 
@@ -383,7 +390,7 @@
 
         // Update bet input field
         function updateBetInput() {
-            betInput.value = currentBet;
+            betInput.value = currentBet.toFixed(2);
         }
 
         // Place a bet
@@ -396,6 +403,7 @@
 
             bets[color] += currentBet;
             balance -= currentBet;
+            balance = Math.round(balance * 100) / 100;
             updateBalance();
 
             // Visual feedback
@@ -410,6 +418,7 @@
         function startBettingTimer() {
             timer = 10;
             timerDisplay.textContent = timer;
+            resultDisplay.style.display = 'none';
             gameState = 'betting';
             enableBettingControls(true);
 
@@ -429,8 +438,7 @@
         function startSpinning() {
             gameState = 'spinning';
             enableBettingControls(false);
-            resultMessage.textContent = '';
-            resultMessage.className = 'result-message';
+            resultDisplay.style.display = 'none';
 
             // Calculate random spin (5-10 full rotations plus random stop)
             const spinAngle = 1800 + Math.floor(Math.random() * 1800);
@@ -438,6 +446,8 @@
             const winningIndex = Math.floor((360 - finalAngle) / (360 / wheelSections.length)) % wheelSections.length;
             const winningSection = wheelSections[winningIndex];
 
+            // Apply spin animation
+            wheel.style.transition = 'transform 5s cubic-bezier(0.2, 0.8, 0.4, 1)';
             wheel.style.transform = `rotate(${spinAngle}deg)`;
 
             setTimeout(() => {
@@ -451,24 +461,26 @@
             const winColor = winningSection.color;
             let winAmount = 0;
 
+            // Reset wheel transition for next spin
+            wheel.style.transition = 'none';
+            
+            // Display result
+            resultDisplay.className = `result-display result-${winColor}`;
+            
             if (winColor === 'red') {
                 winAmount = bets.red * 2;
-                resultMessage.textContent = `Выпало красное ${winningSection.value}!`;
+                resultDisplay.textContent = 'Красное';
             } else if (winColor === 'black') {
                 winAmount = bets.black * 2;
-                resultMessage.textContent = `Выпало чёрное ${winningSection.value}!`;
+                resultDisplay.textContent = 'Чёрное';
             } else if (winColor === 'green') {
                 winAmount = bets.green * 22;
-                resultMessage.textContent = `Выпало зелёное ${winningSection.value}!`;
+                resultDisplay.textContent = 'Зелёное';
             }
 
             if (winAmount > 0) {
                 balance += winAmount;
-                resultMessage.className = 'result-message win';
-                resultMessage.textContent += ` Вы выиграли ${winAmount} ₽!`;
-            } else {
-                resultMessage.className = 'result-message lose';
-                resultMessage.textContent += ' Вы проиграли.';
+                balance = Math.round(balance * 100) / 100;
             }
 
             updateBalance();
@@ -482,7 +494,7 @@
 
         // Enable/disable betting controls
         function enableBettingControls(enable) {
-            const controls = [redButton, greenButton, blackButton, minBet, maxBet, plusBet, minusBet, add5, add10];
+            const controls = [redButton, greenButton, blackButton, minBet, plus1, plus5, maxBet, betInput];
             controls.forEach(control => {
                 if (enable) {
                     control.classList.remove('disabled');
@@ -505,7 +517,7 @@
 
         // Update balance display
         function updateBalance() {
-            balanceDisplay.textContent = `${balance} ₽`;
+            balanceDisplay.textContent = `${balance.toFixed(2)} ₽`;
             saveBalanceToDatabase();
         }
 
