@@ -183,6 +183,11 @@
             align-items: center;
             justify-content: center;
         }
+        .roulette-image {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+        }
         .auth-screen {
             position: fixed;
             top: 70px;
@@ -383,55 +388,6 @@
             display: flex;
             justify-content: center;
             align-items: center;
-        }
-        .roulette-wheel {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-        }
-        .roulette-sector {
-            position: absolute;
-            width: 50%;
-            height: 50%;
-            left: 50%;
-            top: 0;
-            transform-origin: bottom center;
-            clip-path: polygon(0 0, 100% 0, 50% 100%);
-        }
-        .roulette-green {
-            background: #2e7d32;
-        }
-        .roulette-red {
-            background: #c62828;
-        }
-        .roulette-black {
-            background: #212121;
-        }
-        .roulette-center {
-            position: absolute;
-            width: 30px;
-            height: 30px;
-            background: white;
-            border-radius: 50%;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 2;
-        }
-        .roulette-pointer {
-            position: absolute;
-            top: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 0;
-            border-left: 10px solid transparent;
-            border-right: 10px solid transparent;
-            border-top: 20px solid white;
-            z-index: 3;
         }
 
         @keyframes rotation {
@@ -770,9 +726,15 @@
                 
                 let pattern;
                 switch(game.id) {
-                    case 'miner': pattern = createMinerPattern(); break;
-                    case 'ladder': pattern = createLadderPattern(); break;
-                    case 'roulette': pattern = createRoulettePattern(); break;
+                    case 'miner': 
+                        pattern = createMinerPattern(); 
+                        break;
+                    case 'ladder': 
+                        pattern = createLadderPattern(); 
+                        break;
+                    case 'roulette': 
+                        pattern = createRoulettePattern(); 
+                        break;
                     default: 
                         pattern = document.createElement('div');
                         pattern.className = 'game-pattern';
@@ -901,38 +863,13 @@
             const pattern = document.createElement('div');
             pattern.className = 'game-pattern roulette-pattern';
             
-            const wheel = document.createElement('div');
-            wheel.className = 'roulette-wheel';
+            // Создаем изображение рулетки
+            const img = document.createElement('img');
+            img.src = 'https://i.imgur.com/JQ9w0VK.png'; // URL изображения рулетки
+            img.alt = 'Рулетка';
+            img.className = 'roulette-image';
+            pattern.appendChild(img);
             
-            // Создаем 9 секторов (4 черных, 4 красных, 1 зеленый)
-            const sectors = [
-                { color: 'roulette-black', angle: 0 },
-                { color: 'roulette-red', angle: 40 },
-                { color: 'roulette-black', angle: 80 },
-                { color: 'roulette-red', angle: 120 },
-                { color: 'roulette-green', angle: 160 },
-                { color: 'roulette-red', angle: 200 },
-                { color: 'roulette-black', angle: 240 },
-                { color: 'roulette-red', angle: 280 },
-                { color: 'roulette-black', angle: 320 }
-            ];
-            
-            sectors.forEach(sector => {
-                const sectorElement = document.createElement('div');
-                sectorElement.className = `roulette-sector ${sector.color}`;
-                sectorElement.style.transform = `rotate(${sector.angle}deg)`;
-                wheel.appendChild(sectorElement);
-            });
-            
-            const center = document.createElement('div');
-            center.className = 'roulette-center';
-            wheel.appendChild(center);
-            
-            const pointer = document.createElement('div');
-            pointer.className = 'roulette-pointer';
-            wheel.appendChild(pointer);
-            
-            pattern.appendChild(wheel);
             return pattern;
         }
     </script>
