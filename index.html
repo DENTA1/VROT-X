@@ -152,6 +152,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            background-color: #1e1e1e;
         }
         .game-card:hover {
             transform: translateY(-5px);
@@ -172,21 +173,10 @@
             font-size: 16px;
             z-index: 2;
         }
-        .game-pattern {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .roulette-image {
-            width: 120px;
-            height: 120px;
-            object-fit: contain;
+        .game-number {
+            font-size: 48px;
+            font-weight: bold;
+            color: #4285F4;
         }
         .auth-screen {
             position: fixed;
@@ -259,6 +249,7 @@
             font-size: 20px;
             z-index: 1003;
             padding: 20px;
+            overflow-y: auto;
         }
         .leaderboard-header {
             display: flex;
@@ -276,6 +267,53 @@
             font-size: 30px;
             cursor: pointer;
             color: white;
+        }
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            background: rgba(30, 30, 30, 0.7);
+            border-radius: 8px;
+        }
+        .leaderboard-position {
+            font-size: 20px;
+            font-weight: bold;
+            margin-right: 15px;
+            width: 30px;
+            text-align: center;
+        }
+        .position-1 {
+            color: #FFD700;
+            text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+        }
+        .position-2 {
+            color: #C0C0C0;
+            text-shadow: 0 0 5px rgba(192, 192, 192, 0.5);
+        }
+        .position-3 {
+            color: #CD7F32;
+            text-shadow: 0 0 5px rgba(205, 127, 50, 0.5);
+        }
+        .position-other {
+            color: #666;
+        }
+        .leaderboard-name {
+            flex: 1;
+            font-weight: bold;
+        }
+        .leaderboard-balance {
+            font-weight: bold;
+            color: #34A853;
+            margin-right: 10px;
+        }
+        .you-badge {
+            background: #4285F4;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 14px;
         }
         .loader {
             width: 48px;
@@ -322,72 +360,6 @@
             color: #aaa;
             font-size: 14px;
             margin-top: 10px;
-        }
-
-        /* Стили для игровых паттернов */
-        .miner-pattern {
-            background: linear-gradient(135deg, #1e88e5, #64b5f6);
-        }
-        .miner-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            grid-template-rows: repeat(5, 1fr);
-            gap: 4px;
-            width: 120px;
-            height: 120px;
-            padding: 5px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-        }
-        .miner-cell {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 3px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-        }
-        .miner-bomb {
-            background: rgba(239, 83, 80, 0.7);
-        }
-        .miner-crystal {
-            background: rgba(38, 198, 218, 0.7);
-        }
-
-        .ladder-pattern {
-            background: linear-gradient(135deg, #2e7d32, #66bb6a);
-        }
-        .ladder-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(5, 1fr);
-            gap: 4px;
-            width: 120px;
-            height: 120px;
-            padding: 5px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-        }
-        .ladder-cell {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 3px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-        }
-        .ladder-bomb {
-            background: rgba(239, 83, 80, 0.7);
-        }
-        .ladder-check {
-            background: rgba(38, 198, 218, 0.7);
-        }
-
-        .roulette-pattern {
-            background: linear-gradient(135deg, #ff6d00, #ff3d00);
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
 
         @keyframes rotation {
@@ -439,7 +411,7 @@
             <div class="leaderboard-title">ЛидерБорд</div>
             <div class="close-leaderboard" id="closeLeaderboard">×</div>
         </div>
-        <!-- Здесь будет содержимое лидерборда -->
+        <div id="leaderboardContent"></div>
     </div>
 
     <div id="appContent" style="display: none;">
@@ -488,14 +460,8 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         
-        // Настройки доступности игр
-        const gamesAvailability = {
-            miner: true,
-            ladder: true,
-            roulette: true
-        };
-        
         let userId = null;
+        let userName = null;
         const transitionScreen = document.getElementById('transitionScreen');
         const loader = document.getElementById('loader');
         const checkmark = document.getElementById('checkmark');
@@ -503,6 +469,7 @@
         const userIdText = document.getElementById('userIdText');
         const authScreen = document.getElementById('authScreen');
         const leaderboardScreen = document.getElementById('leaderboardScreen');
+        const leaderboardContent = document.getElementById('leaderboardContent');
         const closeLeaderboard = document.getElementById('closeLeaderboard');
         const leaderboardButton = document.getElementById('leaderboardButton');
         const appContentElement = document.getElementById('appContent');
@@ -525,10 +492,7 @@
             startLogoAnimation();
             
             // Назначаем обработчики для кнопок
-            leaderboardButton.addEventListener('click', () => {
-                leaderboardScreen.style.display = 'flex';
-            });
-            
+            leaderboardButton.addEventListener('click', showLeaderboard);
             closeLeaderboard.addEventListener('click', () => {
                 leaderboardScreen.style.display = 'none';
             });
@@ -541,6 +505,7 @@
                 if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
                     const tgUser = window.Telegram.WebApp.initDataUnsafe.user;
                     userId = tgUser.id.toString();
+                    userName = tgUser.first_name || 'Аноним';
                     setTelegramIdCookie(userId);
                     await checkUserInDatabase();
                 } else {
@@ -642,6 +607,7 @@
                 if (tg.initDataUnsafe?.user) {
                     const tgUser = tg.initDataUnsafe.user;
                     userId = tgUser.id.toString();
+                    userName = tgUser.first_name || 'Аноним';
                     setTelegramIdCookie(userId);
                     await checkUserInDatabase();
                 } else {
@@ -666,9 +632,15 @@
                 const snapshot = await database.ref('users/' + userId).once('value');
                 
                 if (snapshot.exists()) {
+                    // Обновляем имя пользователя, если оно изменилось
+                    await database.ref('users/' + userId).update({
+                        name: userName
+                    });
                     showSuccessTransition();
                 } else {
+                    // Создаем нового пользователя
                     await database.ref('users/' + userId).set({
+                        name: userName,
                         created_at: new Date().toISOString(),
                         balance: 0
                     });
@@ -712,40 +684,21 @@
 
         // Создание карточек игр
         function createGameCards() {
-            const games = [
-                { id: 'miner', name: 'Минёр' },
-                { id: 'ladder', name: 'Лесенка' },
-                { id: 'roulette', name: 'Рулетка' }
-            ];
-            
             gamesGrid.innerHTML = '';
             
-            games.forEach(game => {
+            // Создаем две карточки для рулетки
+            for (let i = 1; i <= 2; i++) {
                 const gameCard = document.createElement('div');
                 gameCard.className = 'game-card';
                 
-                let pattern;
-                switch(game.id) {
-                    case 'miner': 
-                        pattern = createMinerPattern(); 
-                        break;
-                    case 'ladder': 
-                        pattern = createLadderPattern(); 
-                        break;
-                    case 'roulette': 
-                        pattern = createRoulettePattern(); 
-                        break;
-                    default: 
-                        pattern = document.createElement('div');
-                        pattern.className = 'game-pattern';
-                        pattern.style.background = '#333';
-                }
-                
-                gameCard.appendChild(pattern);
+                const number = document.createElement('div');
+                number.className = 'game-number';
+                number.textContent = i;
+                gameCard.appendChild(number);
                 
                 const gameName = document.createElement('div');
                 gameName.className = 'game-name';
-                gameName.textContent = game.name;
+                gameName.textContent = 'Рулетка';
                 gameCard.appendChild(gameName);
                 
                 gameCard.addEventListener('click', () => {
@@ -753,14 +706,11 @@
                         showAuthScreen();
                         return;
                     }
-                    
-                    if (gamesAvailability[game.id]) {
-                        openGame(game.id);
-                    }
+                    openGame('roulette');
                 });
                 
                 gamesGrid.appendChild(gameCard);
-            });
+            }
         }
 
         // Открытие игры
@@ -772,12 +722,74 @@
             
             const params = new URLSearchParams();
             params.append('user', userId);
+            window.location.href = `${game}.html?${params.toString()}`;
+        }
+
+        // Показать лидерборд
+        async function showLeaderboard() {
+            leaderboardScreen.style.display = 'flex';
+            leaderboardContent.innerHTML = '<div style="text-align: center;">Загрузка...</div>';
             
-            switch(game) {
-                case 'miner': window.location.href = `miner.html?${params.toString()}`; break;
-                case 'ladder': window.location.href = `lecenka.html?${params.toString()}`; break;
-                case 'roulette': window.location.href = `roulette.html?${params.toString()}`; break;
-                default: console.error('Неизвестная игра:', game);
+            try {
+                const snapshot = await database.ref('users').once('value');
+                const users = [];
+                
+                snapshot.forEach(childSnapshot => {
+                    const userData = childSnapshot.val();
+                    users.push({
+                        id: childSnapshot.key,
+                        name: userData.name || 'Аноним',
+                        balance: userData.balance || 0
+                    });
+                });
+                
+                // Сортируем по балансу (по убыванию)
+                users.sort((a, b) => b.balance - a.balance);
+                
+                // Очищаем содержимое
+                leaderboardContent.innerHTML = '';
+                
+                // Добавляем пользователей в лидерборд
+                users.forEach((user, index) => {
+                    const position = index + 1;
+                    const item = document.createElement('div');
+                    item.className = 'leaderboard-item';
+                    
+                    // Позиция
+                    const posElement = document.createElement('div');
+                    posElement.className = `leaderboard-position position-${position <= 3 ? position : 'other'}`;
+                    posElement.textContent = position;
+                    item.appendChild(posElement);
+                    
+                    // Имя
+                    const nameElement = document.createElement('div');
+                    nameElement.className = 'leaderboard-name';
+                    nameElement.textContent = user.name;
+                    item.appendChild(nameElement);
+                    
+                    // Баланс
+                    const balanceElement = document.createElement('div');
+                    balanceElement.className = 'leaderboard-balance';
+                    balanceElement.textContent = user.balance;
+                    item.appendChild(balanceElement);
+                    
+                    // Метка "Это ты" для текущего пользователя
+                    if (user.id === userId) {
+                        const youElement = document.createElement('div');
+                        youElement.className = 'you-badge';
+                        youElement.textContent = 'Это ты';
+                        item.appendChild(youElement);
+                    }
+                    
+                    leaderboardContent.appendChild(item);
+                });
+                
+                if (users.length === 0) {
+                    leaderboardContent.innerHTML = '<div style="text-align: center;">Нет данных</div>';
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки лидерборда:', error);
+                leaderboardContent.innerHTML = '<div style="text-align: center; color: #ff5252;">Ошибка загрузки</div>';
             }
         }
 
@@ -808,69 +820,6 @@
                 if (name === 'tg_user_id') return value;
             }
             return null;
-        }
-
-        // Функции создания паттернов для игр
-        function createMinerPattern() {
-            const pattern = document.createElement('div');
-            pattern.className = 'game-pattern miner-pattern';
-            
-            const grid = document.createElement('div');
-            grid.className = 'miner-grid';
-            
-            const bombPositions = [3, 7, 12, 19, 23];
-            const crystalPositions = [1, 9, 11, 15, 21];
-            
-            for (let i = 0; i < 25; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'miner-cell';
-                
-                if (bombPositions.includes(i)) cell.classList.add('miner-bomb');
-                else if (crystalPositions.includes(i)) cell.classList.add('miner-crystal');
-                
-                grid.appendChild(cell);
-            }
-            
-            pattern.appendChild(grid);
-            return pattern;
-        }
-
-        function createLadderPattern() {
-            const pattern = document.createElement('div');
-            pattern.className = 'game-pattern ladder-pattern';
-            
-            const grid = document.createElement('div');
-            grid.className = 'ladder-grid';
-            
-            const bombPositions = [2, 5, 9, 12];
-            const checkPositions = [1, 4, 7, 11, 14];
-            
-            for (let i = 0; i < 15; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'ladder-cell';
-                
-                if (bombPositions.includes(i)) cell.classList.add('ladder-bomb');
-                else if (checkPositions.includes(i)) cell.classList.add('ladder-check');
-                
-                grid.appendChild(cell);
-            }
-            
-            pattern.appendChild(grid);
-            return pattern;
-        }
-
-        function createRoulettePattern() {
-            const pattern = document.createElement('div');
-            pattern.className = 'game-pattern roulette-pattern';
-            
-            // Создаем изображение рулетки
-            const img = document.createElement('img');
-            img.src = 'https://casinopoker.co/wp-content/uploads/2020/06/Roulette-Combinations.png'; // URL изображения рулетки
-            img.alt = 'Рулетка';
-            img.className = 'roulette-image';
-            pattern.appendChild(img);
-            
-            return pattern;
         }
     </script>
 </body>
