@@ -2,113 +2,160 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Plinko Game</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
         body {
             font-family: Arial, sans-serif;
+            background-color: #1a1a2e;
+            color: white;
+            overflow: hidden;
+            touch-action: manipulation;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .header {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            background-color: #f0f0f0;
-            margin: 0;
-            padding: 20px;
+            justify-content: space-between;
+            padding: 15px;
+            background-color: #16213e;
+        }
+        
+        .back-btn {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            background-color: #0f3460;
         }
         
         .game-container {
             position: relative;
-            width: 600px;
-            height: 500px;
-            background-color: #222;
-            border-radius: 10px;
+            width: 100%;
+            height: calc(100% - 120px);
+            background-color: #1a1a2e;
             overflow: hidden;
-            margin-bottom: 20px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
         }
         
         .peg {
             position: absolute;
-            width: 10px;
-            height: 10px;
-            background-color: #777;
+            width: 6px;
+            height: 6px;
+            background-color: #4cc9f0;
             border-radius: 50%;
             transform: translate(-50%, -50%);
+            z-index: 1;
         }
         
         .ball {
             position: absolute;
-            width: 20px;
-            height: 20px;
-            background-color: #f00;
+            width: 14px;
+            height: 14px;
+            background: radial-gradient(circle at 30% 30%, #fff, #f72585);
             border-radius: 50%;
             transform: translate(-50%, -50%);
-            box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 8px rgba(247, 37, 133, 0.7);
+            z-index: 2;
         }
         
         .bucket {
             position: absolute;
             bottom: 0;
             height: 30px;
-            border-top: 15px solid #444;
-            border-left: 10px solid transparent;
-            border-right: 10px solid transparent;
             display: flex;
             justify-content: center;
             align-items: center;
-            color: white;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 12px;
+            color: white;
+            border-top: 2px solid #4cc9f0;
+            background-color: rgba(15, 52, 96, 0.7);
+            z-index: 3;
         }
         
         .controls {
-            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            padding: 15px;
+            background-color: #16213e;
         }
         
-        button {
-            padding: 10px 20px;
+        .drop-btn {
+            padding: 12px 25px;
             font-size: 16px;
-            background-color: #4CAF50;
+            background: linear-gradient(135deg, #f72585, #7209b7);
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 25px;
             cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        
-        button:hover {
-            background-color: #45a049;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
         
         .result {
-            margin-top: 20px;
-            font-size: 18px;
+            text-align: center;
+            padding: 10px;
+            font-size: 16px;
             font-weight: bold;
-            height: 24px;
+            color: #4cc9f0;
+            height: 20px;
+            background-color: #16213e;
+        }
+        
+        @media (max-width: 400px) {
+            .peg {
+                width: 5px;
+                height: 5px;
+            }
+            
+            .ball {
+                width: 12px;
+                height: 12px;
+            }
+            
+            .bucket {
+                font-size: 10px;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Plinko Game</h1>
-    <div class="game-container" id="gameContainer"></div>
-    <div class="controls">
-        <button id="dropBall">Запустить шарик</button>
+    <div class="header">
+        <a href="index.html" class="back-btn">Назад</a>
+        <div class="result" id="result"></div>
     </div>
-    <div class="result" id="result"></div>
+    
+    <div class="game-container" id="gameContainer"></div>
+    
+    <div class="controls">
+        <button class="drop-btn" id="dropBall">Запустить</button>
+    </div>
 
     <script>
+        // Инициализация игры
         const gameContainer = document.getElementById('gameContainer');
         const dropBallBtn = document.getElementById('dropBall');
         const resultDisplay = document.getElementById('result');
         
+        // Размеры контейнера
         const containerWidth = gameContainer.offsetWidth;
         const containerHeight = gameContainer.offsetHeight;
         
-        // Коэффициенты для ячеек
-        const multipliers = [5, 2, 1.5, 1, 0.5, 1, 1.5, 2, 5];
+        // Коэффициенты (симметричные, увеличиваются к краям)
+        const multipliers = [10, 5, 3, 2, 1.5, 1.2, 1, 1.2, 1.5, 2, 3, 5, 10];
         const bucketCount = multipliers.length;
         const bucketWidth = containerWidth / bucketCount;
         
-        // Создание ячеек
+        // Создание ячеек с коэффициентами
         for (let i = 0; i < bucketCount; i++) {
             const bucket = document.createElement('div');
             bucket.className = 'bucket';
@@ -118,57 +165,73 @@
             gameContainer.appendChild(bucket);
         }
         
-        // Создание препятствий (точек)
-        const pegRows = 12;
-        const pegCols = 15;
-        const pegHorizontalSpacing = containerWidth / (pegCols + 1);
+        // Создание симметричного поля с препятствиями
+        const pegRows = 14;
         const pegVerticalSpacing = (containerHeight - 100) / pegRows;
+        const centerX = containerWidth / 2;
         
         for (let row = 0; row < pegRows; row++) {
-            // Смещение четных рядов для создания шахматного порядка
-            const offset = row % 2 === 0 ? pegHorizontalSpacing / 2 : 0;
+            // Количество препятствий в ряду увеличивается к низу
+            const pegsInRow = 5 + Math.floor(row * 0.7);
+            const pegSpacing = containerWidth / (pegsInRow + 1);
             
-            for (let col = 0; col < (row % 2 === 0 ? pegCols : pegCols + 1); col++) {
+            // Смещение для создания симметричного узора
+            const offset = row % 2 === 0 ? pegSpacing / 2 : 0;
+            
+            for (let col = 0; col < pegsInRow; col++) {
                 const peg = document.createElement('div');
                 peg.className = 'peg';
-                peg.style.left = `${offset + col * pegHorizontalSpacing}px`;
-                peg.style.top = `${50 + row * pegVerticalSpacing}px`;
+                
+                // Симметричное расположение
+                const x = offset + col * pegSpacing;
+                const y = 40 + row * pegVerticalSpacing;
+                
+                peg.style.left = `${x}px`;
+                peg.style.top = `${y}px`;
                 gameContainer.appendChild(peg);
+                
+                // Зеркальное отражение для симметрии
+                if (x < centerX) {
+                    const mirrorPeg = document.createElement('div');
+                    mirrorPeg.className = 'peg';
+                    mirrorPeg.style.left = `${containerWidth - x}px`;
+                    mirrorPeg.style.top = `${y}px`;
+                    gameContainer.appendChild(mirrorPeg);
+                }
             }
         }
         
+        // Физические параметры
+        const gravity = 0.3;
+        const friction = 0.98;
+        const bounce = 0.85;
+        const pegRadius = 3;
+        const ballRadius = 7;
+        
         // Массив активных шариков
         const balls = [];
-        
-        // Физические параметры
-        const gravity = 0.2;
-        const friction = 0.99;
-        const bounce = 0.8;
-        const pegRadius = 5;
-        const ballRadius = 10;
         
         // Функция создания нового шарика
         function createBall() {
             const ball = document.createElement('div');
             ball.className = 'ball';
             
-            // Случайная начальная позиция в верхней части
-            const x = Math.random() * (containerWidth - 40) + 20;
-            ball.style.left = `${x}px`;
+            // Старт из центра с небольшим случайным отклонением
+            const startX = containerWidth / 2 + (Math.random() - 0.5) * 40;
+            ball.style.left = `${startX}px`;
             ball.style.top = '20px';
             
             gameContainer.appendChild(ball);
             
-            // Начальная скорость
+            // Начальная скорость с небольшим случайным отклонением
             const velocity = {
-                x: (Math.random() - 0.5) * 2,
+                x: (Math.random() - 0.5) * 1.5,
                 y: 0
             };
             
-            // Состояние шарика
             const state = {
                 element: ball,
-                x: x,
+                x: startX,
                 y: 20,
                 vx: velocity.x,
                 vy: velocity.y,
@@ -179,36 +242,33 @@
             return state;
         }
         
-        // Проверка столкновения с препятствиями
-        function checkPegCollision(ball) {
+        // Оптимизированная проверка столкновений
+        function checkCollisions(ball) {
             const pegs = document.querySelectorAll('.peg');
+            const minDist = ballRadius + pegRadius;
+            const minDistSq = minDist * minDist;
             
             pegs.forEach(peg => {
                 const pegX = parseFloat(peg.style.left);
                 const pegY = parseFloat(peg.style.top);
                 
-                // Расстояние между шариком и препятствием
                 const dx = ball.x - pegX;
                 const dy = ball.y - pegY;
-                const distance = Math.sqrt(dx * dx + dy * dy);
+                const distanceSq = dx * dx + dy * dy;
                 
-                // Если есть столкновение
-                if (distance < ballRadius + pegRadius) {
-                    // Нормализованный вектор
+                if (distanceSq < minDistSq) {
+                    const distance = Math.sqrt(distanceSq);
                     const nx = dx / distance;
                     const ny = dy / distance;
                     
-                    // Скорость вдоль нормали
                     const dotProduct = ball.vx * nx + ball.vy * ny;
-                    
-                    // Изменение скорости при столкновении
                     ball.vx -= 2 * dotProduct * nx * bounce;
                     ball.vy -= 2 * dotProduct * ny * bounce;
                     
-                    // Отодвигаем шарик, чтобы он не застрял
-                    const overlap = ballRadius + pegRadius - distance;
-                    ball.x += nx * overlap * 0.5;
-                    ball.y += ny * overlap * 0.5;
+                    // Коррекция позиции
+                    const overlap = minDist - distance;
+                    ball.x += nx * overlap * 0.7;
+                    ball.y += ny * overlap * 0.7;
                 }
             });
         }
@@ -216,35 +276,31 @@
         // Проверка попадания в ячейку
         function checkBucketCollision(ball) {
             if (ball.y > containerHeight - 30 && ball.vy > 0) {
-                const bucketIndex = Math.floor(ball.x / bucketWidth);
+                const bucketIndex = Math.min(bucketCount - 1, Math.floor(ball.x / bucketWidth));
+                const multiplier = multipliers[bucketIndex];
                 
-                if (bucketIndex >= 0 && bucketIndex < bucketCount) {
-                    resultDisplay.textContent = `Вы выиграли: x${multipliers[bucketIndex]}`;
-                    return true;
-                }
+                resultDisplay.textContent = `Выигрыш: x${multiplier}`;
+                return true;
             }
             return false;
         }
         
-        // Основной цикл игры
+        // Основной игровой цикл
         function gameLoop() {
             for (let i = balls.length - 1; i >= 0; i--) {
                 const ball = balls[i];
                 
                 if (!ball.active) continue;
                 
-                // Применяем гравитацию
+                // Физика движения
                 ball.vy += gravity;
-                
-                // Применяем трение
                 ball.vx *= friction;
                 ball.vy *= friction;
                 
-                // Обновляем позицию
                 ball.x += ball.vx;
                 ball.y += ball.vy;
                 
-                // Проверяем столкновения с границами
+                // Границы поля
                 if (ball.x < ballRadius) {
                     ball.x = ballRadius;
                     ball.vx = -ball.vx * bounce;
@@ -253,23 +309,23 @@
                     ball.vx = -ball.vx * bounce;
                 }
                 
-                // Проверяем столкновения с препятствиями
-                checkPegCollision(ball);
+                // Проверка столкновений
+                checkCollisions(ball);
                 
-                // Обновляем позицию на экране
+                // Обновление позиции
                 ball.element.style.left = `${ball.x}px`;
                 ball.element.style.top = `${ball.y}px`;
                 
-                // Проверяем попадание в ячейку
+                // Проверка попадания в ячейку
                 if (checkBucketCollision(ball)) {
                     ball.active = false;
                     setTimeout(() => {
                         gameContainer.removeChild(ball.element);
                         balls.splice(i, 1);
-                    }, 100);
+                    }, 300);
                 }
                 
-                // Удаляем шарики, которые вылетели за нижнюю границу
+                // Удаление вылетевших шариков
                 if (ball.y > containerHeight + 50) {
                     gameContainer.removeChild(ball.element);
                     balls.splice(i, 1);
@@ -279,9 +335,16 @@
             requestAnimationFrame(gameLoop);
         }
         
-        // Запуск игры
+        // Обработчики событий
         dropBallBtn.addEventListener('click', createBall);
+        
+        // Запуск игры
         gameLoop();
+        
+        // Адаптация к изменению размера экрана
+        window.addEventListener('resize', () => {
+            // Можно добавить логику пересчета позиций при повороте экрана
+        });
     </script>
 </body>
 </html>
