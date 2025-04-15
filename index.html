@@ -29,17 +29,29 @@
             color: #4285F4;
             font-size: 24px;
             font-weight: bold;
-            animation: logoGlow 3s ease-in-out infinite;
+            display: inline-block;
         }
-        @keyframes logoGlow {
+        .logo span {
+            display: inline-block;
+            animation: letterGlow 3s ease-in-out infinite;
+        }
+        .logo span:nth-child(1) { animation-delay: 0.1s; }
+        .logo span:nth-child(2) { animation-delay: 0.2s; }
+        .logo span:nth-child(3) { animation-delay: 0.3s; }
+        .logo span:nth-child(4) { animation-delay: 0.4s; }
+        .logo span:nth-child(5) { animation-delay: 0.5s; }
+        @keyframes letterGlow {
             0%, 100% { 
                 text-shadow: 0 0 5px #4285F4, 0 0 10px #4285F4;
+                transform: translateY(0);
             }
             50% { 
                 text-shadow: 0 0 15px #4285F4, 0 0 20px #4285F4;
+                transform: translateY(-2px);
             }
             70% {
                 text-shadow: 0 0 5px #4285F4, 0 0 10px #4285F4;
+                transform: translateY(0);
             }
         }
         .buttons-container {
@@ -133,13 +145,22 @@
             position: absolute;
             bottom: 8px;
             right: 8px;
-            padding: 6px 12px;
+            padding: 6px 12px 6px 30px;
             background: rgba(66, 133, 244, 0.8);
             border-radius: 8px;
             color: white;
             font-weight: bold;
             font-size: 14px;
             z-index: 2;
+            min-width: 80px;
+            text-align: right;
+        }
+        .game-name::before {
+            content: "✓";
+            position: absolute;
+            left: 8px;
+            color: #34A853;
+            font-weight: bold;
         }
         .game-pattern {
             height: 100%;
@@ -165,12 +186,17 @@
         /* Стили минера */
         .miner-pattern {
             background: #0d1a30;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
         }
         .miner-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             gap: 4px;
-            height: 100%;
+            width: 90%;
+            height: 90%;
         }
         .miner-cell {
             background: #1e3a5a;
@@ -178,7 +204,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 16px;
+            aspect-ratio: 1;
         }
         .miner-cell.green {
             background: #2e7d32;
@@ -190,12 +217,17 @@
         /* Стили лесенки */
         .ladder-pattern {
             background: #332100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
         }
         .ladder-grid {
             display: flex;
             flex-direction: column-reverse;
             gap: 8px;
-            height: 100%;
+            width: 90%;
+            height: 90%;
         }
         .ladder-floor {
             display: flex;
@@ -203,14 +235,14 @@
             gap: 5px;
         }
         .ladder-cell {
-            width: 30px;
-            height: 30px;
+            width: 18%;
+            aspect-ratio: 1;
             background: #ffb74d;
             border-radius: 3px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
+            font-size: 14px;
         }
         .ladder-cell.green {
             background: #2e7d32;
@@ -231,6 +263,32 @@
             font-size: 16px;
             text-align: center;
             padding: 20px;
+        }
+        .case-pattern {
+            background: #1a1a2e;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .case-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+            color: #ff9800;
+        }
+        .case-dots {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(255, 152, 0, 0.1) 2px, transparent 3px),
+                radial-gradient(circle at 80% 70%, rgba(255, 152, 0, 0.1) 2px, transparent 3px),
+                radial-gradient(circle at 40% 60%, rgba(255, 152, 0, 0.1) 2px, transparent 3px),
+                radial-gradient(circle at 60% 20%, rgba(255, 152, 0, 0.1) 2px, transparent 3px);
+            background-size: 50px 50px;
         }
 
         /* Лидерборд */
@@ -345,7 +403,7 @@
     </div>
 
     <div class="header">
-        <div class="logo">VROT-X</div>
+        <div class="logo"><span>V</span><span>R</span><span>O</span><span>T</span><span>-X</span></div>
     </div>
 
     <div class="leaderboard-screen" id="leaderboardScreen">
@@ -366,7 +424,7 @@
                             <circle cx="12" cy="7" r="4"></circle>
                         </svg>
                     </div>
-                    <span>Мой профиль</span>
+                    <span>Перейти в профиль</span>
                 </div>
             </div>
             <div class="leaderboard-button" id="leaderboardButton">🏆</div>
@@ -500,7 +558,7 @@
             const games = [
                 { id: 'miner', name: 'Минер', file: 'miner.html' },
                 { id: 'ladder', name: 'Лесенка', file: 'lecenka.html' },
-                { id: 'crash', name: '№1', file: 'crash.html' },
+                { id: 'case', name: 'Кейсы', file: 'case.html' },
                 { id: 'roulette', name: '№2', file: 'roulette.html' }
             ];
 
@@ -514,9 +572,21 @@
                 const pattern = document.createElement('div');
                 pattern.className = 'game-pattern';
                 
-                if (game.id === 'miner' || game.id === 'ladder') {
-                    pattern.appendChild(createGamePattern(game.id));
+                if (game.id === 'miner') {
+                    pattern.className = 'game-pattern miner-pattern';
+                    pattern.appendChild(createMinerPattern());
+                } else if (game.id === 'ladder') {
+                    pattern.className = 'game-pattern ladder-pattern';
+                    pattern.appendChild(createLadderPattern());
+                } else if (game.id === 'case') {
+                    pattern.className = 'game-pattern case-pattern';
+                    pattern.innerHTML = `
+                        <div class="case-dots"></div>
+                        <div class="case-icon">🎁</div>
+                        <div class="coming-soon">В разработке</div>
+                    `;
                 } else {
+                    pattern.className = 'game-pattern';
                     const comingSoon = document.createElement('div');
                     comingSoon.className = 'coming-soon';
                     comingSoon.textContent = 'В разработке';
@@ -533,64 +603,68 @@
             });
         }
 
-        function createGamePattern(gameId) {
-            const pattern = document.createElement('div');
-            switch(gameId) {
-                case 'miner':
-                    pattern.className = 'miner-pattern';
-                    const minerGrid = document.createElement('div');
-                    minerGrid.className = 'miner-grid';
-                    for (let i = 0; i < 25; i++) {
-                        const cell = document.createElement('div');
-                        cell.className = 'miner-cell';
-                        if (i === 12) {
-                            cell.classList.add('red');
-                            cell.textContent = '💣';
-                        } else if ([6, 8, 16, 18, 22].includes(i)) {
-                            cell.classList.add('green');
-                            cell.textContent = '💎';
-                        }
-                        minerGrid.appendChild(cell);
-                    }
-                    pattern.appendChild(minerGrid);
-                    break;
-
-                case 'ladder':
-                    pattern.className = 'ladder-pattern';
-                    const ladderGrid = document.createElement('div');
-                    ladderGrid.className = 'ladder-grid';
-                    
-                    // 5 этажей (снизу вверх)
-                    const floors = [
-                        [null, 'green', null, 'red', null],    // 1 этаж
-                        ['green', null, null, null, 'red'],    // 2 этаж
-                        [null, 'green', 'red', null, null],    // 3 этаж
-                        [null, null, 'green', 'red', null],   // 4 этаж
-                        ['red', null, null, null, null]        // 5 этаж
-                    ];
-
-                    floors.forEach(floor => {
-                        const floorDiv = document.createElement('div');
-                        floorDiv.className = 'ladder-floor';
-                        floor.forEach((cellType, index) => {
-                            const cell = document.createElement('div');
-                            cell.className = 'ladder-cell';
-                            if (cellType === 'green') {
-                                cell.classList.add('green');
-                                cell.textContent = '🟢';
-                            } else if (cellType === 'red') {
-                                cell.classList.add('red');
-                                cell.textContent = '🪨';
-                            }
-                            floorDiv.appendChild(cell);
-                        });
-                        ladderGrid.appendChild(floorDiv);
-                    });
-
-                    pattern.appendChild(ladderGrid);
-                    break;
+        function createMinerPattern() {
+            const minerGrid = document.createElement('div');
+            minerGrid.className = 'miner-grid';
+            
+            // Создаем поле 5x5
+            for (let i = 0; i < 25; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'miner-cell';
+                
+                // Бомба в центре
+                if (i === 12) {
+                    cell.classList.add('red');
+                    cell.textContent = '💣';
+                } 
+                // Кристаллы в определенных позициях
+                else if ([6, 8, 16, 18, 22].includes(i)) {
+                    cell.classList.add('green');
+                    cell.textContent = '💎';
+                }
+                
+                minerGrid.appendChild(cell);
             }
-            return pattern;
+            
+            return minerGrid;
+        }
+
+        function createLadderPattern() {
+            const ladderGrid = document.createElement('div');
+            ladderGrid.className = 'ladder-grid';
+            
+            // 5 этажей (снизу вверх)
+            const floors = [
+                [null, 'green', null, 'red', null],    // 1 этаж
+                ['green', null, null, null, 'red'],    // 2 этаж
+                [null, 'green', 'red', null, null],    // 3 этаж
+                [null, null, 'green', 'red', null],   // 4 этаж
+                ['red', null, null, null, null]        // 5 этаж
+            ];
+
+            floors.forEach(floor => {
+                const floorDiv = document.createElement('div');
+                floorDiv.className = 'ladder-floor';
+                
+                floor.forEach((cellType, index) => {
+                    const cell = document.createElement('div');
+                    cell.className = 'ladder-cell';
+                    
+                    if (cellType === 'green') {
+                        cell.classList.add('green');
+                        cell.textContent = '🟢';
+                    } else if (cellType === 'red') {
+                        cell.classList.add('red');
+                        cell.textContent = '🪨';
+                    }
+                    
+                    floorDiv.appendChild(cell);
+                });
+                
+                ladderGrid.appendChild(floorDiv);
+            });
+            
+            return ladderGrid;
         }
 
         function handleGameClick(gameFile) {
