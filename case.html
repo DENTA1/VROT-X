@@ -170,6 +170,23 @@
             color: #4cc9f0;
         }
         
+        .prizes-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin: 20px 0;
+        }
+        
+        .prize-chip {
+            padding: 6px 12px;
+            background-color: #1a56a7;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            border: 1px solid #4cc9f0;
+        }
+        
         .modal-buttons {
             display: flex;
             justify-content: center;
@@ -260,8 +277,8 @@
         .prize-item.active {
             transform: scale(1.05);
             box-shadow: 0 0 20px rgba(76, 201, 240, 0.8);
-            border-color: #e94560;
-            background-color: #1a56a7;
+            border-color: #2ecc71;
+            background-color: #2ecc71;
         }
         
         /* Result modal */
@@ -297,7 +314,7 @@
         .result-amount {
             font-size: 36px;
             font-weight: bold;
-            color: #e94560;
+            color: #2ecc71;
             margin: 20px 0;
         }
         
@@ -332,14 +349,14 @@
         <div class="case">
             <div class="case-image" style="background-image: url('https://via.placeholder.com/200/16213e/4cc9f0?text=Простой');"></div>
             <div class="case-name">Простой</div>
-            <div class="case-range">Выигрыш: от 1р до 100р</div>
+            <div class="case-range">Выигрыш: от 1р до 50р</div>
             <button class="open-button" onclick="openCaseModal('simple')">Открыть за 10р</button>
         </div>
         
         <div class="case">
             <div class="case-image" style="background-image: url('https://via.placeholder.com/200/0f3460/e94560?text=Новичок');"></div>
             <div class="case-name">Новичок</div>
-            <div class="case-range">Выигрыш: от 50р до 500р</div>
+            <div class="case-range">Выигрыш: от 10р до 500р</div>
             <button class="open-button" onclick="openCaseModal('beginner')">Открыть за 50р</button>
         </div>
     </div>
@@ -349,6 +366,9 @@
         <div class="modal-content">
             <div class="modal-title" id="modalCaseName">Подтверждение</div>
             <p id="modalCaseDescription">Вы уверены, что хотите открыть этот кейс?</p>
+            
+            <div class="prizes-grid" id="prizesGrid"></div>
+            
             <div class="modal-buttons">
                 <button class="modal-button confirm-button" id="confirmOpen">Открыть</button>
                 <button class="modal-button cancel-button" onclick="closeModal()">Отмена</button>
@@ -405,8 +425,7 @@
                     { amount: 10, weight: 7 },
                     { amount: 15, weight: 6 },
                     { amount: 25, weight: 4 },
-                    { amount: 50, weight: 2 },
-                    { amount: 100, weight: 1 }
+                    { amount: 50, weight: 2 }
                 ],
                 image: "https://via.placeholder.com/200/16213e/4cc9f0?text=Простой"
             },
@@ -414,17 +433,15 @@
                 name: "Новичок",
                 price: 50,
                 prizes: [
-                    { amount: 50, weight: 15 },
-                    { amount: 75, weight: 14 },
-                    { amount: 100, weight: 13 },
-                    { amount: 150, weight: 12 },
-                    { amount: 200, weight: 10 },
-                    { amount: 250, weight: 8 },
-                    { amount: 300, weight: 7 },
-                    { amount: 350, weight: 6 },
-                    { amount: 400, weight: 4 },
-                    { amount: 450, weight: 2 },
-                    { amount: 500, weight: 1 }
+                    { amount: 10, weight: 15 },
+                    { amount: 15, weight: 14 },
+                    { amount: 20, weight: 13 },
+                    { amount: 25, weight: 12 },
+                    { amount: 50, weight: 10 },
+                    { amount: 100, weight: 8 },
+                    { amount: 150, weight: 7 },
+                    { amount: 250, weight: 4 },
+                    { amount: 500, weight: 2 }
                 ],
                 image: "https://via.placeholder.com/200/0f3460/e94560?text=Новичок"
             }
@@ -442,6 +459,7 @@
         const animationContainer = document.getElementById('animationContainer');
         const resultModal = document.getElementById('resultModal');
         const prizeContainer = document.getElementById('prizeContainer');
+        const prizesGrid = document.getElementById('prizesGrid');
         const modalCaseName = document.getElementById('modalCaseName');
         const modalCaseDescription = document.getElementById('modalCaseDescription');
         const confirmOpenButton = document.getElementById('confirmOpen');
@@ -506,6 +524,15 @@
             modalCaseName.textContent = caseData.name;
             modalCaseDescription.textContent = `Вы уверены, что хотите открыть кейс "${caseData.name}" за ${caseData.price}р?`;
             
+            // Show possible prizes in modal
+            prizesGrid.innerHTML = '';
+            caseData.prizes.forEach(prize => {
+                const chip = document.createElement('div');
+                chip.className = 'prize-chip';
+                chip.textContent = prize.amount + 'р';
+                prizesGrid.appendChild(chip);
+            });
+            
             confirmationModal.style.display = 'flex';
         }
         
@@ -537,6 +564,7 @@
             
             // Generate prize sequence with weights
             const prizeSequence = generatePrizeSequence(caseData);
+            const targetIndex = findTargetIndex(prizeSequence);
             
             // Create prize elements
             prizeSequence.forEach((prize, index) => {
@@ -561,42 +589,64 @@
             
             // Animate
             let startTime = null;
-            const duration = 3500; // 3.5 seconds total
+            const duration = 4500; // 4.5 seconds (на 30% медленнее)
+            const targetPosition = -(targetIndex * 100) + 160;
             
             function animate(timestamp) {
                 if (!startTime) startTime = timestamp;
                 const elapsed = timestamp - startTime;
-                const progress = elapsed / duration;
+                const progress = Math.min(elapsed / duration, 1);
                 
-                // Ease-out function with slow start and slow finish
+                // Custom easing function for smooth start and end
                 const easeProgress = easeInOutCubic(progress);
                 
-                // Calculate distance to move (slower than before)
-                const moveDistance = easeProgress * (prizeSequence.length * 100 + 200);
+                // Calculate current position
+                const currentPosition = easeProgress * (prizeSequence.length * 100 + 200);
                 
-                // Move all prize items
-                prizeContainer.style.transform = `translateY(${-moveDistance}px)`;
+                // Move container
+                prizeContainer.style.transform = `translateY(${-currentPosition}px)`;
                 
                 if (progress < 1) {
                     requestAnimationFrame(animate);
                 } else {
-                    // Find and highlight the winning prize
-                    const prizeElements = prizeContainer.querySelectorAll('.prize-item');
-                    prizeElements.forEach(element => {
-                        if (parseInt(element.dataset.amount) === currentPrize.amount) {
-                            element.classList.add('active');
-                        }
-                    });
+                    // Final adjustment to exactly align the target prize
+                    prizeContainer.style.transform = `translateY(${targetPosition}px)`;
+                    prizeContainer.style.transition = 'transform 0.5s ease-out';
                     
-                    // Show result after delay
+                    // Find and highlight the winning prize
                     setTimeout(() => {
-                        animationContainer.style.display = 'none';
-                        showResult(currentPrize.amount);
-                    }, 1000);
+                        const prizeElements = prizeContainer.querySelectorAll('.prize-item');
+                        prizeElements.forEach(element => {
+                            const rect = element.getBoundingClientRect();
+                            const linePos = window.innerHeight / 2;
+                            
+                            if (rect.top <= linePos && rect.bottom >= linePos) {
+                                element.classList.add('active');
+                                currentPrize = { amount: parseInt(element.dataset.amount) };
+                            }
+                        });
+                        
+                        // Show result after delay
+                        setTimeout(() => {
+                            animationContainer.style.display = 'none';
+                            showResult(currentPrize.amount);
+                        }, 1000);
+                    }, 500);
                 }
             }
             
             requestAnimationFrame(animate);
+        }
+        
+        // Find the index of the target prize in the sequence
+        function findTargetIndex(sequence) {
+            let targetAmount = currentPrize.amount;
+            for (let i = 0; i < sequence.length; i++) {
+                if (sequence[i].amount === targetAmount) {
+                    return i;
+                }
+            }
+            return Math.floor(sequence.length * 0.7); // fallback
         }
         
         // Easing function for smooth animation
@@ -639,7 +689,7 @@
             }
             
             // Add winning prize multiple times at the end
-            for (let i = 0; i < 10; i++) {
+            for (let i = 0; i < 15; i++) {
                 sequence.push(currentPrize);
             }
             
