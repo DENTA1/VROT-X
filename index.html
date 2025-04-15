@@ -30,7 +30,6 @@
             color: #4285F4;
             font-size: 24px;
             font-weight: bold;
-            letter-spacing: 1px;
         }
         .buttons-container {
             display: flex;
@@ -48,15 +47,15 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
             cursor: pointer;
             font-size: 18px;
-            font-weight: bold;
             color: #e0e0e0;
             transition: all 0.2s;
             border: 1px solid #333;
-            flex: 2;
+            flex: 1;
         }
         .leaderboard-button {
             background: #FFD700;
-            padding: 15px;
+            width: 55px;
+            height: 55px;
             border-radius: 10px;
             display: flex;
             align-items: center;
@@ -65,21 +64,10 @@
             cursor: pointer;
             font-size: 24px;
             transition: all 0.2s;
-            border: none;
-            flex: 1;
         }
         .account-button:hover, .leaderboard-button:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.4);
-        }
-        .account-button:active, .leaderboard-button:active {
-            transform: translateY(0);
-        }
-        .account-button:hover {
-            background: #252525;
-        }
-        .leaderboard-button:hover {
-            background: #FFC000;
         }
         .account-icon {
             width: 24px;
@@ -98,7 +86,6 @@
         }
         .arrow-icon {
             font-size: 24px;
-            font-weight: bold;
             color: #4285F4;
         }
         .games-container {
@@ -115,7 +102,6 @@
             font-size: 18px;
             font-weight: bold;
             margin-bottom: 8px;
-            color: #e0e0e0;
         }
         .title-gradient-line {
             width: 100px;
@@ -137,18 +123,10 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.3);
             transition: all 0.3s;
             cursor: pointer;
-            background-size: cover;
-            background-position: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
         .game-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 8px 16px rgba(0,0,0,0.4);
-        }
-        .game-card:active {
-            transform: translateY(0);
         }
         .game-name {
             position: absolute;
@@ -162,18 +140,77 @@
             font-size: 16px;
             z-index: 2;
         }
-        .game-pattern {
-            position: absolute;
-            top: 0;
-            left: 0;
+
+        /* Стили для Минёра */
+        .miner-pattern {
+            background: #0d1a30;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+        .miner-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 4px;
             width: 100%;
             height: 100%;
-            z-index: 1;
+        }
+        .miner-cell {
+            background: #1e3a5a;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        .miner-cell.green {
+            background: #2e7d32;
+        }
+        .miner-cell.red {
+            background: #c62828;
+        }
+
+        /* Стили для Лесенки */
+        .ladder-pattern {
+            background: #332100;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+        .ladder-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+            height: 100%;
+        }
+        .ladder-floor {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+        }
+        .ladder-cell {
+            width: 30px;
+            height: 30px;
+            background: #ffb74d;
+            border-radius: 3px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-        .auth-screen {
+        .ladder-cell.green {
+            background: #2e7d32;
+        }
+        .ladder-cell.red {
+            background: #c62828;
+        }
+
+        /* Лидерборд */
+        .leaderboard-screen {
             position: fixed;
             top: 70px;
             left: 0;
@@ -182,37 +219,53 @@
             background: rgba(0, 0, 0, 0.9);
             display: none;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            font-size: 20px;
-            z-index: 1001;
-            text-align: center;
             padding: 20px;
+            z-index: 1003;
         }
-        .auth-screen h2 {
-            margin-bottom: 10px;
+        .leaderboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
         }
-        .auth-screen p {
-            margin-bottom: 15px;
-            max-width: 400px;
-            line-height: 1.5;
+        .leaderboard-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #FFD700;
         }
-        .auth-screen button {
-            margin-top: 20px;
-            padding: 12px 24px;
-            background: #0088cc;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
+        .close-leaderboard {
+            font-size: 30px;
             cursor: pointer;
-            transition: all 0.3s;
+            color: white;
         }
-        .auth-screen button:hover {
-            background: #0077b3;
-            transform: scale(1.05);
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 8px;
+            background: rgba(50, 50, 50, 0.8);
+            border-radius: 8px;
         }
+        .leaderboard-position {
+            width: 40px;
+            font-size: 20px;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        .leaderboard-name {
+            flex: 1;
+            font-weight: bold;
+        }
+        .leaderboard-balance {
+            font-weight: bold;
+            color: #34A853;
+            min-width: 100px;
+            text-align: right;
+        }
+
+        /* Остальные элементы */
+        .auth-screen,
         .transition-screen {
             position: fixed;
             top: 70px;
@@ -220,14 +273,14 @@
             right: 0;
             bottom: 0;
             background: rgba(0, 0, 0, 0.9);
-            display: flex;
+            display: none;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             color: white;
             font-size: 20px;
-            z-index: 1002;
             text-align: center;
+            padding: 20px;
         }
         .loader {
             width: 48px;
@@ -235,45 +288,8 @@
             border: 5px solid #FFF;
             border-bottom-color: #4285F4;
             border-radius: 50%;
-            display: inline-block;
-            box-sizing: border-box;
             animation: rotation 1s linear infinite;
             margin-bottom: 20px;
-        }
-        .checkmark {
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            display: none;
-            stroke-width: 4;
-            stroke: #4bb71b;
-            stroke-miterlimit: 10;
-            margin-bottom: 10px;
-            animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
-        }
-        .checkmark__circle {
-            stroke-dasharray: 166;
-            stroke-dashoffset: 166;
-            stroke-width: 4;
-            stroke-miterlimit: 10;
-            stroke: #4bb71b;
-            fill: none;
-            animation: stroke .6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
-        }
-        .checkmark__check {
-            transform-origin: 50% 50%;
-            stroke-dasharray: 48;
-            stroke-dashoffset: 48;
-            animation: stroke .3s cubic-bezier(0.65, 0, 0.45, 1) .8s forwards;
-        }
-        .status-text {
-            height: 24px;
-            margin-bottom: 10px;
-        }
-        .user-id {
-            color: #aaa;
-            font-size: 14px;
-            margin-top: 10px;
         }
         .locked-game {
             filter: grayscale(80%) brightness(0.6);
@@ -287,115 +303,10 @@
             font-size: 20px;
             z-index: 3;
         }
-        .leaderboard-screen {
-            position: fixed;
-            top: 70px;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            display: none;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: center;
-            color: white;
-            font-size: 20px;
-            z-index: 1003;
-            padding: 20px;
-            overflow-y: auto;
-        }
-        .leaderboard-header {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-            margin-bottom: 20px;
-            position: relative;
-        }
-        .leaderboard-title {
-            font-size: 28px;
-            font-weight: bold;
-            color: #FFD700;
-            text-align: center;
-            margin-bottom: 15px;
-        }
-        .trophy-icon {
-            font-size: 40px;
-            margin-bottom: 10px;
-        }
-        .close-leaderboard {
-            position: absolute;
-            top: 0;
-            right: 0;
-            font-size: 30px;
-            cursor: pointer;
-            color: white;
-        }
-        .leaderboard-item {
-            display: flex;
-            align-items: center;
-            width: 100%;
-            padding: 12px 15px;
-            margin-bottom: 8px;
-            background: rgba(30, 30, 30, 0.7);
-            border-radius: 8px;
-        }
-        .leaderboard-position {
-            font-size: 20px;
-            font-weight: bold;
-            margin-right: 15px;
-            width: 30px;
-            text-align: center;
-            position: relative;
-        }
-        .position-1 {
-            color: #FFD700;
-            text-shadow: 0 0 8px rgba(255, 215, 0, 0.7);
-        }
-        .position-2 {
-            color: #C0C0C0;
-            text-shadow: 0 0 5px rgba(192, 192, 192, 0.5);
-        }
-        .position-3 {
-            color: #CD7F32;
-            text-shadow: 0 0 3px rgba(205, 127, 50, 0.5);
-        }
-        .position-other {
-            color: #666;
-        }
-        .leaderboard-name {
-            flex: 1;
-            font-weight: bold;
-            text-align: center;
-        }
-        .leaderboard-balance {
-            font-weight: bold;
-            color: #34A853;
-            margin-left: auto;
-            min-width: 80px;
-            text-align: right;
-        }
-        .user-highlight {
-            animation: userHighlight 2s infinite;
-        }
 
         @keyframes rotation {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
-        }
-        @keyframes stroke {
-            100% { stroke-dashoffset: 0; }
-        }
-        @keyframes scale {
-            0%, 100% { transform: none; }
-            50% { transform: scale3d(1.1, 1.1, 1); }
-        }
-        @keyframes fill {
-            100% { box-shadow: inset 0 0 0 100vh rgba(0, 0, 0, 0.9); }
-        }
-        @keyframes userHighlight {
-            0%, 100% { background-color: rgba(30, 30, 30, 0.7); }
-            50% { background-color: rgba(66, 133, 244, 0.3); }
         }
     </style>
 </head>
@@ -405,13 +316,8 @@
     </div>
 
     <div class="transition-screen" id="transitionScreen">
-        <span class="loader" id="loader"></span>
-        <svg class="checkmark" id="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
-            <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
-            <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
-        </svg>
-        <div class="status-text" id="statusText">Идет загрузка...</div>
-        <div class="user-id" id="userIdText"></div>
+        <span class="loader"></span>
+        <div class="status-text">Идет загрузка...</div>
     </div>
     
     <div class="auth-screen" id="authScreen">
@@ -422,8 +328,7 @@
 
     <div class="leaderboard-screen" id="leaderboardScreen">
         <div class="leaderboard-header">
-            <div class="trophy-icon">🏆</div>
-            <div class="leaderboard-title">ЛидерБорд</div>
+            <div class="leaderboard-title">Лидерборд</div>
             <div class="close-leaderboard" id="closeLeaderboard">×</div>
         </div>
         <div id="leaderboardContent"></div>
@@ -443,25 +348,21 @@
                 </div>
                 <div class="arrow-icon">→</div>
             </div>
-            <div class="leaderboard-button" id="leaderboardButton">
-                🏆
-            </div>
+            <div class="leaderboard-button" id="leaderboardButton">🏆</div>
         </div>
+
         <div class="games-container">
             <div class="games-title-container">
                 <div class="games-title">Доступные игры</div>
                 <div class="title-gradient-line"></div>
             </div>
-            <div class="games-grid" id="gamesGrid">
-                <!-- Игры будут добавлены динамически -->
-            </div>
+            <div class="games-grid" id="gamesGrid"></div>
         </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script>
-        // Конфигурация Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyCMos6Y7C-krTLuKCI4VJG-TFLo6QI--k8",
             authDomain: "vrot-x-7a48f.firebaseapp.com",
@@ -472,11 +373,11 @@
             appId: "1:622297225288:web:5df6a5b02ffddedd96e07d"
         };
         
-        // Инициализация Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        
-        // Настройки доступности игр
+
+        let userId = null;
+        let userName = 'Аноним';
         const gamesAvailability = {
             miner: true,
             ladder: true,
@@ -486,144 +387,72 @@
             plinko: false,
             roulette: false
         };
-        
-        let userId = null;
-        let userName = 'Аноним';
-        let leaderboardInterval = null;
-        const transitionScreen = document.getElementById('transitionScreen');
-        const loader = document.getElementById('loader');
-        const checkmark = document.getElementById('checkmark');
-        const statusText = document.getElementById('statusText');
-        const userIdText = document.getElementById('userIdText');
-        const authScreen = document.getElementById('authScreen');
-        const appContentElement = document.getElementById('appContent');
-        const gamesGrid = document.getElementById('gamesGrid');
-        const telegramAuthButton = document.getElementById('telegramAuthButton');
-        const accountButton = document.getElementById('accountButton');
-        const leaderboardButton = document.getElementById('leaderboardButton');
-        const leaderboardScreen = document.getElementById('leaderboardScreen');
-        const closeLeaderboard = document.getElementById('closeLeaderboard');
-        const leaderboardContent = document.getElementById('leaderboardContent');
 
-        // Инициализация при загрузке страницы
+        // Инициализация приложения
         document.addEventListener('DOMContentLoaded', async () => {
-            // Назначаем обработчики
-            leaderboardButton.addEventListener('click', showLeaderboard);
-            closeLeaderboard.addEventListener('click', () => {
-                leaderboardScreen.style.display = 'none';
-                clearInterval(leaderboardInterval);
-            });
-
-            // Пытаемся загрузить Telegram WebApp
+            initEventListeners();
             try {
                 await loadTelegramScript();
-                
-                // Проверяем авторизацию
-                if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
-                    const tgUser = window.Telegram.WebApp.initDataUnsafe.user;
-                    userId = tgUser.id.toString();
-                    userName = tgUser.first_name || 'Аноним';
-                    setTelegramIdCookie(userId);
-                    await checkUserInDatabase();
-                } else {
-                    const savedUserId = getTelegramIdFromCookie();
-                    if (savedUserId) {
-                        userId = savedUserId;
-                        await checkUserInDatabase();
-                    } else {
-                        showAuthScreen();
-                    }
-                }
+                checkAuth();
             } catch (error) {
-                console.error('Ошибка инициализации:', error);
                 showAuthScreen();
             }
-            
-            telegramAuthButton.addEventListener('click', initTelegramAuth);
-            accountButton.addEventListener('click', goToProfile);
         });
 
-        // Загрузка Telegram WebApp API
-        function loadTelegramScript() {
+        function initEventListeners() {
+            document.getElementById('leaderboardButton').addEventListener('click', showLeaderboard);
+            document.getElementById('closeLeaderboard').addEventListener('click', () => {
+                document.getElementById('leaderboardScreen').style.display = 'none';
+            });
+            document.getElementById('telegramAuthButton').addEventListener('click', initTelegramAuth);
+            document.getElementById('accountButton').addEventListener('click', goToProfile);
+        }
+
+        async function loadTelegramScript() {
             return new Promise((resolve, reject) => {
-                if (window.Telegram && window.Telegram.WebApp) return resolve();
-                
+                if (window.Telegram?.WebApp) return resolve();
                 const script = document.createElement('script');
                 script.src = 'https://telegram.org/js/telegram-web-app.js';
-                script.async = true;
-                script.onload = () => window.Telegram?.WebApp ? resolve() : reject();
+                script.onload = resolve;
                 script.onerror = reject;
                 document.body.appendChild(script);
             });
         }
 
-        // Авторизация через Telegram
-        async function initTelegramAuth() {
-            try {
-                const tg = window.Telegram.WebApp;
-                tg.expand();
-                
-                if (tg.initDataUnsafe?.user) {
-                    const tgUser = tg.initDataUnsafe.user;
-                    userId = tgUser.id.toString();
-                    userName = tgUser.first_name || 'Аноним';
-                    setTelegramIdCookie(userId);
-                    await checkUserInDatabase();
+        async function checkAuth() {
+            const tg = window.Telegram?.WebApp;
+            if (tg?.initDataUnsafe?.user) {
+                handleAuth(tg.initDataUnsafe.user);
+            } else {
+                const savedUserId = getCookie('tg_user_id');
+                if (savedUserId) {
+                    userId = savedUserId;
+                    checkUserInDatabase();
                 } else {
-                    tg.showAlert('Пожалуйста, авторизуйтесь в Telegram');
+                    showAuthScreen();
                 }
-            } catch (error) {
-                console.error('Ошибка авторизации:', error);
-                showAuthScreen();
             }
         }
 
-        // Проверка пользователя в БД
+        async function handleAuth(tgUser) {
+            userId = tgUser.id.toString();
+            userName = tgUser.first_name || 'Аноним';
+            setCookie('tg_user_id', userId);
+            await checkUserInDatabase();
+        }
+
         async function checkUserInDatabase() {
-            if (!userId) return showAuthScreen();
-            
-            try {
-                const snapshot = await database.ref('users/' + userId).once('value');
-                
-                if (!snapshot.exists()) {
-                    await database.ref('users/' + userId).set({
-                        name: userName,
-                        created_at: new Date().toISOString(),
-                        balance: 0
-                    });
-                } else {
-                    await database.ref('users/' + userId).update({ name: userName });
-                }
-                showSuccessTransition();
-            } catch (error) {
-                console.error('Ошибка проверки пользователя:', error);
-                showAuthScreen();
+            const snapshot = await database.ref('users/' + userId).once('value');
+            if (!snapshot.exists()) {
+                await database.ref('users/' + userId).set({
+                    name: userName,
+                    balance: 0,
+                    created_at: new Date().toISOString()
+                });
             }
+            showAppContent();
         }
 
-        // Отображение успешной авторизации
-        function showSuccessTransition() {
-            transitionScreen.style.display = 'flex';
-            authScreen.style.display = 'none';
-            appContentElement.style.display = 'none';
-            
-            loader.style.display = 'block';
-            checkmark.style.display = 'none';
-            statusText.textContent = 'Авторизация успешна';
-            userIdText.textContent = `ID: ${userId}`;
-            
-            setTimeout(() => {
-                loader.style.display = 'none';
-                checkmark.style.display = 'block';
-                setTimeout(() => {
-                    transitionScreen.style.display = 'none';
-                    appContentElement.style.display = 'block';
-                    createGameCards();
-                }, 1500);
-            }, 1000);
-        }
-
-        // Создание игровых карточек
         function createGameCards() {
             const games = [
                 { id: 'miner', name: 'Минёр' },
@@ -634,169 +463,146 @@
                 { id: 'plinko', name: 'Плинко' },
                 { id: 'roulette', name: 'Рулетка' }
             ];
-            
-            gamesGrid.innerHTML = '';
-            
+
+            const grid = document.getElementById('gamesGrid');
+            grid.innerHTML = '';
+
             games.forEach(game => {
-                const gameCard = document.createElement('div');
-                gameCard.className = `game-card ${gamesAvailability[game.id] ? '' : 'locked-game'}`;
+                const card = document.createElement('div');
+                card.className = `game-card ${gamesAvailability[game.id] ? '' : 'locked-game'}`;
                 
-                let pattern;
-                switch(game.id) {
-                    case 'miner': pattern = createMinerPattern(); break;
-                    case 'ladder': pattern = createLadderPattern(); break;
-                    case 'slots': pattern = createSlotsPattern(); break;
-                    default: pattern = document.createElement('div');
-                }
-                
-                gameCard.appendChild(pattern);
-                const gameName = document.createElement('div');
-                gameName.className = 'game-name';
-                gameName.textContent = game.name;
-                gameCard.appendChild(gameName);
-                
-                gameCard.addEventListener('click', () => {
-                    if (!userId) return showAuthScreen();
-                    if (gamesAvailability[game.id]) openGame(game.id);
-                    else alert('Эта игра временно недоступна');
-                });
-                
-                gamesGrid.appendChild(gameCard);
+                const pattern = createGamePattern(game.id);
+                const name = document.createElement('div');
+                name.className = 'game-name';
+                name.textContent = game.name;
+
+                card.append(pattern, name);
+                card.addEventListener('click', () => handleGameClick(game.id));
+                grid.appendChild(card);
             });
         }
 
-        // Открытие игры
-        function openGame(game) {
-            const params = new URLSearchParams();
-            params.append('user', userId);
-            
-            switch(game) {
-                case 'miner': window.location.href = `miner.html?${params}`; break;
-                case 'ladder': window.location.href = `lesenka.html?${params}`; break;
-                case 'slots': window.location.href = `slots.html?${params}`; break;
-                case 'crash': window.location.href = `crash.html?${params}`; break;
-                case 'classic': window.location.href = `classik.html?${params}`; break;
-                case 'plinko': window.location.href = `plinko.html?${params}`; break;
-                default: console.error('Неизвестная игра:', game);
+        function createGamePattern(gameId) {
+            const pattern = document.createElement('div');
+            switch(gameId) {
+                case 'miner':
+                    pattern.className = 'miner-pattern';
+                    const minerGrid = document.createElement('div');
+                    minerGrid.className = 'miner-grid';
+                    // Добавление ячеек для минёра
+                    for (let i = 0; i < 25; i++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'miner-cell';
+                        if (i === 12) {
+                            cell.classList.add('red');
+                            cell.textContent = '💣';
+                        } else if ([6, 8, 16, 18, 22].includes(i)) {
+                            cell.classList.add('green');
+                            cell.textContent = '💎';
+                        }
+                        minerGrid.appendChild(cell);
+                    }
+                    pattern.appendChild(minerGrid);
+                    break;
+
+                case 'ladder':
+                    pattern.className = 'ladder-pattern';
+                    const ladderGrid = document.createElement('div');
+                    ladderGrid.className = 'ladder-grid';
+                    // Добавление этажей для лесенки
+                    for (let floor = 0; floor < 5; floor++) {
+                        const floorDiv = document.createElement('div');
+                        floorDiv.className = 'ladder-floor';
+                        for (let i = 0; i < 5; i++) {
+                            const cell = document.createElement('div');
+                            cell.className = 'ladder-cell';
+                            if (floor < 3) {
+                                if (i === 2) cell.classList.add('red');
+                                if (i === 3) cell.classList.add('green');
+                            }
+                            floorDiv.appendChild(cell);
+                        }
+                        ladderGrid.appendChild(floorDiv);
+                    }
+                    pattern.appendChild(ladderGrid);
+                    break;
+
+                default:
+                    pattern.style.backgroundColor = '#333';
             }
+            return pattern;
         }
 
-        // Лидерборд
-        async function loadLeaderboard() {
-            try {
-                const snapshot = await database.ref('users').once('value');
-                const users = [];
-                
-                snapshot.forEach(child => {
-                    users.push({
-                        id: child.key,
-                        name: child.val().name || 'Аноним',
-                        balance: Math.round(child.val().balance || 0)
-                    });
-                });
-                
-                users.sort((a, b) => b.balance - a.balance);
-                leaderboardContent.innerHTML = '';
-                
-                users.forEach((user, index) => {
-                    const item = document.createElement('div');
-                    item.className = `leaderboard-item ${user.id === userId ? 'user-highlight' : ''}`;
-                    
-                    const pos = document.createElement('div');
-                    pos.className = `leaderboard-position position-${index < 3 ? index+1 : 'other'}`;
-                    pos.textContent = index + 1;
-                    
-                    const name = document.createElement('div');
-                    name.className = 'leaderboard-name';
-                    name.textContent = user.name;
-                    
-                    const balance = document.createElement('div');
-                    balance.className = 'leaderboard-balance';
-                    balance.textContent = `${user.balance}р`;
-                    
-                    item.append(pos, name, balance);
-                    leaderboardContent.appendChild(item);
-                });
-            } catch (error) {
-                leaderboardContent.innerHTML = '<div>Ошибка загрузки</div>';
-                console.error('Ошибка лидерборда:', error);
+        function handleGameClick(gameId) {
+            if (!gamesAvailability[gameId]) {
+                alert('Игра временно недоступна');
+                return;
             }
+            window.location.href = `${gameId}.html?user=${userId}`;
         }
 
-        function showLeaderboard() {
-            leaderboardScreen.style.display = 'flex';
-            loadLeaderboard();
-            leaderboardInterval = setInterval(loadLeaderboard, 5000);
+        async function showLeaderboard() {
+            const screen = document.getElementById('leaderboardScreen');
+            screen.style.display = 'flex';
+            const snapshot = await database.ref('users').once('value');
+            const users = [];
+            snapshot.forEach(child => {
+                users.push({
+                    id: child.key,
+                    name: child.val().name,
+                    balance: child.val().balance
+                });
+            });
+            users.sort((a, b) => b.balance - a.balance);
+            renderLeaderboard(users);
         }
 
-        // Переход в профиль
+        function renderLeaderboard(users) {
+            const container = document.getElementById('leaderboardContent');
+            container.innerHTML = '';
+            users.forEach((user, index) => {
+                const item = document.createElement('div');
+                item.className = 'leaderboard-item';
+                item.innerHTML = `
+                    <div class="leaderboard-position">${index + 1}</div>
+                    <div class="leaderboard-name">${user.name}</div>
+                    <div class="leaderboard-balance">${user.balance}р</div>
+                `;
+                if (user.id === userId) item.classList.add('user-highlight');
+                container.appendChild(item);
+            });
+        }
+
+        // Вспомогательные функции
+        function setCookie(name, value) {
+            document.cookie = `${name}=${value};max-age=31536000;path=/`;
+        }
+
+        function getCookie(name) {
+            return document.cookie.split('; ').find(row => row.startsWith(name))?.split('=')[1];
+        }
+
+        function showAuthScreen() {
+            document.getElementById('authScreen').style.display = 'flex';
+        }
+
+        function showAppContent() {
+            document.getElementById('appContent').style.display = 'block';
+            createGameCards();
+        }
+
         function goToProfile() {
-            if (!userId) return showAuthScreen();
             window.location.href = `profile.html?user=${userId}`;
         }
 
-        // Работа с cookie
-        function setTelegramIdCookie(id) {
-            document.cookie = `tg_user_id=${id};max-age=31536000;path=/;SameSite=Lax`;
-        }
-        
-        function getTelegramIdFromCookie() {
-            return document.cookie.split('; ')
-                .find(row => row.startsWith('tg_user_id='))
-                ?.split('=')[1];
-        }
-
-        // Паттерны для игр
-        function createMinerPattern() {
-            const pattern = document.createElement('div');
-            pattern.className = 'game-pattern miner-pattern';
-            const grid = document.createElement('div');
-            grid.className = 'miner-grid';
-            
-            for (let i = 0; i < 25; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'miner-cell';
-                if ([3,7,12,19,23].includes(i)) cell.classList.add('miner-bomb');
-                else if ([1,9,11,15,21].includes(i)) cell.classList.add('miner-crystal');
-                grid.appendChild(cell);
+        async function initTelegramAuth() {
+            const tg = window.Telegram.WebApp;
+            tg.expand();
+            if (tg.initDataUnsafe?.user) {
+                handleAuth(tg.initDataUnsafe.user);
+            } else {
+                tg.showAlert('Требуется авторизация в Telegram');
             }
-            
-            pattern.appendChild(grid);
-            return pattern;
-        }
-
-        function createLadderPattern() {
-            const pattern = document.createElement('div');
-            pattern.className = 'game-pattern ladder-pattern';
-            const grid = document.createElement('div');
-            grid.className = 'ladder-grid';
-            
-            for (let i = 0; i < 15; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'ladder-cell';
-                if ([2,5,9,12].includes(i)) cell.classList.add('ladder-bomb');
-                else if ([1,4,7,11,14].includes(i)) cell.classList.add('ladder-check');
-                grid.appendChild(cell);
-            }
-            
-            pattern.appendChild(grid);
-            return pattern;
-        }
-
-        function createSlotsPattern() {
-            const pattern = document.createElement('div');
-            pattern.className = 'game-pattern slots-pattern';
-            const machine = document.createElement('div');
-            machine.className = 'slots-machine';
-            
-            for (let i = 0; i < 3; i++) {
-                const reel = document.createElement('div');
-                reel.className = 'slots-reel';
-                machine.appendChild(reel);
-            }
-            
-            pattern.appendChild(machine);
-            return pattern;
         }
     </script>
 </body>
