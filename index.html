@@ -29,6 +29,18 @@
             color: #4285F4;
             font-size: 24px;
             font-weight: bold;
+            animation: logoGlow 3s ease-in-out infinite;
+        }
+        @keyframes logoGlow {
+            0%, 100% { 
+                text-shadow: 0 0 5px #4285F4, 0 0 10px #4285F4;
+            }
+            50% { 
+                text-shadow: 0 0 15px #4285F4, 0 0 20px #4285F4;
+            }
+            70% {
+                text-shadow: 0 0 5px #4285F4, 0 0 10px #4285F4;
+            }
         }
         .buttons-container {
             display: flex;
@@ -112,6 +124,7 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.3);
             cursor: pointer;
             transition: transform 0.3s;
+            background-color: #333;
         }
         .game-card:hover {
             transform: translateY(-5px);
@@ -128,12 +141,30 @@
             font-size: 14px;
             z-index: 2;
         }
+        .game-pattern {
+            height: 100%;
+            padding: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(66, 133, 244, 0.3);
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+            pointer-events: none;
+        }
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
 
         /* Стили минера */
         .miner-pattern {
             background: #0d1a30;
-            height: 100%;
-            padding: 10px;
         }
         .miner-grid {
             display: grid;
@@ -159,8 +190,6 @@
         /* Стили лесенки */
         .ladder-pattern {
             background: #332100;
-            height: 100%;
-            padding: 10px;
         }
         .ladder-grid {
             display: flex;
@@ -188,6 +217,20 @@
         }
         .ladder-cell.red {
             background: #c62828;
+        }
+
+        /* Карточки в разработке */
+        .coming-soon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            background: #3a3a3a;
+            color: #999;
+            font-size: 16px;
+            text-align: center;
+            padding: 20px;
         }
 
         /* Лидерборд */
@@ -385,6 +428,29 @@
                 clearInterval(leaderboardInterval);
             });
             document.getElementById('accountButton').addEventListener('click', goToProfile);
+            
+            // Добавляем обработчики для эффекта ripple
+            document.querySelectorAll('.game-card').forEach(card => {
+                card.addEventListener('click', createRipple);
+            });
+        }
+
+        function createRipple(e) {
+            const card = e.currentTarget;
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const ripple = document.createElement('span');
+            ripple.className = 'ripple';
+            ripple.style.left = `${x}px`;
+            ripple.style.top = `${y}px`;
+            
+            card.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
         }
 
         async function loadTelegramScript() {
@@ -433,7 +499,9 @@
         function createGameCards() {
             const games = [
                 { id: 'miner', name: 'Минер', file: 'miner.html' },
-                { id: 'ladder', name: 'Лесенка', file: 'lecenka.html' }
+                { id: 'ladder', name: 'Лесенка', file: 'lecenka.html' },
+                { id: 'crash', name: '№1', file: 'crash.html' },
+                { id: 'roulette', name: '№2', file: 'roulette.html' }
             ];
 
             const grid = document.getElementById('gamesGrid');
@@ -441,9 +509,20 @@
 
             games.forEach(game => {
                 const card = document.createElement('div');
-                card.className = `game-card ${gamesAvailability[game.id] ? '' : 'locked-game'}`;
+                card.className = 'game-card';
                 
-                const pattern = createGamePattern(game.id);
+                const pattern = document.createElement('div');
+                pattern.className = 'game-pattern';
+                
+                if (game.id === 'miner' || game.id === 'ladder') {
+                    pattern.appendChild(createGamePattern(game.id));
+                } else {
+                    const comingSoon = document.createElement('div');
+                    comingSoon.className = 'coming-soon';
+                    comingSoon.textContent = 'В разработке';
+                    pattern.appendChild(comingSoon);
+                }
+
                 const name = document.createElement('div');
                 name.className = 'game-name';
                 name.textContent = game.name;
