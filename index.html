@@ -422,11 +422,14 @@
         .leaderboard-name {
             flex: 1;
             font-weight: bold;
+            text-align: center;
         }
         .leaderboard-balance {
             font-weight: bold;
             color: #34A853;
-            margin-right: 5px;
+            margin-left: auto;
+            min-width: 80px;
+            text-align: right;
         }
         .user-highlight {
             animation: userHighlight 2s infinite;
@@ -804,10 +807,10 @@
         // Создание карточек игр
         function createGameCards() {
             const games = [
-                { id: 'miner', name: 'Минёр' },
-                { id: 'ladder', name: 'Лесенка' },
-                { id: 'roulette1', name: 'Рулетка' },
-                { id: 'roulette2', name: 'Рулетка' }
+                { id: 'miner', name: 'Минёр', file: 'miner.html' },
+                { id: 'ladder', name: 'Лесенка', file: 'lesenka.html' },
+                { id: 'roulette1', name: 'Рулетка', file: 'roulette.html' },
+                { id: 'roulette2', name: 'Рулетка', file: 'roulette.html' }
             ];
             
             gamesGrid.innerHTML = '';
@@ -840,7 +843,7 @@
                         showAuthScreen();
                         return;
                     }
-                    openGame(game.id.includes('roulette') ? 'roulette' : game.id);
+                    openGame(game.file);
                 });
                 
                 gamesGrid.appendChild(gameCard);
@@ -898,7 +901,7 @@
         }
 
         // Открытие игры
-        function openGame(game) {
+        function openGame(gameFile) {
             if (!userId) {
                 showAuthScreen();
                 return;
@@ -906,7 +909,7 @@
             
             const params = new URLSearchParams();
             params.append('user', userId);
-            window.location.href = `${game}.html?${params.toString()}`;
+            window.location.href = `${gameFile}?${params.toString()}`;
         }
 
         // Показать лидерборд
