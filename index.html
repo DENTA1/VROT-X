@@ -12,19 +12,18 @@
             font-family: 'Arial', sans-serif;
         }
         body {
-            background-color: #121212;
+            background-color: #1a1a1a;
             color: #e0e0e0;
         }
         .header {
-            background-color: #1a1a1a;
-            color: white;
+            background-color: #222;
             padding: 15px 0;
             text-align: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
             position: fixed;
             top: 0;
             width: 100%;
             z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
         }
         .logo {
             color: #4285F4;
@@ -38,19 +37,18 @@
             gap: 10px;
         }
         .account-button {
-            background: #1e1e1e;
+            background: #252525;
             padding: 15px 20px;
             border-radius: 10px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
             cursor: pointer;
             font-size: 18px;
+            font-weight: bold;
             color: #e0e0e0;
-            transition: all 0.2s;
-            border: 1px solid #333;
             flex: 1;
+            border: 1px solid #333;
         }
         .leaderboard-button {
             background: #FFD700;
@@ -63,39 +61,13 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
             cursor: pointer;
             font-size: 24px;
-            transition: all 0.2s;
         }
-        .account-button:hover, .leaderboard-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
-        }
-        .account-icon {
-            width: 24px;
-            height: 24px;
-            background: linear-gradient(135deg, #4285F4, #34A853);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            margin-right: 10px;
-        }
-        .account-icon svg {
-            width: 14px;
-            height: 14px;
-        }
-        .arrow-icon {
-            font-size: 24px;
-            color: #4285F4;
-        }
+
         .games-container {
             padding: 0 20px;
             margin-top: 20px;
         }
         .games-title-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
             margin-bottom: 20px;
         }
         .games-title {
@@ -104,11 +76,12 @@
             margin-bottom: 8px;
         }
         .title-gradient-line {
-            width: 100px;
+            width: 100%;
             height: 3px;
             background: linear-gradient(90deg, #4285F4, #34A853);
             border-radius: 3px;
         }
+
         .games-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -121,40 +94,23 @@
             position: relative;
             overflow: hidden;
             box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-            transition: all 0.3s;
             cursor: pointer;
+            transition: transform 0.3s;
         }
         .game-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
-        }
-        .game-name {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            padding: 8px 15px;
-            background-color: rgba(30, 30, 30, 0.9);
-            border-top-left-radius: 12px;
-            color: #4285F4;
-            font-weight: bold;
-            font-size: 16px;
-            z-index: 2;
         }
 
-        /* Стили для Минёра */
+        /* Стили паттернов */
         .miner-pattern {
             background: #0d1a30;
             height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             padding: 10px;
         }
         .miner-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             gap: 4px;
-            width: 100%;
             height: 100%;
         }
         .miner-cell {
@@ -172,20 +128,15 @@
             background: #c62828;
         }
 
-        /* Стили для Лесенки */
         .ladder-pattern {
             background: #332100;
             height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             padding: 10px;
         }
         .ladder-grid {
             display: flex;
             flex-direction: column;
             gap: 8px;
-            width: 100%;
             height: 100%;
         }
         .ladder-floor {
@@ -198,9 +149,6 @@
             height: 30px;
             background: #ffb74d;
             border-radius: 3px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
         .ladder-cell.green {
             background: #2e7d32;
@@ -216,7 +164,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.95);
             display: none;
             flex-direction: column;
             padding: 20px;
@@ -244,8 +192,9 @@
             width: 100%;
             padding: 12px;
             margin-bottom: 8px;
-            background: rgba(50, 50, 50, 0.8);
+            background: #252525;
             border-radius: 8px;
+            transition: background 0.3s;
         }
         .leaderboard-position {
             width: 40px;
@@ -253,6 +202,10 @@
             font-weight: bold;
             margin-right: 15px;
         }
+        .position-gold { color: #FFD700; }
+        .position-silver { color: #C0C0C0; }
+        .position-bronze { color: #CD7F32; }
+        .position-other { color: #666; }
         .leaderboard-name {
             flex: 1;
             font-weight: bold;
@@ -264,66 +217,53 @@
             text-align: right;
         }
 
-        /* Остальные элементы */
-        .auth-screen,
-        .transition-screen {
+        /* Экран загрузки */
+        .splash-screen {
             position: fixed;
-            top: 70px;
+            top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.9);
-            display: none;
+            background: #000;
+            display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            color: white;
-            font-size: 20px;
-            text-align: center;
-            padding: 20px;
+            z-index: 9999;
         }
-        .loader {
+        .splash-logo {
+            font-size: 48px;
+            color: #4285F4;
+            margin-bottom: 20px;
+            animation: logoFloat 2s ease-in-out infinite;
+        }
+        .splash-loader {
             width: 48px;
             height: 48px;
             border: 5px solid #FFF;
             border-bottom-color: #4285F4;
             border-radius: 50%;
             animation: rotation 1s linear infinite;
-            margin-bottom: 20px;
-        }
-        .locked-game {
-            filter: grayscale(80%) brightness(0.6);
-            position: relative;
-        }
-        .locked-game::after {
-            content: '🔒';
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 20px;
-            z-index: 3;
         }
 
         @keyframes rotation {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        @keyframes logoFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="logo">VROT-X</div>
+    <div class="splash-screen" id="splashScreen">
+        <div class="splash-logo">VROT-X</div>
+        <div class="splash-loader"></div>
     </div>
 
-    <div class="transition-screen" id="transitionScreen">
-        <span class="loader"></span>
-        <div class="status-text">Идет загрузка...</div>
-    </div>
-    
-    <div class="auth-screen" id="authScreen">
-        <h2>Добро пожаловать в VROT-X</h2>
-        <p>Для доступа к платформе требуется авторизация через Telegram</p>
-        <button id="telegramAuthButton">Войти через Telegram</button>
+    <div class="header">
+        <div class="logo">VROT-X</div>
     </div>
 
     <div class="leaderboard-screen" id="leaderboardScreen">
@@ -339,14 +279,13 @@
             <div class="account-button" id="accountButton">
                 <div style="display: flex; align-items: center;">
                     <div class="account-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                             <circle cx="12" cy="7" r="4"></circle>
                         </svg>
                     </div>
                     <span>Мой профиль</span>
                 </div>
-                <div class="arrow-icon">→</div>
             </div>
             <div class="leaderboard-button" id="leaderboardButton">🏆</div>
         </div>
@@ -372,12 +311,12 @@
             messagingSenderId: "622297225288",
             appId: "1:622297225288:web:5df6a5b02ffddedd96e07d"
         };
-        
+
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
         let userId = null;
-        let userName = 'Аноним';
+        let leaderboardInterval = null;
         const gamesAvailability = {
             miner: true,
             ladder: true,
@@ -388,8 +327,12 @@
             roulette: false
         };
 
-        // Инициализация приложения
         document.addEventListener('DOMContentLoaded', async () => {
+            setTimeout(() => {
+                document.getElementById('splashScreen').style.display = 'none';
+                document.getElementById('appContent').style.display = 'block';
+            }, 1000);
+
             initEventListeners();
             try {
                 await loadTelegramScript();
@@ -403,8 +346,8 @@
             document.getElementById('leaderboardButton').addEventListener('click', showLeaderboard);
             document.getElementById('closeLeaderboard').addEventListener('click', () => {
                 document.getElementById('leaderboardScreen').style.display = 'none';
+                clearInterval(leaderboardInterval);
             });
-            document.getElementById('telegramAuthButton').addEventListener('click', initTelegramAuth);
             document.getElementById('accountButton').addEventListener('click', goToProfile);
         }
 
@@ -436,7 +379,6 @@
 
         async function handleAuth(tgUser) {
             userId = tgUser.id.toString();
-            userName = tgUser.first_name || 'Аноним';
             setCookie('tg_user_id', userId);
             await checkUserInDatabase();
         }
@@ -445,12 +387,11 @@
             const snapshot = await database.ref('users/' + userId).once('value');
             if (!snapshot.exists()) {
                 await database.ref('users/' + userId).set({
-                    name: userName,
+                    name: window.Telegram.WebApp.initDataUnsafe.user.first_name || 'Аноним',
                     balance: 0,
                     created_at: new Date().toISOString()
                 });
             }
-            showAppContent();
         }
 
         function createGameCards() {
@@ -489,7 +430,6 @@
                     pattern.className = 'miner-pattern';
                     const minerGrid = document.createElement('div');
                     minerGrid.className = 'miner-grid';
-                    // Добавление ячеек для минёра
                     for (let i = 0; i < 25; i++) {
                         const cell = document.createElement('div');
                         cell.className = 'miner-cell';
@@ -509,7 +449,6 @@
                     pattern.className = 'ladder-pattern';
                     const ladderGrid = document.createElement('div');
                     ladderGrid.className = 'ladder-grid';
-                    // Добавление этажей для лесенки
                     for (let floor = 0; floor < 5; floor++) {
                         const floorDiv = document.createElement('div');
                         floorDiv.className = 'ladder-floor';
@@ -538,21 +477,31 @@
                 alert('Игра временно недоступна');
                 return;
             }
-            window.location.href = `${gameId}.html?user=${userId}`;
+            if (gameId === 'ladder') {
+                window.location.href = `lecenka.html?user=${userId}`;
+            } else {
+                window.location.href = `${gameId}.html?user=${userId}`;
+            }
         }
 
         async function showLeaderboard() {
             const screen = document.getElementById('leaderboardScreen');
             screen.style.display = 'flex';
+            updateLeaderboard();
+            leaderboardInterval = setInterval(updateLeaderboard, 5000);
+        }
+
+        async function updateLeaderboard() {
             const snapshot = await database.ref('users').once('value');
             const users = [];
             snapshot.forEach(child => {
                 users.push({
                     id: child.key,
                     name: child.val().name,
-                    balance: child.val().balance
+                    balance: child.val().balance || 0
                 });
             });
+            
             users.sort((a, b) => b.balance - a.balance);
             renderLeaderboard(users);
         }
@@ -563,11 +512,24 @@
             users.forEach((user, index) => {
                 const item = document.createElement('div');
                 item.className = 'leaderboard-item';
-                item.innerHTML = `
-                    <div class="leaderboard-position">${index + 1}</div>
-                    <div class="leaderboard-name">${user.name}</div>
-                    <div class="leaderboard-balance">${user.balance}р</div>
-                `;
+                
+                const position = document.createElement('div');
+                position.className = 'leaderboard-position ';
+                if (index === 0) position.classList.add('position-gold');
+                else if (index === 1) position.classList.add('position-silver');
+                else if (index === 2) position.classList.add('position-bronze');
+                else position.classList.add('position-other');
+                position.textContent = index + 1;
+
+                const name = document.createElement('div');
+                name.className = 'leaderboard-name';
+                name.textContent = user.name;
+
+                const balance = document.createElement('div');
+                balance.className = 'leaderboard-balance';
+                balance.textContent = `${Math.round(user.balance)}₽`;
+
+                item.append(position, name, balance);
                 if (user.id === userId) item.classList.add('user-highlight');
                 container.appendChild(item);
             });
@@ -583,26 +545,11 @@
         }
 
         function showAuthScreen() {
-            document.getElementById('authScreen').style.display = 'flex';
-        }
-
-        function showAppContent() {
-            document.getElementById('appContent').style.display = 'block';
-            createGameCards();
+            alert('Требуется авторизация через Telegram');
         }
 
         function goToProfile() {
             window.location.href = `profile.html?user=${userId}`;
-        }
-
-        async function initTelegramAuth() {
-            const tg = window.Telegram.WebApp;
-            tg.expand();
-            if (tg.initDataUnsafe?.user) {
-                handleAuth(tg.initDataUnsafe.user);
-            } else {
-                tg.showAlert('Требуется авторизация в Telegram');
-            }
         }
     </script>
 </body>
