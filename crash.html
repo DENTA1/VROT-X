@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>CRASH UP-X</title>
+    <title>CRASH GAME</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
@@ -28,23 +28,12 @@
             width: 100%;
         }
 
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
         .balance-box {
             background: var(--surface);
             padding: 20px;
             border-radius: 15px;
             margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .balance-label {
-            font-size: 14px;
-            color: #7f8c8d;
-            margin-bottom: 5px;
+            text-align: center;
         }
 
         .balance-value {
@@ -61,15 +50,6 @@
             overflow: hidden;
         }
 
-        .multiplier-display {
-            text-align: center;
-            font-size: 48px;
-            font-weight: bold;
-            margin: 30px 0;
-            color: var(--primary);
-            text-shadow: 0 0 15px rgba(46, 204, 113, 0.4);
-        }
-
         #chart {
             height: 200px;
             background: #000;
@@ -77,11 +57,18 @@
             margin: 20px 0;
         }
 
+        .multiplier-display {
+            text-align: center;
+            font-size: 48px;
+            font-weight: bold;
+            margin: 30px 0;
+            color: var(--primary);
+        }
+
         .controls {
             display: grid;
             grid-template-columns: 1fr auto;
             gap: 15px;
-            margin-top: 25px;
         }
 
         input {
@@ -91,12 +78,6 @@
             background: #0d1117;
             color: #fff;
             font-size: 16px;
-            transition: border-color 0.3s;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: var(--primary);
         }
 
         button {
@@ -105,17 +86,12 @@
             border-radius: 10px;
             font-weight: bold;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: opacity 0.3s;
         }
 
         .bet-button {
             background: var(--primary);
             color: white;
-        }
-
-        .bet-button:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
         }
 
         .cashout-button {
@@ -127,45 +103,19 @@
         .timer {
             text-align: center;
             font-size: 20px;
-            color: #7f8c8d;
             margin: 20px 0;
-        }
-
-        .history {
-            margin-top: 30px;
-            background: var(--surface);
-            padding: 20px;
-            border-radius: 15px;
-        }
-
-        .history-title {
-            font-size: 18px;
-            margin-bottom: 15px;
-        }
-
-        .history-item {
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .crash-point {
-            color: var(--danger);
+            color: #7f8c8d;
         }
     </style>
 </head>
 <body>
     <div class="game-container">
         <div class="balance-box">
-            <div class="balance-label">ВАШ БАЛАНС</div>
             <div class="balance-value"><span id="balance">0</span> р</div>
         </div>
 
         <div class="game-box">
-            <div class="timer" id="timer">Ставки принимаются: 10s</div>
+            <div class="timer" id="timer"></div>
             <canvas id="chart"></canvas>
             <div class="multiplier-display" id="multiplier">1.00x</div>
             
@@ -174,11 +124,6 @@
                 <button class="bet-button" id="betBtn" onclick="placeBet()">СТАВКА</button>
                 <button class="cashout-button" id="cashoutBtn" onclick="cashOut()">ЗАБРАТЬ</button>
             </div>
-        </div>
-
-        <div class="history">
-            <div class="history-title">ИСТОРИЯ ИГР</div>
-            <div id="historyList"></div>
         </div>
     </div>
 
@@ -199,99 +144,85 @@
         let userRef;
         let currentGameRef;
         let isPlaying = false;
-        let isBettingPhase = true;
         let currentMultiplier = 1.0;
         let betAmount = 0;
         let crashPoint = 1.0;
         let chartCtx;
         let animationFrame;
-        let startTime;
 
+        // Получение ID пользователя
         function getUserId() {
             const cookie = document.cookie.split('; ').find(row => row.startsWith('tg_user_id'));
-            if (cookie) return cookie.split('=')[1];
-            const newId = 'user_' + Math.random().toString(36).substr(2, 9);
-            document.cookie = `tg_user_id=${newId}; path=/; max-age=31536000`;
-            return newId;
+            return cookie ? cookie.split('=')[1] : null;
         }
 
+        // Инициализация пользователя
         function initUser() {
             const userId = getUserId();
+            if (!userId) {
+                alert('Пользователь не авторизован!');
+                return;
+            }
+
             userRef = database.ref(`users/${userId}`);
             
-            userRef.on('value', (snapshot) => {
+            userRef.on('value', snapshot => {
                 if (!snapshot.exists()) {
-                    userRef.set({ balance: 1000, history: [] });
-                } else {
-                    const data = snapshot.val();
-                    document.getElementById('balance').textContent = data.balance.toFixed(2);
-                    updateHistory(data.history);
+                    alert('Пользователь не найден в базе!');
+                    return;
                 }
-            });
-        }
-
-        function updateHistory(history) {
-            const container = document.getElementById('historyList');
-            container.innerHTML = '';
-            
-            history.slice(-10).reverse().forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'history-item';
-                div.innerHTML = `
-                    <span>${new Date(item.date).toLocaleTimeString()}</span>
-                    <span class="${item.result === 'win' ? 'text-green' : 'text-red'}">
-                        ${item.multiplier}x ${item.result === 'win' ? '+' : '-'}${item.amount}р
-                    </span>
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        function startNewGame() {
-            isBettingPhase = true;
-            crashPoint = calculateCrashPoint();
-            currentGameRef = database.ref(`games/${Date.now()}`);
-            currentGameRef.set({
-                status: 'betting',
-                crashPoint: crashPoint,
-                players: {}
-            });
-
-            let countdown = 10;
-            const timerElement = document.getElementById('timer');
-            const timerInterval = setInterval(() => {
-                timerElement.textContent = `Ставки принимаются: ${countdown}s`;
                 
-                if (countdown <= 0) {
-                    clearInterval(timerInterval);
+                const data = snapshot.val();
+                document.getElementById('balance').textContent = data.balance.toFixed(2);
+            });
+        }
+
+        // Запуск новой игры
+        function startNewGame() {
+            crashPoint = calculateCrashPoint();
+            startCountdown(10);
+        }
+
+        // Обратный отсчет
+        function startCountdown(seconds) {
+            let remaining = seconds;
+            const timerElement = document.getElementById('timer');
+            
+            const countdown = setInterval(() => {
+                timerElement.textContent = `До начала игры: ${remaining}s`;
+                
+                if (remaining <= 0) {
+                    clearInterval(countdown);
                     startGameAnimation();
-                    isBettingPhase = false;
                 }
-                countdown--;
+                remaining--;
             }, 1000);
         }
 
+        // Механика игры
         function calculateCrashPoint() {
             const rand = Math.random();
-            // 5% chance instant crash
-            if (rand < 0.05) return 1.00;
-            return Math.max(1.10, (1 / (1 - 0.99 * rand)).toFixed(2));
+            return rand < 0.05 ? 1.00 : Math.max(1.10, (1 / (1 - 0.99 * rand)).toFixed(2));
         }
 
         function placeBet() {
-            if (!isBettingPhase) return alert('Ставки закрыты!');
+            const userId = getUserId();
+            if (!userId) return alert('Ошибка авторизации!');
             
             const betInput = parseFloat(document.getElementById('betAmount').value);
-            userRef.once('value').then(snapshot => {
-                const user = snapshot.val();
-                
-                if (betInput < 1 || isNaN(betInput)) return alert('Минимальная ставка 1р!');
-                if (betInput > user.balance) return alert('Недостаточно средств!');
+            if (betInput < 1 || isNaN(betInput)) return alert('Минимальная ставка 1р!');
 
-                betAmount = betInput;
-                userRef.update({ balance: user.balance - betAmount });
-                currentGameRef.child(`players/${getUserId()}`).set(betAmount);
-
+            userRef.transaction(user => {
+                if (user) {
+                    if (betInput > user.balance) {
+                        alert('Недостаточно средств!');
+                        return;
+                    }
+                    user.balance -= betInput;
+                    betAmount = betInput;
+                }
+                return user;
+            }, () => {
                 document.getElementById('betBtn').disabled = true;
                 document.getElementById('cashoutBtn').style.display = 'block';
             });
@@ -299,12 +230,9 @@
 
         function startGameAnimation() {
             isPlaying = true;
-            startTime = Date.now();
-            document.getElementById('timer').style.display = 'none';
-            document.getElementById('cashoutBtn').style.display = 'block';
-            
+            currentMultiplier = 1.0;
+            const startTime = Date.now();
             const crashTime = Math.log(crashPoint) / 0.1 * 1000;
-            const startCrashAnimation = Date.now() + crashTime;
 
             function update() {
                 if (!isPlaying) return;
@@ -312,28 +240,20 @@
                 const elapsed = Date.now() - startTime;
                 currentMultiplier = Math.exp(elapsed * 0.1 / 1000);
 
-                if (currentMultiplier >= crashPoint) {
-                    endGame(false);
-                    return;
-                }
-
                 document.getElementById('multiplier').textContent = 
                     currentMultiplier.toFixed(2) + 'x';
 
                 drawChart(elapsed);
 
-                // Crash animation
-                if (Date.now() > startCrashAnimation) {
-                    chartCtx.fillStyle = '#e74c3c';
-                    chartCtx.fillRect(0, 0, 600, 300);
-                    cancelAnimationFrame(animationFrame);
+                if (currentMultiplier >= crashPoint || elapsed > crashTime) {
+                    endGame(false);
                     return;
                 }
 
                 animationFrame = requestAnimationFrame(update);
             }
 
-            animationFrame = requestAnimationFrame(update);
+            update();
         }
 
         function drawChart(time) {
@@ -344,7 +264,7 @@
             }
             
             const x = (time * 0.2) % 600;
-            chartCtx.fillStyle = var(--primary);
+            chartCtx.fillStyle = '#2ecc71';
             chartCtx.fillRect(x, 300 - (currentMultiplier * 15), 2, 2);
         }
 
@@ -356,40 +276,32 @@
         function endGame(manualCashout) {
             isPlaying = false;
             cancelAnimationFrame(animationFrame);
-            
-            const result = {
-                amount: betAmount,
-                multiplier: manualCashout ? currentMultiplier.toFixed(2) : 0,
-                date: Date.now(),
-                result: manualCashout ? 'win' : 'lose'
-            };
 
-            userRef.transaction(user => {
-                if (user) {
-                    user.balance += manualCashout ? betAmount * currentMultiplier : 0;
-                    user.history.push(result);
-                }
-                return user;
-            });
+            if (manualCashout) {
+                userRef.transaction(user => {
+                    if (user) user.balance += betAmount * currentMultiplier;
+                    return user;
+                });
+            }
 
             resetUI();
-            setTimeout(startNewGame, 5000);
+            setTimeout(startNewGame, 3000);
         }
 
         function resetUI() {
-            document.getElementById('multiplier').textContent = '1.00x';
             document.getElementById('betBtn').disabled = false;
             document.getElementById('cashoutBtn').style.display = 'none';
             document.getElementById('betAmount').value = '';
-            document.getElementById('timer').style.display = 'block';
+            document.getElementById('multiplier').textContent = '1.00x';
+            chartCtx.fillStyle = '#000';
+            chartCtx.fillRect(0, 0, 600, 300);
         }
 
-        window.onload = function() {
+        // Инициализация
+        window.onload = () => {
             initUser();
             startNewGame();
             chartCtx = document.getElementById('chart').getContext('2d');
-            chartCtx.fillStyle = '#000';
-            chartCtx.fillRect(0, 0, 600, 300);
         };
     </script>
 </body>
