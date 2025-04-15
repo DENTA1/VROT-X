@@ -215,9 +215,8 @@
         }
         
         .animation-box {
-            width: 80%;
-            max-width: 600px;
-            height: 200px;
+            width: 300px;
+            height: 400px;
             position: relative;
             overflow: hidden;
             border: 3px solid #4cc9f0;
@@ -225,33 +224,47 @@
             background-color: #0f3460;
         }
         
-        .center-line {
+        .horizontal-line {
             position: absolute;
-            top: 0;
-            left: 50%;
-            width: 2px;
-            height: 100%;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 2px;
             background-color: #e94560;
             z-index: 10;
+            box-shadow: 0 0 10px rgba(233, 69, 96, 0.8);
+        }
+        
+        .prize-container {
+            position: absolute;
+            width: 100%;
+            transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
         }
         
         .prize-item {
-            position: absolute;
-            width: 100px;
-            height: 50px;
+            width: 280px;
+            height: 80px;
+            margin: 10px auto;
             background-color: #16213e;
-            border: 1px solid #4cc9f0;
-            border-radius: 5px;
+            border: 2px solid #4cc9f0;
+            border-radius: 8px;
             display: flex;
             justify-content: center;
             align-items: center;
             font-weight: bold;
+            font-size: 24px;
             color: white;
-            left: 50%;
-            transform: translateX(-50%);
-            transition: transform 0.1s;
+            transition: all 0.3s;
         }
         
+        .prize-item.active {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(76, 201, 240, 0.8);
+            border-color: #e94560;
+            background-color: #1a56a7;
+        }
+        
+        /* Result modal */
         .result-modal {
             display: none;
             position: fixed;
@@ -346,8 +359,8 @@
     <!-- Animation Container -->
     <div class="animation-container" id="animationContainer">
         <div class="animation-box">
-            <div class="center-line"></div>
-            <div id="prizeItems"></div>
+            <div class="horizontal-line"></div>
+            <div class="prize-container" id="prizeContainer"></div>
         </div>
     </div>
     
@@ -377,20 +390,42 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         
-        // Case definitions
+        // Case definitions with weighted prizes
         const cases = {
             simple: {
                 name: "Простой",
                 price: 10,
-                minWin: 1,
-                maxWin: 100,
+                prizes: [
+                    { amount: 1, weight: 15 },
+                    { amount: 2, weight: 14 },
+                    { amount: 3, weight: 13 },
+                    { amount: 4, weight: 12 },
+                    { amount: 5, weight: 10 },
+                    { amount: 8, weight: 8 },
+                    { amount: 10, weight: 7 },
+                    { amount: 15, weight: 6 },
+                    { amount: 25, weight: 4 },
+                    { amount: 50, weight: 2 },
+                    { amount: 100, weight: 1 }
+                ],
                 image: "https://via.placeholder.com/200/16213e/4cc9f0?text=Простой"
             },
             beginner: {
                 name: "Новичок",
                 price: 50,
-                minWin: 50,
-                maxWin: 500,
+                prizes: [
+                    { amount: 50, weight: 15 },
+                    { amount: 75, weight: 14 },
+                    { amount: 100, weight: 13 },
+                    { amount: 150, weight: 12 },
+                    { amount: 200, weight: 10 },
+                    { amount: 250, weight: 8 },
+                    { amount: 300, weight: 7 },
+                    { amount: 350, weight: 6 },
+                    { amount: 400, weight: 4 },
+                    { amount: 450, weight: 2 },
+                    { amount: 500, weight: 1 }
+                ],
                 image: "https://via.placeholder.com/200/0f3460/e94560?text=Новичок"
             }
         };
@@ -399,13 +434,14 @@
         let userId = null;
         let userBalance = 0;
         let currentCase = null;
+        let currentPrize = null;
         
         // DOM elements
         const balanceElement = document.getElementById('userBalance');
         const confirmationModal = document.getElementById('confirmationModal');
         const animationContainer = document.getElementById('animationContainer');
         const resultModal = document.getElementById('resultModal');
-        const prizeItemsContainer = document.getElementById('prizeItems');
+        const prizeContainer = document.getElementById('prizeContainer');
         const modalCaseName = document.getElementById('modalCaseName');
         const modalCaseDescription = document.getElementById('modalCaseDescription');
         const confirmOpenButton = document.getElementById('confirmOpen');
@@ -497,60 +533,117 @@
         // Function to show animation
         function showAnimation(caseData) {
             animationContainer.style.display = 'flex';
-            prizeItemsContainer.innerHTML = '';
+            prizeContainer.innerHTML = '';
             
-            // Generate random prizes for animation
-            const prizes = [];
-            for (let i = 0; i < 20; i++) {
-                prizes.push(Math.floor(Math.random() * (caseData.maxWin - caseData.minWin + 1) + caseData.minWin));
-            }
-            
-            // Add the real prize at the end
-            const realPrize = Math.floor(Math.random() * (caseData.maxWin - caseData.minWin + 1) + caseData.minWin);
-            prizes.push(realPrize);
+            // Generate prize sequence with weights
+            const prizeSequence = generatePrizeSequence(caseData);
             
             // Create prize elements
-            prizes.forEach((prize, index) => {
+            prizeSequence.forEach((prize, index) => {
                 const prizeElement = document.createElement('div');
                 prizeElement.className = 'prize-item';
-                prizeElement.textContent = prize + 'р';
-                prizeElement.style.top = `${index * 60}px`;
-                prizeItemsContainer.appendChild(prizeElement);
+                prizeElement.textContent = prize.amount + 'р';
+                prizeElement.dataset.amount = prize.amount;
+                prizeElement.style.top = `${index * 100}px`;
+                prizeContainer.appendChild(prizeElement);
             });
+            
+            // Duplicate items for seamless animation
+            const itemsToClone = prizeContainer.querySelectorAll('.prize-item');
+            itemsToClone.forEach(item => {
+                const clone = item.cloneNode(true);
+                clone.style.top = `${parseInt(item.style.top) + prizeSequence.length * 100}px`;
+                prizeContainer.appendChild(clone);
+            });
+            
+            // Set container height
+            prizeContainer.style.height = `${prizeSequence.length * 200}px`;
             
             // Animate
             let startTime = null;
-            const duration = 4000; // 4 seconds
+            const duration = 3500; // 3.5 seconds total
             
             function animate(timestamp) {
                 if (!startTime) startTime = timestamp;
-                const progress = timestamp - startTime;
+                const elapsed = timestamp - startTime;
+                const progress = elapsed / duration;
                 
-                // Ease-out function (starts fast, ends slow)
-                const easeOutProgress = 1 - Math.pow(1 - Math.min(progress / duration, 1), 3);
+                // Ease-out function with slow start and slow finish
+                const easeProgress = easeInOutCubic(progress);
                 
-                // Calculate how far to move
-                const moveDistance = easeOutProgress * (prizes.length * 60 - 100);
+                // Calculate distance to move (slower than before)
+                const moveDistance = easeProgress * (prizeSequence.length * 100 + 200);
                 
                 // Move all prize items
-                const prizeElements = document.querySelectorAll('.prize-item');
-                prizeElements.forEach(element => {
-                    const originalTop = parseInt(element.style.top);
-                    element.style.transform = `translateX(-50%) translateY(${-moveDistance}px)`;
-                });
+                prizeContainer.style.transform = `translateY(${-moveDistance}px)`;
                 
-                if (progress < duration) {
+                if (progress < 1) {
                     requestAnimationFrame(animate);
                 } else {
-                    // Animation complete, show result
+                    // Find and highlight the winning prize
+                    const prizeElements = prizeContainer.querySelectorAll('.prize-item');
+                    prizeElements.forEach(element => {
+                        if (parseInt(element.dataset.amount) === currentPrize.amount) {
+                            element.classList.add('active');
+                        }
+                    });
+                    
+                    // Show result after delay
                     setTimeout(() => {
                         animationContainer.style.display = 'none';
-                        showResult(realPrize);
-                    }, 500);
+                        showResult(currentPrize.amount);
+                    }, 1000);
                 }
             }
             
             requestAnimationFrame(animate);
+        }
+        
+        // Easing function for smooth animation
+        function easeInOutCubic(t) {
+            return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        }
+        
+        // Function to generate weighted prize sequence
+        function generatePrizeSequence(caseData) {
+            let sequence = [];
+            let totalWeight = 0;
+            
+            // Calculate total weight
+            caseData.prizes.forEach(prize => totalWeight += prize.weight);
+            
+            // Select random prize (weighted)
+            let random = Math.random() * totalWeight;
+            let weightSum = 0;
+            
+            for (const prize of caseData.prizes) {
+                weightSum += prize.weight;
+                if (random <= weightSum) {
+                    currentPrize = prize;
+                    break;
+                }
+            }
+            
+            // Fill sequence with prizes according to weights
+            caseData.prizes.forEach(prize => {
+                const count = Math.max(1, Math.floor(prize.weight * 1.5));
+                for (let i = 0; i < count; i++) {
+                    sequence.push(prize);
+                }
+            });
+            
+            // Shuffle sequence
+            for (let i = sequence.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [sequence[i], sequence[j]] = [sequence[j], sequence[i]];
+            }
+            
+            // Add winning prize multiple times at the end
+            for (let i = 0; i < 10; i++) {
+                sequence.push(currentPrize);
+            }
+            
+            return sequence;
         }
         
         // Function to show result
