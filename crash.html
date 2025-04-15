@@ -95,10 +95,15 @@
             width: 200px;
             height: 200px;
             margin: 0 auto 15px;
-            background-size: cover;
-            background-position: center;
+            background-color: #0f3460;
             border-radius: 5px;
             border: 2px solid #4cc9f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #4cc9f0;
         }
         
         .case-name {
@@ -217,7 +222,7 @@
         
         .animation-box {
             width: 90%;
-            max-width: 800px;
+            max-width: 600px;
             height: 200px;
             position: relative;
             overflow: hidden;
@@ -237,37 +242,32 @@
             box-shadow: 0 0 10px rgba(233, 69, 96, 0.8);
         }
         
-        .prize-container {
-            position: absolute;
+        .slots-container {
             display: flex;
+            position: absolute;
+            top: 0;
+            left: 0;
             height: 100%;
             transition-timing-function: cubic-bezier(0.1, 0.8, 0.2, 1);
         }
         
-        .prize-item {
-            width: 150px;
+        .slot-item {
+            width: 100px;
             height: 180px;
             margin: 10px;
             background-color: #16213e;
             border: 2px solid #4cc9f0;
             border-radius: 8px;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
             font-weight: bold;
+            font-size: 24px;
             color: white;
             transition: transform 0.2s, box-shadow 0.2s;
         }
         
-        .prize-item img {
-            width: 80px;
-            height: 80px;
-            margin-bottom: 10px;
-            object-fit: contain;
-        }
-        
-        .prize-item.active {
+        .slot-item.active {
             transform: scale(1.1);
             box-shadow: 0 0 20px rgba(76, 201, 240, 0.8);
             border-color: #e94560;
@@ -343,14 +343,14 @@
     
     <div class="cases-container">
         <div class="case">
-            <div class="case-image" style="background-image: url('https://i.imgur.com/JQJxZOY.png');"></div>
+            <div class="case-image">Простой</div>
             <div class="case-name">Простой</div>
             <div class="case-range">Выигрыш: от 1р до 100р</div>
             <button class="open-button" onclick="openCaseModal('simple')">Открыть за 10р</button>
         </div>
         
         <div class="case">
-            <div class="case-image" style="background-image: url('https://i.imgur.com/VvYw3Xj.png');"></div>
+            <div class="case-image">Новичок</div>
             <div class="case-name">Новичок</div>
             <div class="case-range">Выигрыш: от 50р до 500р</div>
             <button class="open-button" onclick="openCaseModal('beginner')">Открыть за 50р</button>
@@ -373,7 +373,7 @@
     <div class="animation-container" id="animationContainer">
         <div class="animation-box">
             <div class="center-line"></div>
-            <div class="prize-container" id="prizeContainer"></div>
+            <div class="slots-container" id="slotsContainer"></div>
         </div>
     </div>
     
@@ -399,35 +399,33 @@
                 name: "Простой",
                 price: 10,
                 prizes: [
-                    { amount: 1, weight: 30, image: 'https://i.imgur.com/1aXmQ9W.png' },
-                    { amount: 2, weight: 25, image: 'https://i.imgur.com/1aXmQ9W.png' },
-                    { amount: 3, weight: 20, image: 'https://i.imgur.com/1aXmQ9W.png' },
-                    { amount: 4, weight: 15, image: 'https://i.imgur.com/1aXmQ9W.png' },
-                    { amount: 5, weight: 10, image: 'https://i.imgur.com/1aXmQ9W.png' },
-                    { amount: 10, weight: 8, image: 'https://i.imgur.com/8kQxZOY.png' },
-                    { amount: 15, weight: 5, image: 'https://i.imgur.com/8kQxZOY.png' },
-                    { amount: 25, weight: 3, image: 'https://i.imgur.com/8kQxZOY.png' },
-                    { amount: 50, weight: 2, image: 'https://i.imgur.com/JQJxZOY.png' },
-                    { amount: 100, weight: 1, image: 'https://i.imgur.com/JQJxZOY.png' }
-                ],
-                image: "https://i.imgur.com/JQJxZOY.png"
+                    { amount: 1, weight: 30 },
+                    { amount: 2, weight: 25 },
+                    { amount: 3, weight: 20 },
+                    { amount: 4, weight: 15 },
+                    { amount: 5, weight: 10 },
+                    { amount: 10, weight: 8 },
+                    { amount: 15, weight: 5 },
+                    { amount: 25, weight: 3 },
+                    { amount: 50, weight: 2 },
+                    { amount: 100, weight: 1 }
+                ]
             },
             beginner: {
                 name: "Новичок",
                 price: 50,
                 prizes: [
-                    { amount: 50, weight: 30, image: 'https://i.imgur.com/JQJxZOY.png' },
-                    { amount: 75, weight: 25, image: 'https://i.imgur.com/JQJxZOY.png' },
-                    { amount: 100, weight: 20, image: 'https://i.imgur.com/JQJxZOY.png' },
-                    { amount: 150, weight: 15, image: 'https://i.imgur.com/VvYw3Xj.png' },
-                    { amount: 200, weight: 10, image: 'https://i.imgur.com/VvYw3Xj.png' },
-                    { amount: 250, weight: 8, image: 'https://i.imgur.com/VvYw3Xj.png' },
-                    { amount: 300, weight: 5, image: 'https://i.imgur.com/VvYw3Xj.png' },
-                    { amount: 400, weight: 3, image: 'https://i.imgur.com/VvYw3Xj.png' },
-                    { amount: 450, weight: 2, image: 'https://i.imgur.com/VvYw3Xj.png' },
-                    { amount: 500, weight: 1, image: 'https://i.imgur.com/VvYw3Xj.png' }
-                ],
-                image: "https://i.imgur.com/VvYw3Xj.png"
+                    { amount: 50, weight: 30 },
+                    { amount: 75, weight: 25 },
+                    { amount: 100, weight: 20 },
+                    { amount: 150, weight: 15 },
+                    { amount: 200, weight: 10 },
+                    { amount: 250, weight: 8 },
+                    { amount: 300, weight: 5 },
+                    { amount: 400, weight: 3 },
+                    { amount: 450, weight: 2 },
+                    { amount: 500, weight: 1 }
+                ]
             }
         };
         
@@ -442,7 +440,7 @@
         const balanceElement = document.getElementById('userBalance');
         const confirmationModal = document.getElementById('confirmationModal');
         const animationContainer = document.getElementById('animationContainer');
-        const prizeContainer = document.getElementById('prizeContainer');
+        const slotsContainer = document.getElementById('slotsContainer');
         const modalCaseName = document.getElementById('modalCaseName');
         const modalCaseDescription = document.getElementById('modalCaseDescription');
         const confirmOpenButton = document.getElementById('confirmOpen');
@@ -533,7 +531,7 @@
         // Function to show animation
         function showAnimation(caseData) {
             animationContainer.style.display = 'flex';
-            prizeContainer.innerHTML = '';
+            slotsContainer.innerHTML = '';
             
             // Generate prize sequence based on weights
             const prizeSequence = [];
@@ -546,7 +544,7 @@
             // Shuffle the sequence
             for (let i = prizeSequence.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
-                [prizeSequence[i], prizeSequence[j]] = [prizeSequence[j], prizezeSequence[i]];
+                [prizeSequence[i], prizeSequence[j]] = [prizeSequence[j], prizeSequence[i]];
             }
             
             // Select random prize (weighted)
@@ -565,43 +563,34 @@
             }
             
             // Add the selected prize to the sequence multiple times at the end
-            for (let i = 0; i < 10; i++) {
+            for (let i = 0; i < 15; i++) {
                 prizeSequence.push(currentPrize);
             }
             
-            // Create prize elements
+            // Create slot items
             prizeSequence.forEach((prize, index) => {
-                const prizeElement = document.createElement('div');
-                prizeElement.className = 'prize-item';
-                prizeElement.dataset.amount = prize.amount;
-                
-                const img = document.createElement('img');
-                img.src = prize.image;
-                img.alt = prize.amount + 'р';
-                
-                const amountText = document.createElement('span');
-                amountText.textContent = prize.amount + 'р';
-                
-                prizeElement.appendChild(img);
-                prizeElement.appendChild(amountText);
-                prizeContainer.appendChild(prizeElement);
+                const slotItem = document.createElement('div');
+                slotItem.className = 'slot-item';
+                slotItem.dataset.amount = prize.amount;
+                slotItem.textContent = prize.amount + 'р';
+                slotsContainer.appendChild(slotItem);
             });
             
-            // Duplicate items for seamless looping
-            const itemsToClone = prizeContainer.querySelectorAll('.prize-item');
+            // Duplicate items for seamless animation
+            const itemsToClone = slotsContainer.querySelectorAll('.slot-item');
             itemsToClone.forEach(item => {
                 const clone = item.cloneNode(true);
-                prizeContainer.appendChild(clone);
+                slotsContainer.appendChild(clone);
             });
             
             // Calculate total width
-            const itemWidth = 170; // 150px width + 20px margin
+            const itemWidth = 120; // 100px width + 20px margin
             const totalWidth = prizeSequence.length * itemWidth * 2;
-            prizeContainer.style.width = `${totalWidth}px`;
+            slotsContainer.style.width = `${totalWidth}px`;
             
             // Start position (middle)
-            const startPosition = -totalWidth / 2 + 400;
-            prizeContainer.style.left = `${startPosition}px`;
+            const startPosition = -totalWidth / 2 + 300;
+            slotsContainer.style.left = `${startPosition}px`;
             
             // Animate
             let startTime = null;
@@ -611,8 +600,8 @@
             const totalDuration = accelerationDuration + constantDuration + decelerationDuration;
             
             // Find the position of the selected prize in the sequence
-            let targetIndex = prizeSequence.length * 2 - 10; // Position near the end
-            const targetPosition = -targetIndex * itemWidth + 400;
+            let targetIndex = prizeSequence.length * 2 - 15; // Position near the end
+            const targetPosition = -targetIndex * itemWidth + 300;
             
             function animate(timestamp) {
                 if (!startTime) startTime = timestamp;
@@ -645,8 +634,8 @@
                     currentPosition = targetPosition;
                     
                     // Highlight the winning prize
-                    const prizeItems = prizeContainer.querySelectorAll('.prize-item');
-                    prizeItems.forEach(item => {
+                    const slotItems = slotsContainer.querySelectorAll('.slot-item');
+                    slotItems.forEach(item => {
                         if (parseInt(item.dataset.amount) === currentPrize.amount) {
                             item.classList.add('active');
                         }
@@ -661,7 +650,7 @@
                     return;
                 }
                 
-                prizeContainer.style.left = `${currentPosition}px`;
+                slotsContainer.style.left = `${currentPosition}px`;
                 requestAnimationFrame(animate);
             }
             
