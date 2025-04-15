@@ -67,27 +67,22 @@
         
         .cases-container {
             display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 30px;
-            padding: 30px 20px;
+            flex-direction: column;
+            padding: 30px 0;
             max-width: 1200px;
             margin: 0 auto;
         }
         
         .case {
             background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
-            border-radius: 10px;
-            padding: 20px;
-            width: 280px;
+            width: 100%;
             text-align: center;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-            transition: transform 0.3s;
-            border: 2px solid #0f3460;
+            padding: 30px 0;
+            border-bottom: 2px solid #0f3460;
         }
         
-        .case:hover {
-            transform: translateY(-5px);
+        .case:last-child {
+            border-bottom: none;
         }
         
         .case-image {
@@ -124,7 +119,7 @@
             font-weight: bold;
             font-size: 16px;
             transition: transform 0.2s, box-shadow 0.2s;
-            width: 100%;
+            width: 200px;
         }
         
         .open-button:hover {
@@ -181,20 +176,21 @@
             justify-content: space-between;
             align-items: center;
             padding: 8px 15px;
-            background-color: #1a56a7;
             border-radius: 20px;
             font-size: 14px;
         }
+        
+        .prize-item.high { background: #2ecc7133; border: 1px solid #2ecc71; }
+        .prize-item.medium { background: #f1c40f33; border: 1px solid #f1c40f; }
+        .prize-item.low { background: #e9456033; border: 1px solid #e94560; }
         
         .prize-amount {
             font-weight: bold;
         }
         
         .prize-chance {
-            color: #2ecc71;
+            font-weight: bold;
         }
-        .prize-chance.low { color: #e94560; }
-        .prize-chance.medium { color: #f1c40f; }
         
         .modal-buttons {
             display: flex;
@@ -259,6 +255,26 @@
             z-index: 10;
             box-shadow: 0 0 15px rgba(233, 69, 96, 0.8);
             transform: translateY(-50%);
+        }
+        
+        .horizontal-line::before,
+        .horizontal-line::after {
+            content: '';
+            position: absolute;
+            top: -6px;
+            width: 0;
+            height: 0;
+            border: 8px solid transparent;
+        }
+        
+        .horizontal-line::before {
+            left: 10px;
+            border-right-color: #e94560;
+        }
+        
+        .horizontal-line::after {
+            right: 10px;
+            border-left-color: #e94560;
         }
         
         .prize-container {
@@ -536,22 +552,21 @@
         function openCaseModal(caseType) {
             currentCase = caseType;
             const caseData = cases[caseType];
+            const totalWeight = caseData.prizes.reduce((sum, p) => sum + p.weight, 0);
             
             modalCaseName.textContent = caseData.name;
             modalCaseDescription.textContent = `Вы уверены, что хотите открыть кейс "${caseData.name}" за ${caseData.price}р?`;
             
-            const totalWeight = caseData.prizes.reduce((sum, p) => sum + p.weight, 0);
             prizesGrid.innerHTML = caseData.prizes.map(prize => {
                 const chance = ((prize.weight / totalWeight) * 100).toFixed(1);
-                let chanceClass = '';
+                let chanceClass = 'low';
                 if (chance > 15) chanceClass = 'high';
                 else if (chance > 5) chanceClass = 'medium';
-                else chanceClass = 'low';
                 
                 return `
-                    <div class="prize-item">
+                    <div class="prize-item ${chanceClass}">
                         <span class="prize-amount">${prize.amount}р</span>
-                        <span class="prize-chance ${chanceClass}">${chance}%</span>
+                        <span class="prize-chance">${chance}%</span>
                     </div>
                 `;
             }).join('');
@@ -574,12 +589,28 @@
             startAnimation(caseData);
         }
 
+        function generatePrizeSequence(caseData) {
+            const totalWeight = caseData.prizes.reduce((sum, p) => sum + p.weight, 0);
+            let sequence = [];
+            
+            caseData.prizes.forEach(prize => {
+                sequence.push(...Array(prize.weight * 5).fill(prize));
+            });
+
+            for (let i = sequence.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [sequence[i], sequence[j]] = [sequence[j], sequence[i]];
+            }
+
+            return { sequence, totalWeight };
+        }
+
         function startAnimation(caseData) {
             animationContainer.style.display = 'flex';
             prizeContainer.innerHTML = '';
 
             const { sequence, totalWeight } = generatePrizeSequence(caseData);
-            const targetIndex = Math.floor(Math.random() * (sequence.length - 20) + 10);
+            const targetIndex = Math.floor(Math.random() * (sequence.length - 40) + 20);
             const itemHeight = 100;
 
             sequence.forEach((prize, index) => {
@@ -595,14 +626,14 @@
             
             const startPosition = 0;
             const targetPosition = -(targetIndex * itemHeight) + 200;
-            const duration = 3000;
+            const duration = 5000;
             let startTime = null;
 
             function animate(timestamp) {
                 if (!startTime) startTime = timestamp;
                 const elapsed = timestamp - startTime;
                 const progress = Math.min(elapsed / duration, 1);
-                const eased = 1 - Math.pow(1 - progress, 3);
+                const eased = Math.pow(progress - 1, 3) + 1;
                 const currentY = startPosition + (targetPosition - startPosition) * eased;
                 
                 prizeContainer.style.transform = `translateY(${currentY}px)`;
@@ -631,22 +662,6 @@
             }
 
             requestAnimationFrame(animate);
-        }
-
-        function generatePrizeSequence(caseData) {
-            const totalWeight = caseData.prizes.reduce((sum, p) => sum + p.weight, 0);
-            let sequence = [];
-            
-            caseData.prizes.forEach(prize => {
-                sequence.push(...Array(prize.weight * 2).fill(prize));
-            });
-
-            for (let i = sequence.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [sequence[i], sequence[j]] = [sequence[j], sequence[i]];
-            }
-
-            return { sequence, totalWeight };
         }
 
         function showResult() {
