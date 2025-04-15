@@ -27,78 +27,36 @@
             z-index: 1000;
         }
         .logo {
+            color: #4285F4;
             font-size: 24px;
             font-weight: bold;
             letter-spacing: 1px;
-            height: 30px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .logo span {
-            display: inline-block;
-            transition: all 0.5s ease;
-        }
-        @keyframes highlight {
-            0%, 100% { color: white; transform: scale(1); }
-            50% { color: #64b5f6; transform: scale(1.1); }
-        }
-        @keyframes oAnimation {
-            0%, 100% { letter-spacing: 1px; }
-            50% { letter-spacing: 4px; }
-        }
-        @keyframes userHighlight {
-            0%, 100% { background-color: rgba(30, 30, 30, 0.7); }
-            50% { background-color: rgba(66, 133, 244, 0.3); }
-        }
-        .buttons-container {
-            display: flex;
-            margin: 20px;
-            margin-top: 70px;
-            gap: 10px;
         }
         .account-button {
             background: #1e1e1e;
+            margin: 20px;
             padding: 15px 20px;
             border-radius: 10px;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: space-between;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
             cursor: pointer;
             font-size: 18px;
             font-weight: bold;
             color: #e0e0e0;
             transition: all 0.2s;
+            margin-top: 70px;
             border: 1px solid #333;
-            flex: 2;
-        }
-        .leaderboard-button {
-            background: #FFD700;
-            padding: 15px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            cursor: pointer;
-            font-size: 24px;
-            transition: all 0.2s;
-            border: none;
-            flex: 1;
-        }
-        .account-button:hover, .leaderboard-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
-        }
-        .account-button:active, .leaderboard-button:active {
-            transform: translateY(0);
         }
         .account-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
             background: #252525;
         }
-        .leaderboard-button:hover {
-            background: #FFC000;
+        .account-button:active {
+            background: #1a1a1a;
+            transform: translateY(0);
         }
         .account-icon {
             width: 24px;
@@ -114,6 +72,11 @@
         .account-icon svg {
             width: 14px;
             height: 14px;
+        }
+        .arrow-icon {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4285F4;
         }
         .games-container {
             padding: 0 20px;
@@ -187,73 +150,6 @@
             align-items: center;
             justify-content: center;
         }
-        .miner-pattern {
-            background: linear-gradient(135deg, #1e88e5, #64b5f6);
-        }
-        .miner-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            grid-template-rows: repeat(5, 1fr);
-            gap: 4px;
-            width: 120px;
-            height: 120px;
-            padding: 5px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-        }
-        .miner-cell {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 3px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-        }
-        .miner-bomb {
-            background: rgba(239, 83, 80, 0.7);
-        }
-        .miner-crystal {
-            background: rgba(38, 198, 218, 0.7);
-        }
-        .ladder-pattern {
-            background: linear-gradient(135deg, #2e7d32, #66bb6a);
-        }
-        .ladder-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(5, 1fr);
-            gap: 4px;
-            width: 120px;
-            height: 120px;
-            padding: 5px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-        }
-        .ladder-cell {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 3px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-        }
-        .ladder-bomb {
-            background: rgba(239, 83, 80, 0.7);
-        }
-        .ladder-check {
-            background: rgba(38, 198, 218, 0.7);
-        }
-        .roulette-card {
-            background: linear-gradient(135deg, #ff6d00, #ff3d00);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .game-number {
-            font-size: 48px;
-            font-weight: bold;
-            color: white;
-        }
         .auth-screen {
             position: fixed;
             top: 70px;
@@ -310,130 +206,6 @@
             z-index: 1002;
             text-align: center;
         }
-        .leaderboard-screen {
-            position: fixed;
-            top: 70px;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            display: none;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: center;
-            color: white;
-            font-size: 20px;
-            z-index: 1003;
-            padding: 20px;
-            overflow-y: auto;
-        }
-        .leaderboard-header {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-            margin-bottom: 20px;
-            position: relative;
-        }
-        .leaderboard-title {
-            font-size: 28px;
-            font-weight: bold;
-            color: #FFD700;
-            text-align: center;
-            margin-bottom: 15px;
-        }
-        .trophy-icon {
-            font-size: 40px;
-            margin-bottom: 10px;
-        }
-        .close-leaderboard {
-            position: absolute;
-            top: 0;
-            right: 0;
-            font-size: 30px;
-            cursor: pointer;
-            color: white;
-        }
-        .leaderboard-item {
-            display: flex;
-            align-items: center;
-            width: 100%;
-            padding: 12px 15px;
-            margin-bottom: 8px;
-            background: rgba(30, 30, 30, 0.7);
-            border-radius: 8px;
-        }
-        .leaderboard-position {
-            font-size: 20px;
-            font-weight: bold;
-            margin-right: 15px;
-            width: 30px;
-            text-align: center;
-            position: relative;
-        }
-        .position-1 {
-            color: #FFD700;
-            text-shadow: 0 0 8px rgba(255, 215, 0, 0.7);
-        }
-        .position-1::before {
-            content: "";
-            position: absolute;
-            top: -10px;
-            left: -5px;
-            right: -5px;
-            bottom: -10px;
-            border: 2px solid #FFD700;
-            border-radius: 50%;
-            opacity: 0.7;
-        }
-        .position-2 {
-            color: #C0C0C0;
-            text-shadow: 0 0 5px rgba(192, 192, 192, 0.5);
-        }
-        .position-2::before {
-            content: "";
-            position: absolute;
-            top: -5px;
-            left: -3px;
-            right: -3px;
-            bottom: -5px;
-            border: 1px solid #C0C0C0;
-            border-radius: 50%;
-            opacity: 0.7;
-        }
-        .position-3 {
-            color: #CD7F32;
-            text-shadow: 0 0 3px rgba(205, 127, 50, 0.5);
-        }
-        .position-3::before {
-            content: "";
-            position: absolute;
-            top: -3px;
-            left: -2px;
-            right: -2px;
-            bottom: -3px;
-            border: 1px solid #CD7F32;
-            border-radius: 50%;
-            opacity: 0.7;
-        }
-        .position-other {
-            color: #666;
-        }
-        .leaderboard-name {
-            flex: 1;
-            font-weight: bold;
-            text-align: center;
-        }
-        .leaderboard-balance {
-            font-weight: bold;
-            color: #34A853;
-            margin-left: auto;
-            min-width: 80px;
-            text-align: right;
-        }
-        .user-highlight {
-            animation: userHighlight 2s infinite;
-        }
         .loader {
             width: 48px;
             height: 48px;
@@ -480,6 +252,103 @@
             font-size: 14px;
             margin-top: 10px;
         }
+        .locked-game {
+            filter: grayscale(80%) brightness(0.6);
+            position: relative;
+        }
+        .locked-game::after {
+            content: '🔒';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 20px;
+            z-index: 3;
+        }
+
+        /* Стили для игровых паттернов */
+        .miner-pattern {
+            background: linear-gradient(135deg, #1e88e5, #64b5f6);
+        }
+        .miner-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(5, 1fr);
+            gap: 4px;
+            width: 120px;
+            height: 120px;
+            padding: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+        .miner-cell {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        .miner-bomb {
+            background: rgba(239, 83, 80, 0.7);
+        }
+        .miner-crystal {
+            background: rgba(38, 198, 218, 0.7);
+        }
+
+        .ladder-pattern {
+            background: linear-gradient(135deg, #2e7d32, #66bb6a);
+        }
+        .ladder-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(5, 1fr);
+            gap: 4px;
+            width: 120px;
+            height: 120px;
+            padding: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+        .ladder-cell {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        .ladder-bomb {
+            background: rgba(239, 83, 80, 0.7);
+        }
+        .ladder-check {
+            background: rgba(38, 198, 218, 0.7);
+        }
+
+        .slots-pattern {
+            background: linear-gradient(135deg, #ff6d00, #ff3d00);
+        }
+        .slots-machine {
+            width: 140px;
+            height: 80px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            display: flex;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        .slots-reel {
+            flex: 1;
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: gold;
+        }
+        .slots-reel:nth-child(1)::after { content: '🍒'; }
+        .slots-reel:nth-child(2)::after { content: '7'; color: white; }
+        .slots-reel:nth-child(3)::after { content: '💰'; }
 
         @keyframes rotation {
             0% { transform: rotate(0deg); }
@@ -499,14 +368,7 @@
 </head>
 <body>
     <div class="header">
-        <div class="logo" id="logo">
-            <span id="logoV">V</span>
-            <span id="logoR">R</span>
-            <span id="logoO">O</span>
-            <span id="logoT">T</span>
-            <span id="logoDash">-</span>
-            <span id="logoX">X</span>
-        </div>
+        <div class="logo">VROT-X</div>
     </div>
 
     <div class="transition-screen" id="transitionScreen">
@@ -525,31 +387,18 @@
         <button id="telegramAuthButton">Войти через Telegram</button>
     </div>
 
-    <div class="leaderboard-screen" id="leaderboardScreen">
-        <div class="leaderboard-header">
-            <div class="trophy-icon">🏆</div>
-            <div class="leaderboard-title">ЛидерБорд</div>
-            <div class="close-leaderboard" id="closeLeaderboard">×</div>
-        </div>
-        <div id="leaderboardContent"></div>
-    </div>
-
     <div id="appContent" style="display: none;">
-        <div class="buttons-container">
-            <div class="account-button" id="accountButton">
-                <div style="display: flex; align-items: center;">
-                    <div class="account-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="12" cy="7" r="4"></circle>
-                        </svg>
-                    </div>
-                    <span>Мой профиль</span>
+        <div class="account-button" id="accountButton">
+            <div style="display: flex; align-items: center;">
+                <div class="account-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
                 </div>
+                <span>Мой профиль</span>
             </div>
-            <div class="leaderboard-button" id="leaderboardButton">
-                🏆
-            </div>
+            <div class="arrow-icon">→</div>
         </div>
         <div class="games-container">
             <div class="games-title-container">
@@ -580,45 +429,31 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         
+        // Настройки доступности игр
+        const gamesAvailability = {
+            miner: true,
+            ladder: true,
+            slots: false,
+            crash: false,
+            classic: false,
+            plinko: false,
+            roulette: false
+        };
+        
         let userId = null;
-        let userName = null;
-        let leaderboardInterval = null;
         const transitionScreen = document.getElementById('transitionScreen');
         const loader = document.getElementById('loader');
         const checkmark = document.getElementById('checkmark');
         const statusText = document.getElementById('statusText');
         const userIdText = document.getElementById('userIdText');
         const authScreen = document.getElementById('authScreen');
-        const leaderboardScreen = document.getElementById('leaderboardScreen');
-        const leaderboardContent = document.getElementById('leaderboardContent');
-        const closeLeaderboard = document.getElementById('closeLeaderboard');
-        const leaderboardButton = document.getElementById('leaderboardButton');
         const appContentElement = document.getElementById('appContent');
         const gamesGrid = document.getElementById('gamesGrid');
         const telegramAuthButton = document.getElementById('telegramAuthButton');
         const accountButton = document.getElementById('accountButton');
 
-        // Элементы логотипа для анимации
-        const logoV = document.getElementById('logoV');
-        const logoR = document.getElementById('logoR');
-        const logoO = document.getElementById('logoO');
-        const logoT = document.getElementById('logoT');
-        const logoDash = document.getElementById('logoDash');
-        const logoX = document.getElementById('logoX');
-        const logoElement = document.getElementById('logo');
-
         // Инициализация при загрузке страницы
         document.addEventListener('DOMContentLoaded', async () => {
-            // Запускаем анимацию логотипа
-            startLogoAnimation();
-            
-            // Назначаем обработчики для кнопок
-            leaderboardButton.addEventListener('click', showLeaderboard);
-            closeLeaderboard.addEventListener('click', () => {
-                leaderboardScreen.style.display = 'none';
-                clearInterval(leaderboardInterval);
-            });
-            
             // Пытаемся загрузить Telegram WebApp
             try {
                 await loadTelegramScript();
@@ -627,7 +462,6 @@
                 if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
                     const tgUser = window.Telegram.WebApp.initDataUnsafe.user;
                     userId = tgUser.id.toString();
-                    userName = tgUser.first_name || 'Аноним';
                     setTelegramIdCookie(userId);
                     await checkUserInDatabase();
                 } else {
@@ -651,45 +485,6 @@
             // Назначаем обработчик для кнопки профиля
             accountButton.addEventListener('click', goToProfile);
         });
-
-        // Анимация логотипа
-        function startLogoAnimation() {
-            // Функция для анимации букв
-            function animateLetter(letter, delay) {
-                setTimeout(() => {
-                    letter.style.animation = 'highlight 1.5s ease-in-out';
-                    setTimeout(() => {
-                        letter.style.animation = 'none';
-                    }, 1500);
-                }, delay);
-            }
-            
-            // Анимация подсветки букв по очереди
-            function highlightLetters() {
-                animateLetter(logoV, 0);
-                animateLetter(logoR, 300);
-                animateLetter(logoO, 600);
-                animateLetter(logoT, 900);
-                animateLetter(logoDash, 1200);
-                animateLetter(logoX, 1500);
-                
-                // Анимация буквы O
-                setTimeout(() => {
-                    logoElement.style.animation = 'oAnimation 4s ease-in-out';
-                    setTimeout(() => {
-                        logoO.textContent = 'OOOO';
-                        setTimeout(() => {
-                            logoO.textContent = 'O';
-                            logoElement.style.animation = 'none';
-                            // Запускаем цикл заново
-                            setTimeout(highlightLetters, 1000);
-                        }, 2000);
-                    }, 1800);
-                }, 1800);
-            }
-            
-            highlightLetters();
-        }
 
         // Загрузка Telegram WebApp API
         function loadTelegramScript() {
@@ -729,7 +524,6 @@
                 if (tg.initDataUnsafe?.user) {
                     const tgUser = tg.initDataUnsafe.user;
                     userId = tgUser.id.toString();
-                    userName = tgUser.first_name || 'Аноним';
                     setTelegramIdCookie(userId);
                     await checkUserInDatabase();
                 } else {
@@ -754,15 +548,9 @@
                 const snapshot = await database.ref('users/' + userId).once('value');
                 
                 if (snapshot.exists()) {
-                    // Обновляем имя пользователя, если оно изменилось
-                    await database.ref('users/' + userId).update({
-                        name: userName
-                    });
                     showSuccessTransition();
                 } else {
-                    // Создаем нового пользователя
                     await database.ref('users/' + userId).set({
-                        name: userName,
                         created_at: new Date().toISOString(),
                         balance: 0
                     });
@@ -807,31 +595,36 @@
         // Создание карточек игр
         function createGameCards() {
             const games = [
-                { id: 'miner', name: 'Минёр', file: 'miner.html' },
-                { id: 'ladder', name: 'Лесенка', file: 'lesenka.html' },
-                { id: 'roulette1', name: 'Рулетка', file: 'roulette.html' },
-                { id: 'roulette2', name: 'Рулетка', file: 'roulette.html' }
+                { id: 'miner', name: 'Минёр' },
+                { id: 'ladder', name: 'Лесенка' },
+                { id: 'slots', name: 'Слоты' },
+                { id: 'crash', name: 'Краш' },
+                { id: 'classic', name: 'Классик' },
+                { id: 'plinko', name: 'Плинко' },
+                { id: 'roulette', name: 'Рулетка' }
             ];
             
             gamesGrid.innerHTML = '';
             
             games.forEach(game => {
                 const gameCard = document.createElement('div');
-                gameCard.className = 'game-card';
+                gameCard.className = `game-card ${gamesAvailability[game.id] ? '' : 'locked-game'}`;
                 
-                if (game.id === 'miner') {
-                    const pattern = createMinerPattern();
-                    gameCard.appendChild(pattern);
-                } else if (game.id === 'ladder') {
-                    const pattern = createLadderPattern();
-                    gameCard.appendChild(pattern);
-                } else {
-                    gameCard.classList.add('roulette-card');
-                    const number = document.createElement('div');
-                    number.className = 'game-number';
-                    number.textContent = game.id === 'roulette1' ? '1' : '2';
-                    gameCard.appendChild(number);
+                let pattern;
+                switch(game.id) {
+                    case 'miner': pattern = createMinerPattern(); break;
+                    case 'ladder': pattern = createLadderPattern(); break;
+                    case 'slots': pattern = createSlotsPattern(); break;
+                    case 'crash': pattern = createCrashPattern(); break;
+                    case 'classic': pattern = createClassicPattern(); break;
+                    case 'plinko': pattern = createPlinkoPattern(); break;
+                    default: 
+                        pattern = document.createElement('div');
+                        pattern.className = 'game-pattern';
+                        pattern.style.background = '#333';
                 }
+                
+                gameCard.appendChild(pattern);
                 
                 const gameName = document.createElement('div');
                 gameName.className = 'game-name';
@@ -843,65 +636,20 @@
                         showAuthScreen();
                         return;
                     }
-                    openGame(game.file);
+                    
+                    if (gamesAvailability[game.id]) {
+                        openGame(game.id);
+                    } else {
+                        alert('Эта игра временно недоступна');
+                    }
                 });
                 
                 gamesGrid.appendChild(gameCard);
             });
         }
 
-        // Создание паттерна для игры "Минёр"
-        function createMinerPattern() {
-            const pattern = document.createElement('div');
-            pattern.className = 'game-pattern miner-pattern';
-            
-            const grid = document.createElement('div');
-            grid.className = 'miner-grid';
-            
-            const bombPositions = [3, 7, 12, 19, 23];
-            const crystalPositions = [1, 9, 11, 15, 21];
-            
-            for (let i = 0; i < 25; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'miner-cell';
-                
-                if (bombPositions.includes(i)) cell.classList.add('miner-bomb');
-                else if (crystalPositions.includes(i)) cell.classList.add('miner-crystal');
-                
-                grid.appendChild(cell);
-            }
-            
-            pattern.appendChild(grid);
-            return pattern;
-        }
-
-        // Создание паттерна для игры "Лесенка"
-        function createLadderPattern() {
-            const pattern = document.createElement('div');
-            pattern.className = 'game-pattern ladder-pattern';
-            
-            const grid = document.createElement('div');
-            grid.className = 'ladder-grid';
-            
-            const bombPositions = [2, 5, 9, 12];
-            const checkPositions = [1, 4, 7, 11, 14];
-            
-            for (let i = 0; i < 15; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'ladder-cell';
-                
-                if (bombPositions.includes(i)) cell.classList.add('ladder-bomb');
-                else if (checkPositions.includes(i)) cell.classList.add('ladder-check');
-                
-                grid.appendChild(cell);
-            }
-            
-            pattern.appendChild(grid);
-            return pattern;
-        }
-
         // Открытие игры
-        function openGame(gameFile) {
+        function openGame(game) {
             if (!userId) {
                 showAuthScreen();
                 return;
@@ -909,75 +657,15 @@
             
             const params = new URLSearchParams();
             params.append('user', userId);
-            window.location.href = `${gameFile}?${params.toString()}`;
-        }
-
-        // Показать лидерборд
-        function showLeaderboard() {
-            leaderboardScreen.style.display = 'flex';
-            loadLeaderboard();
             
-            // Обновляем лидерборд каждые 5 секунд
-            clearInterval(leaderboardInterval);
-            leaderboardInterval = setInterval(loadLeaderboard, 5000);
-        }
-
-        // Загрузка данных лидерборда
-        async function loadLeaderboard() {
-            leaderboardContent.innerHTML = '<div style="text-align: center;">Загрузка...</div>';
-            
-            try {
-                const snapshot = await database.ref('users').once('value');
-                const users = [];
-                
-                snapshot.forEach(childSnapshot => {
-                    const userData = childSnapshot.val();
-                    users.push({
-                        id: childSnapshot.key,
-                        name: userData.name || 'Аноним',
-                        balance: Math.round(userData.balance || 0)
-                    });
-                });
-                
-                // Сортируем по балансу (по убыванию)
-                users.sort((a, b) => b.balance - a.balance);
-                
-                // Очищаем содержимое
-                leaderboardContent.innerHTML = '';
-                
-                // Добавляем пользователей в лидерборд
-                users.forEach((user, index) => {
-                    const position = index + 1;
-                    const item = document.createElement('div');
-                    item.className = `leaderboard-item ${user.id === userId ? 'user-highlight' : ''}`;
-                    
-                    // Позиция
-                    const posElement = document.createElement('div');
-                    posElement.className = `leaderboard-position position-${position <= 3 ? position : 'other'}`;
-                    posElement.textContent = position;
-                    item.appendChild(posElement);
-                    
-                    // Имя
-                    const nameElement = document.createElement('div');
-                    nameElement.className = 'leaderboard-name';
-                    nameElement.textContent = user.name;
-                    item.appendChild(nameElement);
-                    
-                    // Баланс
-                    const balanceElement = document.createElement('div');
-                    balanceElement.className = 'leaderboard-balance';
-                    balanceElement.textContent = `${user.balance}р`;
-                    item.appendChild(balanceElement);
-                    
-                    leaderboardContent.appendChild(item);
-                });
-                
-                if (users.length === 0) {
-                    leaderboardContent.innerHTML = '<div style="text-align: center;">Нет данных</div>';
-                }
-            } catch (error) {
-                console.error('Ошибка загрузки лидерборда:', error);
-                leaderboardContent.innerHTML = '<div style="text-align: center; color: #ff5252;">Ошибка загрузки</div>';
+            switch(game) {
+                case 'miner': window.location.href = `miner.html?${params.toString()}`; break;
+                case 'ladder': window.location.href = `lecenka.html?${params.toString()}`; break;
+                case 'slots': window.location.href = `slots.html?${params.toString()}`; break;
+                case 'crash': window.location.href = `crash.html?${params.toString()}`; break;
+                case 'classic': window.location.href = `classik.html?${params.toString()}`; break;
+                case 'plinko': window.location.href = `plinko.html?${params.toString()}`; break;
+                default: console.error('Неизвестная игра:', game);
             }
         }
 
@@ -1008,6 +696,141 @@
                 if (name === 'tg_user_id') return value;
             }
             return null;
+        }
+
+        // Функции создания паттернов для игр
+        function createMinerPattern() {
+            const pattern = document.createElement('div');
+            pattern.className = 'game-pattern miner-pattern';
+            
+            const grid = document.createElement('div');
+            grid.className = 'miner-grid';
+            
+            const bombPositions = [3, 7, 12, 19, 23];
+            const crystalPositions = [1, 9, 11, 15, 21];
+            
+            for (let i = 0; i < 25; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'miner-cell';
+                
+                if (bombPositions.includes(i)) cell.classList.add('miner-bomb');
+                else if (crystalPositions.includes(i)) cell.classList.add('miner-crystal');
+                
+                grid.appendChild(cell);
+            }
+            
+            pattern.appendChild(grid);
+            return pattern;
+        }
+
+        function createLadderPattern() {
+            const pattern = document.createElement('div');
+            pattern.className = 'game-pattern ladder-pattern';
+            
+            const grid = document.createElement('div');
+            grid.className = 'ladder-grid';
+            
+            const bombPositions = [2, 5, 9, 12];
+            const checkPositions = [1, 4, 7, 11, 14];
+            
+            for (let i = 0; i < 15; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'ladder-cell';
+                
+                if (bombPositions.includes(i)) cell.classList.add('ladder-bomb');
+                else if (checkPositions.includes(i)) cell.classList.add('ladder-check');
+                
+                grid.appendChild(cell);
+            }
+            
+            pattern.appendChild(grid);
+            return pattern;
+        }
+
+        function createSlotsPattern() {
+            const pattern = document.createElement('div');
+            pattern.className = 'game-pattern slots-pattern';
+            
+            const machine = document.createElement('div');
+            machine.className = 'slots-machine';
+            
+            for (let i = 0; i < 3; i++) {
+                const reel = document.createElement('div');
+                reel.className = 'slots-reel';
+                machine.appendChild(reel);
+            }
+            
+            pattern.appendChild(machine);
+            return pattern;
+        }
+
+        function createCrashPattern() {
+            const pattern = document.createElement('div');
+            pattern.className = 'game-pattern crash-pattern';
+            
+            const graph = document.createElement('div');
+            graph.className = 'crash-graph';
+            
+            const line = document.createElement('div');
+            line.className = 'crash-line';
+            
+            const multiplier = document.createElement('div');
+            multiplier.className = 'crash-multiplier';
+            multiplier.textContent = 'x2.45';
+            
+            graph.appendChild(line);
+            pattern.appendChild(graph);
+            pattern.appendChild(multiplier);
+            
+            return pattern;
+        }
+
+        function createClassicPattern() {
+            const pattern = document.createElement('div');
+            pattern.className = 'game-pattern classic-pattern';
+            
+            const cards = document.createElement('div');
+            cards.className = 'classic-cards';
+            
+            const symbols = ['♥', '♦', '♣'];
+            for (let i = 0; i < 3; i++) {
+                const card = document.createElement('div');
+                card.className = 'classic-card';
+                card.textContent = symbols[i];
+                cards.appendChild(card);
+            }
+            
+            pattern.appendChild(cards);
+            return pattern;
+        }
+
+        function createPlinkoPattern() {
+            const pattern = document.createElement('div');
+            pattern.className = 'game-pattern plinko-pattern';
+            
+            const board = document.createElement('div');
+            board.className = 'plinko-board';
+            
+            const pinPositions = [
+                [60, 20], [50, 35], [70, 35], [40, 50], [60, 50], 
+                [80, 50], [30, 65], [50, 65], [70, 65], [90, 65],
+                [20, 80], [40, 80], [60, 80], [80, 80], [100, 80]
+            ];
+            
+            pinPositions.forEach(pos => {
+                const pin = document.createElement('div');
+                pin.className = 'plinko-pin';
+                pin.style.left = `${pos[0]}px`;
+                pin.style.top = `${pos[1]}px`;
+                board.appendChild(pin);
+            });
+            
+            const ball = document.createElement('div');
+            ball.className = 'plinko-ball';
+            
+            pattern.appendChild(board);
+            pattern.appendChild(ball);
+            return pattern;
         }
     </script>
 </body>
