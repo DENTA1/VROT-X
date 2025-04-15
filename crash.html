@@ -1,1 +1,575 @@
-
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кейсы</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background-color: #1a1a2e;
+            color: white;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background-color: #16213e;
+            border-bottom: 2px solid #0f3460;
+        }
+        
+        .back-button {
+            padding: 8px 15px;
+            background-color: #0f3460;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        .back-button:hover {
+            background-color: #1a56a7;
+        }
+        
+        .title {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            font-weight: bold;
+            color: #4cc9f0;
+        }
+        
+        .balance {
+            display: flex;
+            align-items: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #4cc9f0;
+        }
+        
+        .balance-icon {
+            margin-right: 5px;
+            font-size: 20px;
+        }
+        
+        .cases-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            padding: 30px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .case {
+            background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+            border-radius: 10px;
+            padding: 20px;
+            width: 280px;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s;
+            border: 2px solid #0f3460;
+        }
+        
+        .case:hover {
+            transform: translateY(-5px);
+        }
+        
+        .case-image {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 15px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 5px;
+            border: 2px solid #4cc9f0;
+        }
+        
+        .case-name {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #4cc9f0;
+            text-shadow: 0 0 5px rgba(76, 201, 240, 0.5);
+        }
+        
+        .case-range {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #e94560;
+        }
+        
+        .open-button {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #e94560 0%, #b32e46 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+        
+        .open-button:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 15px rgba(233, 69, 96, 0.5);
+        }
+        
+        .open-button:disabled {
+            background: #555;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            border: 2px solid #4cc9f0;
+            box-shadow: 0 0 30px rgba(76, 201, 240, 0.5);
+        }
+        
+        .modal-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #4cc9f0;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        .modal-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        
+        .modal-button:hover {
+            transform: scale(1.05);
+        }
+        
+        .confirm-button {
+            background: linear-gradient(135deg, #4cc9f0 0%, #2a9fd8 100%);
+            color: white;
+        }
+        
+        .cancel-button {
+            background: linear-gradient(135deg, #e94560 0%, #b32e46 100%);
+            color: white;
+        }
+        
+        /* Animation styles */
+        .animation-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 1001;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .animation-box {
+            width: 80%;
+            max-width: 600px;
+            height: 200px;
+            position: relative;
+            overflow: hidden;
+            border: 3px solid #4cc9f0;
+            border-radius: 10px;
+            background-color: #0f3460;
+        }
+        
+        .center-line {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 2px;
+            height: 100%;
+            background-color: #e94560;
+            z-index: 10;
+        }
+        
+        .prize-item {
+            position: absolute;
+            width: 100px;
+            height: 50px;
+            background-color: #16213e;
+            border: 1px solid #4cc9f0;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            color: white;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: transform 0.1s;
+        }
+        
+        .result-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1002;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .result-content {
+            background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            border: 2px solid #4cc9f0;
+        }
+        
+        .result-title {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: #4cc9f0;
+        }
+        
+        .result-amount {
+            font-size: 36px;
+            font-weight: bold;
+            color: #e94560;
+            margin: 20px 0;
+        }
+        
+        .result-button {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #4cc9f0 0%, #2a9fd8 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            transition: transform 0.2s;
+        }
+        
+        .result-button:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <button class="back-button" onclick="window.location.href='index.html'">Назад</button>
+        <div class="title">Кейсы</div>
+        <div class="balance">
+            <span class="balance-icon">💰</span>
+            <span id="userBalance">0</span>
+        </div>
+    </div>
+    
+    <div class="cases-container">
+        <div class="case">
+            <div class="case-image" style="background-image: url('https://via.placeholder.com/200/16213e/4cc9f0?text=Простой');"></div>
+            <div class="case-name">Простой</div>
+            <div class="case-range">Выигрыш: от 1р до 100р</div>
+            <button class="open-button" onclick="openCaseModal('simple')">Открыть за 10р</button>
+        </div>
+        
+        <div class="case">
+            <div class="case-image" style="background-image: url('https://via.placeholder.com/200/0f3460/e94560?text=Новичок');"></div>
+            <div class="case-name">Новичок</div>
+            <div class="case-range">Выигрыш: от 50р до 500р</div>
+            <button class="open-button" onclick="openCaseModal('beginner')">Открыть за 50р</button>
+        </div>
+    </div>
+    
+    <!-- Confirmation Modal -->
+    <div class="modal" id="confirmationModal">
+        <div class="modal-content">
+            <div class="modal-title" id="modalCaseName">Подтверждение</div>
+            <p id="modalCaseDescription">Вы уверены, что хотите открыть этот кейс?</p>
+            <div class="modal-buttons">
+                <button class="modal-button confirm-button" id="confirmOpen">Открыть</button>
+                <button class="modal-button cancel-button" onclick="closeModal()">Отмена</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Animation Container -->
+    <div class="animation-container" id="animationContainer">
+        <div class="animation-box">
+            <div class="center-line"></div>
+            <div id="prizeItems"></div>
+        </div>
+    </div>
+    
+    <!-- Result Modal -->
+    <div class="result-modal" id="resultModal">
+        <div class="result-content">
+            <div class="result-title">Поздравляем!</div>
+            <p>Ваш выигрыш:</p>
+            <div class="result-amount" id="resultAmount">+50р</div>
+            <button class="result-button" onclick="closeResultModal()">OK</button>
+        </div>
+    </div>
+    
+    <script>
+        // Firebase initialization
+        const firebaseConfig = {
+            apiKey: "AIzaSyCMos6Y7C-krTLuKCI4VJG-TFLo6QI--k8",
+            authDomain: "vrot-x-7a48f.firebaseapp.com",
+            databaseURL: "https://vrot-x-7a48f-default-rtdb.firebaseio.com",
+            projectId: "vrot-x-7a48f",
+            storageBucket: "vrot-x-7a48f.firebasestorage.app",
+            messagingSenderId: "622297225288",
+            appId: "1:622297225288:web:5df6a5b02ffddedd96e07d"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        
+        // Case definitions
+        const cases = {
+            simple: {
+                name: "Простой",
+                price: 10,
+                minWin: 1,
+                maxWin: 100,
+                image: "https://via.placeholder.com/200/16213e/4cc9f0?text=Простой"
+            },
+            beginner: {
+                name: "Новичок",
+                price: 50,
+                minWin: 50,
+                maxWin: 500,
+                image: "https://via.placeholder.com/200/0f3460/e94560?text=Новичок"
+            }
+        };
+        
+        // Global variables
+        let userId = null;
+        let userBalance = 0;
+        let currentCase = null;
+        
+        // DOM elements
+        const balanceElement = document.getElementById('userBalance');
+        const confirmationModal = document.getElementById('confirmationModal');
+        const animationContainer = document.getElementById('animationContainer');
+        const resultModal = document.getElementById('resultModal');
+        const prizeItemsContainer = document.getElementById('prizeItems');
+        const modalCaseName = document.getElementById('modalCaseName');
+        const modalCaseDescription = document.getElementById('modalCaseDescription');
+        const confirmOpenButton = document.getElementById('confirmOpen');
+        const resultAmount = document.getElementById('resultAmount');
+        
+        // On page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get user ID from cookie
+            userId = getCookie('tg_user_id');
+            
+            if (!userId) {
+                alert('Пользователь не идентифицирован!');
+                return;
+            }
+            
+            // Load user balance
+            loadUserBalance();
+            
+            // Set up event listeners
+            confirmOpenButton.addEventListener('click', openCase);
+        });
+        
+        // Function to get cookie by name
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+        
+        // Function to load user balance
+        function loadUserBalance() {
+            database.ref('users/' + userId + '/balance').on('value', (snapshot) => {
+                userBalance = snapshot.val() || 0;
+                balanceElement.textContent = userBalance + 'р';
+                
+                // Update button states based on balance
+                updateButtonStates();
+            });
+        }
+        
+        // Function to update button states based on balance
+        function updateButtonStates() {
+            document.querySelectorAll('.open-button').forEach(button => {
+                const caseType = button.getAttribute('onclick').match(/'(.*?)'/)[1];
+                const caseData = cases[caseType];
+                
+                if (userBalance < caseData.price) {
+                    button.disabled = true;
+                    button.textContent = 'Недостаточно средств';
+                } else {
+                    button.disabled = false;
+                    button.textContent = `Открыть за ${caseData.price}р`;
+                }
+            });
+        }
+        
+        // Function to open case modal
+        function openCaseModal(caseType) {
+            currentCase = caseType;
+            const caseData = cases[caseType];
+            
+            modalCaseName.textContent = caseData.name;
+            modalCaseDescription.textContent = `Вы уверены, что хотите открыть кейс "${caseData.name}" за ${caseData.price}р?`;
+            
+            confirmationModal.style.display = 'flex';
+        }
+        
+        // Function to close modal
+        function closeModal() {
+            confirmationModal.style.display = 'none';
+        }
+        
+        // Function to open case (after confirmation)
+        function openCase() {
+            closeModal();
+            
+            const caseData = cases[currentCase];
+            
+            // Deduct balance
+            const newBalance = userBalance - caseData.price;
+            database.ref('users/' + userId).update({
+                balance: newBalance
+            });
+            
+            // Show animation
+            showAnimation(caseData);
+        }
+        
+        // Function to show animation
+        function showAnimation(caseData) {
+            animationContainer.style.display = 'flex';
+            prizeItemsContainer.innerHTML = '';
+            
+            // Generate random prizes for animation
+            const prizes = [];
+            for (let i = 0; i < 20; i++) {
+                prizes.push(Math.floor(Math.random() * (caseData.maxWin - caseData.minWin + 1) + caseData.minWin));
+            }
+            
+            // Add the real prize at the end
+            const realPrize = Math.floor(Math.random() * (caseData.maxWin - caseData.minWin + 1) + caseData.minWin);
+            prizes.push(realPrize);
+            
+            // Create prize elements
+            prizes.forEach((prize, index) => {
+                const prizeElement = document.createElement('div');
+                prizeElement.className = 'prize-item';
+                prizeElement.textContent = prize + 'р';
+                prizeElement.style.top = `${index * 60}px`;
+                prizeItemsContainer.appendChild(prizeElement);
+            });
+            
+            // Animate
+            let startTime = null;
+            const duration = 4000; // 4 seconds
+            
+            function animate(timestamp) {
+                if (!startTime) startTime = timestamp;
+                const progress = timestamp - startTime;
+                
+                // Ease-out function (starts fast, ends slow)
+                const easeOutProgress = 1 - Math.pow(1 - Math.min(progress / duration, 1), 3);
+                
+                // Calculate how far to move
+                const moveDistance = easeOutProgress * (prizes.length * 60 - 100);
+                
+                // Move all prize items
+                const prizeElements = document.querySelectorAll('.prize-item');
+                prizeElements.forEach(element => {
+                    const originalTop = parseInt(element.style.top);
+                    element.style.transform = `translateX(-50%) translateY(${-moveDistance}px)`;
+                });
+                
+                if (progress < duration) {
+                    requestAnimationFrame(animate);
+                } else {
+                    // Animation complete, show result
+                    setTimeout(() => {
+                        animationContainer.style.display = 'none';
+                        showResult(realPrize);
+                    }, 500);
+                }
+            }
+            
+            requestAnimationFrame(animate);
+        }
+        
+        // Function to show result
+        function showResult(amount) {
+            // Add winnings to balance
+            const newBalance = userBalance - cases[currentCase].price + amount;
+            database.ref('users/' + userId).update({
+                balance: newBalance
+            });
+            
+            // Show result modal
+            resultAmount.textContent = `+${amount}р`;
+            resultModal.style.display = 'flex';
+        }
+        
+        // Function to close result modal
+        function closeResultModal() {
+            resultModal.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
