@@ -166,7 +166,13 @@
         
         .modal-title {
             font-size: 24px;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
+            color: #4cc9f0;
+        }
+        
+        .prizes-title {
+            font-size: 18px;
+            margin: 15px 0 10px;
             color: #4cc9f0;
         }
         
@@ -175,7 +181,7 @@
             flex-wrap: wrap;
             justify-content: center;
             gap: 8px;
-            margin: 20px 0;
+            margin: 15px 0;
         }
         
         .prize-chip {
@@ -191,7 +197,7 @@
             display: flex;
             justify-content: center;
             gap: 15px;
-            margin-top: 25px;
+            margin-top: 20px;
         }
         
         .modal-button {
@@ -232,13 +238,14 @@
         }
         
         .animation-box {
-            width: 300px;
-            height: 400px;
+            width: 320px;
+            height: 450px;
             position: relative;
             overflow: hidden;
             border: 3px solid #4cc9f0;
             border-radius: 10px;
             background-color: #0f3460;
+            perspective: 1000px;
         }
         
         .horizontal-line {
@@ -246,39 +253,48 @@
             top: 50%;
             left: 0;
             width: 100%;
-            height: 2px;
-            background-color: #e94560;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #e94560, transparent);
             z-index: 10;
-            box-shadow: 0 0 10px rgba(233, 69, 96, 0.8);
+            box-shadow: 0 0 15px rgba(233, 69, 96, 0.8);
+            transform: translateY(-50%);
         }
         
         .prize-container {
             position: absolute;
             width: 100%;
-            transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
+            will-change: transform;
         }
         
         .prize-item {
             width: 280px;
-            height: 80px;
-            margin: 10px auto;
+            height: 90px;
+            margin: 15px auto;
             background-color: #16213e;
             border: 2px solid #4cc9f0;
-            border-radius: 8px;
+            border-radius: 10px;
             display: flex;
             justify-content: center;
             align-items: center;
             font-weight: bold;
-            font-size: 24px;
+            font-size: 26px;
             color: white;
-            transition: all 0.3s;
+            transition: all 0.5s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transform-style: preserve-3d;
         }
         
         .prize-item.active {
-            transform: scale(1.05);
-            box-shadow: 0 0 20px rgba(76, 201, 240, 0.8);
+            transform: scale(1.08);
+            box-shadow: 0 0 25px rgba(46, 204, 113, 0.8);
             border-color: #2ecc71;
             background-color: #2ecc71;
+            animation: pulse 1s infinite alternate;
+        }
+        
+        @keyframes pulse {
+            from { transform: scale(1.08); }
+            to { transform: scale(1.12); }
         }
         
         /* Result modal */
@@ -289,7 +305,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
+            background-color: rgba(0, 0, 0, 0.9);
             z-index: 1002;
             justify-content: center;
             align-items: center;
@@ -303,6 +319,7 @@
             width: 90%;
             text-align: center;
             border: 2px solid #4cc9f0;
+            box-shadow: 0 0 30px rgba(76, 201, 240, 0.5);
         }
         
         .result-title {
@@ -312,26 +329,28 @@
         }
         
         .result-amount {
-            font-size: 36px;
+            font-size: 42px;
             font-weight: bold;
             color: #2ecc71;
             margin: 20px 0;
+            text-shadow: 0 0 10px rgba(46, 204, 113, 0.5);
         }
         
         .result-button {
-            padding: 10px 20px;
+            padding: 12px 24px;
             background: linear-gradient(135deg, #4cc9f0 0%, #2a9fd8 100%);
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 16px;
-            transition: transform 0.2s;
+            font-size: 18px;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
         
         .result-button:hover {
             transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(76, 201, 240, 0.5);
         }
     </style>
 </head>
@@ -367,6 +386,7 @@
             <div class="modal-title" id="modalCaseName">Подтверждение</div>
             <p id="modalCaseDescription">Вы уверены, что хотите открыть этот кейс?</p>
             
+            <div class="prizes-title">Содержимое:</div>
             <div class="prizes-grid" id="prizesGrid"></div>
             
             <div class="modal-buttons">
@@ -452,6 +472,7 @@
         let userBalance = 0;
         let currentCase = null;
         let currentPrize = null;
+        let animationFrameId = null;
         
         // DOM elements
         const balanceElement = document.getElementById('userBalance');
@@ -587,40 +608,78 @@
             // Set container height
             prizeContainer.style.height = `${prizeSequence.length * 200}px`;
             
-            // Animate
+            // Animation parameters
+            const duration = 6000; // 6 seconds total
+            const targetPosition = -(targetIndex * 100) + 200;
             let startTime = null;
-            const duration = 4500; // 4.5 seconds (на 30% медленнее)
-            const targetPosition = -(targetIndex * 100) + 160;
+            let lastTimestamp = null;
+            let direction = 1;
+            let currentPosition = 0;
+            
+            // Cancel any previous animation
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+            }
             
             function animate(timestamp) {
-                if (!startTime) startTime = timestamp;
+                if (!startTime) {
+                    startTime = timestamp;
+                    lastTimestamp = timestamp;
+                }
+                
                 const elapsed = timestamp - startTime;
+                const deltaTime = timestamp - lastTimestamp;
+                lastTimestamp = timestamp;
+                
+                // Calculate progress (0 to 1)
                 const progress = Math.min(elapsed / duration, 1);
                 
-                // Custom easing function for smooth start and end
-                const easeProgress = easeInOutCubic(progress);
+                // Complex animation curve with bounce effect
+                let speed;
                 
-                // Calculate current position
-                const currentPosition = easeProgress * (prizeSequence.length * 100 + 200);
+                if (progress < 0.3) {
+                    // Initial acceleration
+                    speed = easeInQuad(progress / 0.3) * 2;
+                } else if (progress < 0.5) {
+                    // First bounce back
+                    speed = 2 - easeOutQuad((progress - 0.3) / 0.2) * 4;
+                } else if (progress < 0.7) {
+                    // Continue forward
+                    speed = -2 + easeInQuad((progress - 0.5) / 0.2) * 3;
+                } else if (progress < 0.9) {
+                    // Final bounce back
+                    speed = 1 - easeOutQuad((progress - 0.7) / 0.2) * 2;
+                } else {
+                    // Slow down to target
+                    speed = (1 - easeOutCubic((progress - 0.9) / 0.1)) * 0.5;
+                }
+                
+                // Apply speed to position
+                currentPosition += speed * deltaTime * 0.2;
+                
+                // Ensure we don't go past the target
+                if (progress > 0.95 && Math.abs(currentPosition - targetPosition) < 5) {
+                    currentPosition = targetPosition;
+                }
                 
                 // Move container
-                prizeContainer.style.transform = `translateY(${-currentPosition}px)`;
+                prizeContainer.style.transform = `translateY(${currentPosition}px)`;
                 
                 if (progress < 1) {
-                    requestAnimationFrame(animate);
+                    animationFrameId = requestAnimationFrame(animate);
                 } else {
-                    // Final adjustment to exactly align the target prize
+                    // Final adjustment
                     prizeContainer.style.transform = `translateY(${targetPosition}px)`;
-                    prizeContainer.style.transition = 'transform 0.5s ease-out';
+                    prizeContainer.style.transition = 'transform 0.8s ease-out';
                     
                     // Find and highlight the winning prize
                     setTimeout(() => {
                         const prizeElements = prizeContainer.querySelectorAll('.prize-item');
+                        const centerPosition = window.innerHeight / 2;
+                        
                         prizeElements.forEach(element => {
                             const rect = element.getBoundingClientRect();
-                            const linePos = window.innerHeight / 2;
-                            
-                            if (rect.top <= linePos && rect.bottom >= linePos) {
+                            if (rect.top <= centerPosition && rect.bottom >= centerPosition) {
                                 element.classList.add('active');
                                 currentPrize = { amount: parseInt(element.dataset.amount) };
                             }
@@ -630,13 +689,18 @@
                         setTimeout(() => {
                             animationContainer.style.display = 'none';
                             showResult(currentPrize.amount);
-                        }, 1000);
-                    }, 500);
+                        }, 1500);
+                    }, 800);
                 }
             }
             
-            requestAnimationFrame(animate);
+            animationFrameId = requestAnimationFrame(animate);
         }
+        
+        // Easing functions
+        function easeInQuad(t) { return t * t; }
+        function easeOutQuad(t) { return t * (2 - t); }
+        function easeOutCubic(t) { return (--t) * t * t + 1; }
         
         // Find the index of the target prize in the sequence
         function findTargetIndex(sequence) {
@@ -647,11 +711,6 @@
                 }
             }
             return Math.floor(sequence.length * 0.7); // fallback
-        }
-        
-        // Easing function for smooth animation
-        function easeInOutCubic(t) {
-            return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
         }
         
         // Function to generate weighted prize sequence
@@ -689,7 +748,7 @@
             }
             
             // Add winning prize multiple times at the end
-            for (let i = 0; i < 15; i++) {
+            for (let i = 0; i < 20; i++) {
                 sequence.push(currentPrize);
             }
             
