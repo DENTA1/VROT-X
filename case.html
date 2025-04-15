@@ -139,7 +139,6 @@
             box-shadow: none;
         }
         
-        /* Modal styles */
         .modal {
             display: none;
             position: fixed;
@@ -223,7 +222,6 @@
             color: white;
         }
         
-        /* Animation styles */
         .animation-container {
             display: none;
             position: fixed;
@@ -245,7 +243,6 @@
             border: 3px solid #4cc9f0;
             border-radius: 10px;
             background-color: #0f3460;
-            perspective: 1000px;
         }
         
         .horizontal-line {
@@ -263,7 +260,7 @@
         .prize-container {
             position: absolute;
             width: 100%;
-            will-change: transform;
+            transition: transform 0.1s linear;
         }
         
         .prize-item {
@@ -281,7 +278,6 @@
             color: white;
             transition: all 0.5s;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            transform-style: preserve-3d;
         }
         
         .prize-item.active {
@@ -297,7 +293,6 @@
             to { transform: scale(1.12); }
         }
         
-        /* Result modal */
         .result-modal {
             display: none;
             position: fixed;
@@ -380,7 +375,6 @@
         </div>
     </div>
     
-    <!-- Confirmation Modal -->
     <div class="modal" id="confirmationModal">
         <div class="modal-content">
             <div class="modal-title" id="modalCaseName">Подтверждение</div>
@@ -396,7 +390,6 @@
         </div>
     </div>
     
-    <!-- Animation Container -->
     <div class="animation-container" id="animationContainer">
         <div class="animation-box">
             <div class="horizontal-line"></div>
@@ -404,7 +397,6 @@
         </div>
     </div>
     
-    <!-- Result Modal -->
     <div class="result-modal" id="resultModal">
         <div class="result-content">
             <div class="result-title">Поздравляем!</div>
@@ -415,7 +407,6 @@
     </div>
     
     <script>
-        // Firebase initialization
         const firebaseConfig = {
             apiKey: "AIzaSyCMos6Y7C-krTLuKCI4VJG-TFLo6QI--k8",
             authDomain: "vrot-x-7a48f.firebaseapp.com",
@@ -425,12 +416,10 @@
             messagingSenderId: "622297225288",
             appId: "1:622297225288:web:5df6a5b02ffddedd96e07d"
         };
-        
-        // Initialize Firebase
+
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        
-        // Case definitions with weighted prizes
+
         const cases = {
             simple: {
                 name: "Простой",
@@ -446,8 +435,7 @@
                     { amount: 15, weight: 6 },
                     { amount: 25, weight: 4 },
                     { amount: 50, weight: 2 }
-                ],
-                image: "https://via.placeholder.com/200/16213e/4cc9f0?text=Простой"
+                ]
             },
             beginner: {
                 name: "Новичок",
@@ -462,19 +450,15 @@
                     { amount: 150, weight: 7 },
                     { amount: 250, weight: 4 },
                     { amount: 500, weight: 2 }
-                ],
-                image: "https://via.placeholder.com/200/0f3460/e94560?text=Новичок"
+                ]
             }
         };
-        
-        // Global variables
+
         let userId = null;
         let userBalance = 0;
         let currentCase = null;
         let currentPrize = null;
-        let animationFrameId = null;
-        
-        // DOM elements
+
         const balanceElement = document.getElementById('userBalance');
         const confirmationModal = document.getElementById('confirmationModal');
         const animationContainer = document.getElementById('animationContainer');
@@ -485,246 +469,123 @@
         const modalCaseDescription = document.getElementById('modalCaseDescription');
         const confirmOpenButton = document.getElementById('confirmOpen');
         const resultAmount = document.getElementById('resultAmount');
-        
-        // On page load
+
         document.addEventListener('DOMContentLoaded', function() {
-            // Get user ID from cookie
             userId = getCookie('tg_user_id');
-            
-            if (!userId) {
-                alert('Пользователь не идентифицирован!');
-                return;
+            if (!userId) alert('Пользователь не идентифицирован!');
+            else {
+                loadUserBalance();
+                confirmOpenButton.addEventListener('click', openCase);
             }
-            
-            // Load user balance
-            loadUserBalance();
-            
-            // Set up event listeners
-            confirmOpenButton.addEventListener('click', openCase);
         });
-        
-        // Function to get cookie by name
+
         function getCookie(name) {
             const value = `; ${document.cookie}`;
             const parts = value.split(`; ${name}=`);
-            if (parts.length === 2) return parts.pop().split(';').shift();
+            return parts.length === 2 ? parts.pop().split(';').shift() : null;
         }
-        
-        // Function to load user balance
+
         function loadUserBalance() {
-            database.ref('users/' + userId + '/balance').on('value', (snapshot) => {
+            database.ref('users/' + userId + '/balance').on('value', snapshot => {
                 userBalance = snapshot.val() || 0;
                 balanceElement.textContent = userBalance + 'р';
-                
-                // Update button states based on balance
                 updateButtonStates();
             });
         }
-        
-        // Function to update button states based on balance
+
         function updateButtonStates() {
             document.querySelectorAll('.open-button').forEach(button => {
                 const caseType = button.getAttribute('onclick').match(/'(.*?)'/)[1];
                 const caseData = cases[caseType];
-                
-                if (userBalance < caseData.price) {
-                    button.disabled = true;
-                    button.textContent = 'Недостаточно средств';
-                } else {
-                    button.disabled = false;
-                    button.textContent = `Открыть за ${caseData.price}р`;
-                }
+                button.disabled = userBalance < caseData.price;
+                button.textContent = userBalance < caseData.price 
+                    ? 'Недостаточно средств' 
+                    : `Открыть за ${caseData.price}р`;
             });
         }
-        
-        // Function to open case modal
+
         function openCaseModal(caseType) {
             currentCase = caseType;
             const caseData = cases[caseType];
-            
             modalCaseName.textContent = caseData.name;
             modalCaseDescription.textContent = `Вы уверены, что хотите открыть кейс "${caseData.name}" за ${caseData.price}р?`;
-            
-            // Show possible prizes in modal
-            prizesGrid.innerHTML = '';
-            caseData.prizes.forEach(prize => {
-                const chip = document.createElement('div');
-                chip.className = 'prize-chip';
-                chip.textContent = prize.amount + 'р';
-                prizesGrid.appendChild(chip);
-            });
-            
+            prizesGrid.innerHTML = caseData.prizes.map(prize => 
+                `<div class="prize-chip">${prize.amount}р</div>`
+            ).join('');
             confirmationModal.style.display = 'flex';
         }
-        
-        // Function to close modal
+
         function closeModal() {
             confirmationModal.style.display = 'none';
         }
-        
-        // Function to open case (after confirmation)
+
         function openCase() {
             closeModal();
-            
             const caseData = cases[currentCase];
-            
-            // Deduct balance
-            const newBalance = userBalance - caseData.price;
             database.ref('users/' + userId).update({
-                balance: newBalance
+                balance: userBalance - caseData.price
             });
-            
-            // Show animation
             showAnimation(caseData);
         }
-        
-        // Function to show animation
+
         function showAnimation(caseData) {
             animationContainer.style.display = 'flex';
             prizeContainer.innerHTML = '';
-            
-            // Generate prize sequence with weights
+
             const prizeSequence = generatePrizeSequence(caseData);
-            const targetIndex = findTargetIndex(prizeSequence);
-            
-            // Create prize elements
+            const targetIndex = Math.floor(prizeSequence.length * 0.7);
+            const itemHeight = 120;
+
             prizeSequence.forEach((prize, index) => {
-                const prizeElement = document.createElement('div');
-                prizeElement.className = 'prize-item';
-                prizeElement.textContent = prize.amount + 'р';
-                prizeElement.dataset.amount = prize.amount;
-                prizeElement.style.top = `${index * 100}px`;
-                prizeContainer.appendChild(prizeElement);
+                const element = document.createElement('div');
+                element.className = 'prize-item';
+                element.textContent = prize.amount + 'р';
+                element.dataset.amount = prize.amount;
+                element.style.top = `${index * itemHeight}px`;
+                prizeContainer.appendChild(element);
             });
+
+            prizeContainer.style.height = `${prizeSequence.length * itemHeight}px`;
             
-            // Duplicate items for seamless animation
-            const itemsToClone = prizeContainer.querySelectorAll('.prize-item');
-            itemsToClone.forEach(item => {
-                const clone = item.cloneNode(true);
-                clone.style.top = `${parseInt(item.style.top) + prizeSequence.length * 100}px`;
-                prizeContainer.appendChild(clone);
-            });
-            
-            // Set container height
-            prizeContainer.style.height = `${prizeSequence.length * 200}px`;
-            
-            // Animation parameters
-            const duration = 6000; // 6 seconds total
-            const targetPosition = -(targetIndex * 100) + 200;
+            const startPosition = 0;
+            const targetPosition = -(targetIndex * itemHeight) + 200;
+            const duration = 3000;
             let startTime = null;
-            let lastTimestamp = null;
-            let direction = 1;
-            let currentPosition = 0;
-            
-            // Cancel any previous animation
-            if (animationFrameId) {
-                cancelAnimationFrame(animationFrameId);
-            }
-            
+
             function animate(timestamp) {
-                if (!startTime) {
-                    startTime = timestamp;
-                    lastTimestamp = timestamp;
-                }
-                
+                if (!startTime) startTime = timestamp;
                 const elapsed = timestamp - startTime;
-                const deltaTime = timestamp - lastTimestamp;
-                lastTimestamp = timestamp;
-                
-                // Calculate progress (0 to 1)
                 const progress = Math.min(elapsed / duration, 1);
+                const eased = 1 - Math.pow(1 - progress, 3);
+                const currentY = startPosition + (targetPosition - startPosition) * eased;
                 
-                // Complex animation curve with bounce effect
-                let speed;
-                
-                if (progress < 0.3) {
-                    // Initial acceleration
-                    speed = easeInQuad(progress / 0.3) * 2;
-                } else if (progress < 0.5) {
-                    // First bounce back
-                    speed = 2 - easeOutQuad((progress - 0.3) / 0.2) * 4;
-                } else if (progress < 0.7) {
-                    // Continue forward
-                    speed = -2 + easeInQuad((progress - 0.5) / 0.2) * 3;
-                } else if (progress < 0.9) {
-                    // Final bounce back
-                    speed = 1 - easeOutQuad((progress - 0.7) / 0.2) * 2;
-                } else {
-                    // Slow down to target
-                    speed = (1 - easeOutCubic((progress - 0.9) / 0.1)) * 0.5;
-                }
-                
-                // Apply speed to position
-                currentPosition += speed * deltaTime * 0.2;
-                
-                // Ensure we don't go past the target
-                if (progress > 0.95 && Math.abs(currentPosition - targetPosition) < 5) {
-                    currentPosition = targetPosition;
-                }
-                
-                // Move container
-                prizeContainer.style.transform = `translateY(${currentPosition}px)`;
-                
+                prizeContainer.style.transform = `translateY(${currentY}px)`;
+
                 if (progress < 1) {
-                    animationFrameId = requestAnimationFrame(animate);
+                    requestAnimationFrame(animate);
                 } else {
-                    // Final adjustment
-                    prizeContainer.style.transform = `translateY(${targetPosition}px)`;
-                    prizeContainer.style.transition = 'transform 0.8s ease-out';
-                    
-                    // Find and highlight the winning prize
+                    const centerLine = window.innerHeight / 2;
+                    prizeContainer.querySelectorAll('.prize-item').forEach(item => {
+                        const rect = item.getBoundingClientRect();
+                        if (rect.top <= centerLine && rect.bottom >= centerLine) {
+                            item.classList.add('active');
+                            currentPrize = { amount: parseInt(item.dataset.amount) };
+                        }
+                    });
                     setTimeout(() => {
-                        const prizeElements = prizeContainer.querySelectorAll('.prize-item');
-                        const centerPosition = window.innerHeight / 2;
-                        
-                        prizeElements.forEach(element => {
-                            const rect = element.getBoundingClientRect();
-                            if (rect.top <= centerPosition && rect.bottom >= centerPosition) {
-                                element.classList.add('active');
-                                currentPrize = { amount: parseInt(element.dataset.amount) };
-                            }
-                        });
-                        
-                        // Show result after delay
-                        setTimeout(() => {
-                            animationContainer.style.display = 'none';
-                            showResult(currentPrize.amount);
-                        }, 1500);
-                    }, 800);
+                        animationContainer.style.display = 'none';
+                        showResult(currentPrize.amount);
+                    }, 1500);
                 }
             }
-            
-            animationFrameId = requestAnimationFrame(animate);
+            requestAnimationFrame(animate);
         }
-        
-        // Easing functions
-        function easeInQuad(t) { return t * t; }
-        function easeOutQuad(t) { return t * (2 - t); }
-        function easeOutCubic(t) { return (--t) * t * t + 1; }
-        
-        // Find the index of the target prize in the sequence
-        function findTargetIndex(sequence) {
-            let targetAmount = currentPrize.amount;
-            for (let i = 0; i < sequence.length; i++) {
-                if (sequence[i].amount === targetAmount) {
-                    return i;
-                }
-            }
-            return Math.floor(sequence.length * 0.7); // fallback
-        }
-        
-        // Function to generate weighted prize sequence
+
         function generatePrizeSequence(caseData) {
-            let sequence = [];
-            let totalWeight = 0;
-            
-            // Calculate total weight
-            caseData.prizes.forEach(prize => totalWeight += prize.weight);
-            
-            // Select random prize (weighted)
+            let totalWeight = caseData.prizes.reduce((sum, prize) => sum + prize.weight, 0);
             let random = Math.random() * totalWeight;
             let weightSum = 0;
-            
+
             for (const prize of caseData.prizes) {
                 weightSum += prize.weight;
                 if (random <= weightSum) {
@@ -732,43 +593,28 @@
                     break;
                 }
             }
-            
-            // Fill sequence with prizes according to weights
-            caseData.prizes.forEach(prize => {
-                const count = Math.max(1, Math.floor(prize.weight * 1.5));
-                for (let i = 0; i < count; i++) {
-                    sequence.push(prize);
-                }
-            });
-            
-            // Shuffle sequence
+
+            const sequence = caseData.prizes.flatMap(prize => 
+                Array(Math.ceil(prize.weight * 1.2)).fill(prize)
+            );
+
             for (let i = sequence.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [sequence[i], sequence[j]] = [sequence[j], sequence[i]];
             }
-            
-            // Add winning prize multiple times at the end
-            for (let i = 0; i < 20; i++) {
-                sequence.push(currentPrize);
-            }
-            
+
+            sequence.push(...Array(5).fill(currentPrize));
             return sequence;
         }
-        
-        // Function to show result
+
         function showResult(amount) {
-            // Add winnings to balance
-            const newBalance = userBalance - cases[currentCase].price + amount;
             database.ref('users/' + userId).update({
-                balance: newBalance
+                balance: userBalance - cases[currentCase].price + amount
             });
-            
-            // Show result modal
             resultAmount.textContent = `+${amount}р`;
             resultModal.style.display = 'flex';
         }
-        
-        // Function to close result modal
+
         function closeResultModal() {
             resultModal.style.display = 'none';
         }
