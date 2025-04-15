@@ -12,11 +12,11 @@
             font-family: 'Arial', sans-serif;
         }
         body {
-            background-color: #1a1a1a;
+            background-color: #202020;
             color: #e0e0e0;
         }
         .header {
-            background-color: #222;
+            background-color: #252525;
             padding: 15px 0;
             text-align: center;
             position: fixed;
@@ -37,7 +37,7 @@
             gap: 10px;
         }
         .account-button {
-            background: #252525;
+            background: #2d2d2d;
             padding: 15px 20px;
             border-radius: 10px;
             display: flex;
@@ -48,7 +48,7 @@
             font-weight: bold;
             color: #e0e0e0;
             flex: 1;
-            border: 1px solid #333;
+            border: 1px solid #383838;
         }
         .leaderboard-button {
             background: #FFD700;
@@ -84,6 +84,7 @@
         }
         .games-title-container {
             margin-bottom: 20px;
+            text-align: center;
         }
         .games-title {
             font-size: 18px;
@@ -115,8 +116,20 @@
         .game-card:hover {
             transform: translateY(-5px);
         }
+        .game-name {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            padding: 6px 12px;
+            background: rgba(66, 133, 244, 0.8);
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            z-index: 2;
+        }
 
-        /* Стили паттернов */
+        /* Стили минера */
         .miner-pattern {
             background: #0d1a30;
             height: 100%;
@@ -143,6 +156,7 @@
             background: #c62828;
         }
 
+        /* Стили лесенки */
         .ladder-pattern {
             background: #332100;
             height: 100%;
@@ -150,7 +164,7 @@
         }
         .ladder-grid {
             display: flex;
-            flex-direction: column;
+            flex-direction: column-reverse;
             gap: 8px;
             height: 100%;
         }
@@ -167,7 +181,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
         }
         .ladder-cell.green {
             background: #2e7d32;
@@ -200,6 +213,9 @@
             font-weight: bold;
             color: #FFD700;
         }
+        .leaderboard-title::before {
+            content: "🏆 ";
+        }
         .close-leaderboard {
             font-size: 30px;
             cursor: pointer;
@@ -211,9 +227,12 @@
             width: 100%;
             padding: 12px;
             margin-bottom: 8px;
-            background: #252525;
+            background: #2d2d2d;
             border-radius: 8px;
             transition: background 0.3s;
+        }
+        .leaderboard-item.user-highlight {
+            background: rgba(66, 133, 244, 0.2);
         }
         .leaderboard-position {
             width: 40px;
@@ -338,21 +357,18 @@
         let leaderboardInterval = null;
         const gamesAvailability = {
             miner: true,
-            ladder: true,
-            slots: false,
-            crash: false,
-            classic: false,
-            plinko: false,
-            roulette: false
+            ladder: true
         };
 
         document.addEventListener('DOMContentLoaded', async () => {
+            initEventListeners();
+            createGameCards();
+            
             setTimeout(() => {
                 document.getElementById('splashScreen').style.display = 'none';
                 document.getElementById('appContent').style.display = 'block';
             }, 1000);
 
-            initEventListeners();
             try {
                 await loadTelegramScript();
                 checkAuth();
@@ -411,18 +427,12 @@
                     created_at: new Date().toISOString()
                 });
             }
-            createGameCards();
         }
 
         function createGameCards() {
             const games = [
-                { id: 'miner', name: 'Минёр' },
-                { id: 'ladder', name: 'Лесенка' },
-                { id: 'slots', name: 'Слоты' },
-                { id: 'crash', name: 'Краш' },
-                { id: 'classic', name: 'Классик' },
-                { id: 'plinko', name: 'Плинко' },
-                { id: 'roulette', name: 'Рулетка' }
+                { id: 'miner', name: 'Минер' },
+                { id: 'ladder', name: 'Лесенка' }
             ];
 
             const grid = document.getElementById('gamesGrid');
@@ -453,13 +463,8 @@
                     for (let i = 0; i < 25; i++) {
                         const cell = document.createElement('div');
                         cell.className = 'miner-cell';
-                        if (i === 12) {
-                            cell.classList.add('red');
-                            cell.textContent = '💣';
-                        } else if ([6, 8, 16, 18, 22].includes(i)) {
-                            cell.classList.add('green');
-                            cell.textContent = '💎';
-                        }
+                        if (i === 12) cell.classList.add('red');
+                        else if ([6, 8, 16, 18, 22].includes(i)) cell.classList.add('green');
                         minerGrid.appendChild(cell);
                     }
                     pattern.appendChild(minerGrid);
@@ -469,25 +474,30 @@
                     pattern.className = 'ladder-pattern';
                     const ladderGrid = document.createElement('div');
                     ladderGrid.className = 'ladder-grid';
-                    for (let floor = 0; floor < 5; floor++) {
+                    
+                    // 5 этажей (снизу вверх)
+                    const floors = [
+                        [null, 'green', null, 'red', null],    // 1 этаж
+                        ['green', null, null, null, 'red'],    // 2 этаж
+                        [null, 'green', 'red', null, null],    // 3 этаж
+                        [null, null, 'green', 'red', null],   // 4 этаж
+                        ['red', null, null, null, null]        // 5 этаж
+                    ];
+
+                    floors.forEach(floor => {
                         const floorDiv = document.createElement('div');
                         floorDiv.className = 'ladder-floor';
-                        for (let i = 0; i < 5; i++) {
+                        floor.forEach(cellType => {
                             const cell = document.createElement('div');
                             cell.className = 'ladder-cell';
-                            if (floor < 3) {
-                                if (i === 2) cell.classList.add('red');
-                                if (i === 3) cell.classList.add('green');
-                            }
+                            if (cellType) cell.classList.add(cellType);
                             floorDiv.appendChild(cell);
-                        }
+                        });
                         ladderGrid.appendChild(floorDiv);
-                    }
+                    });
+
                     pattern.appendChild(ladderGrid);
                     break;
-
-                default:
-                    pattern.style.backgroundColor = '#333';
             }
             return pattern;
         }
@@ -497,11 +507,7 @@
                 alert('Игра временно недоступна');
                 return;
             }
-            if (gameId === 'ladder') {
-                window.location.href = `lecenka.html?user=${userId}`;
-            } else {
-                window.location.href = `${gameId}.html?user=${userId}`;
-            }
+            window.location.href = `${gameId}.html?user=${userId}`;
         }
 
         async function showLeaderboard() {
@@ -531,7 +537,7 @@
             container.innerHTML = '';
             users.forEach((user, index) => {
                 const item = document.createElement('div');
-                item.className = 'leaderboard-item';
+                item.className = `leaderboard-item ${user.id === userId ? 'user-highlight' : ''}`;
                 
                 const position = document.createElement('div');
                 position.className = 'leaderboard-position ';
@@ -550,7 +556,6 @@
                 balance.textContent = `${Math.round(user.balance)}₽`;
 
                 item.append(position, name, balance);
-                if (user.id === userId) item.classList.add('user-highlight');
                 container.appendChild(item);
             });
         }
