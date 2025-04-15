@@ -35,22 +35,22 @@
             display: inline-block;
             animation: letterGlow 3s ease-in-out infinite;
         }
-        .logo span:nth-child(1) { animation-delay: 0.1s; }
-        .logo span:nth-child(2) { animation-delay: 0.2s; }
-        .logo span:nth-child(3) { animation-delay: 0.3s; }
-        .logo span:nth-child(4) { animation-delay: 0.4s; }
-        .logo span:nth-child(5) { animation-delay: 0.5s; }
+        .logo span:nth-child(1) { animation-delay: 0.1s; color: #FFD700; }
+        .logo span:nth-child(2) { animation-delay: 0.2s; color: #FFD700; }
+        .logo span:nth-child(3) { animation-delay: 0.3s; color: #FFD700; }
+        .logo span:nth-child(4) { animation-delay: 0.4s; color: #FFD700; }
+        .logo span:nth-child(5) { animation-delay: 0.5s; color: #FFD700; }
         @keyframes letterGlow {
             0%, 100% { 
-                text-shadow: 0 0 5px #4285F4, 0 0 10px #4285F4;
+                text-shadow: 0 0 5px #FFD700, 0 0 10px #FFD700;
                 transform: translateY(0);
             }
             50% { 
-                text-shadow: 0 0 15px #4285F4, 0 0 20px #4285F4;
+                text-shadow: 0 0 15px #FFD700, 0 0 20px #FFD700;
                 transform: translateY(-2px);
             }
             70% {
-                text-shadow: 0 0 5px #4285F4, 0 0 10px #4285F4;
+                text-shadow: 0 0 5px #FFD700, 0 0 10px #FFD700;
                 transform: translateY(0);
             }
         }
@@ -137,15 +137,17 @@
             cursor: pointer;
             transition: transform 0.3s;
             background-color: #333;
+            border: 2px solid #444;
         }
         .game-card:hover {
             transform: translateY(-5px);
+            border-color: #4285F4;
         }
         .game-name {
             position: absolute;
             bottom: 8px;
             right: 8px;
-            padding: 6px 12px 6px 30px;
+            padding: 6px 12px;
             background: rgba(66, 133, 244, 0.8);
             border-radius: 8px;
             color: white;
@@ -155,7 +157,7 @@
             min-width: 80px;
             text-align: right;
         }
-        .game-name::before {
+        .game-name.checked::before {
             content: "✓";
             position: absolute;
             left: 8px;
@@ -171,7 +173,7 @@
         .ripple {
             position: absolute;
             border-radius: 50%;
-            background: rgba(66, 133, 244, 0.3);
+            background: rgba(255, 215, 0, 0.3);
             transform: scale(0);
             animation: ripple 0.6s linear;
             pointer-events: none;
@@ -179,6 +181,23 @@
         @keyframes ripple {
             to {
                 transform: scale(4);
+                opacity: 0;
+            }
+        }
+        .click-effect {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(255, 215, 0, 0.5);
+            transform: translate(-50%, -50%) scale(0);
+            pointer-events: none;
+            animation: clickAnimation 0.6s ease-out;
+            z-index: 1001;
+        }
+        @keyframes clickAnimation {
+            to {
+                transform: translate(-50%, -50%) scale(10);
                 opacity: 0;
             }
         }
@@ -195,8 +214,8 @@
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             gap: 4px;
-            width: 90%;
-            height: 90%;
+            width: 80%;
+            height: 80%;
         }
         .miner-cell {
             background: #1e3a5a;
@@ -204,7 +223,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
+            font-size: 14px;
             aspect-ratio: 1;
         }
         .miner-cell.green {
@@ -491,6 +510,28 @@
             document.querySelectorAll('.game-card').forEach(card => {
                 card.addEventListener('click', createRipple);
             });
+            
+            // Добавляем обработчик кликов по всему экрану
+            document.addEventListener('click', createClickEffect);
+        }
+
+        function createClickEffect(e) {
+            if (e.target.classList.contains('game-card') || 
+                e.target.closest('.game-card') || 
+                e.target.classList.contains('account-button') || 
+                e.target.classList.contains('leaderboard-button')) {
+                return;
+            }
+            
+            const click = document.createElement('div');
+            click.className = 'click-effect';
+            click.style.left = `${e.clientX}px`;
+            click.style.top = `${e.clientY}px`;
+            document.body.appendChild(click);
+            
+            setTimeout(() => {
+                click.remove();
+            }, 600);
         }
 
         function createRipple(e) {
@@ -556,10 +597,10 @@
 
         function createGameCards() {
             const games = [
-                { id: 'miner', name: 'Минер', file: 'miner.html' },
-                { id: 'ladder', name: 'Лесенка', file: 'lecenka.html' },
-                { id: 'case', name: 'Кейсы', file: 'case.html' },
-                { id: 'roulette', name: '№2', file: 'roulette.html' }
+                { id: 'miner', name: 'Минер', file: 'miner.html', checked: true },
+                { id: 'ladder', name: 'Лесенка', file: 'lecenka.html', checked: true },
+                { id: 'case', name: 'Кейсы', file: 'case.html', checked: false },
+                { id: 'roulette', name: '№2', file: 'roulette.html', checked: false }
             ];
 
             const grid = document.getElementById('gamesGrid');
@@ -594,7 +635,7 @@
                 }
 
                 const name = document.createElement('div');
-                name.className = 'game-name';
+                name.className = `game-name ${game.checked ? 'checked' : ''}`;
                 name.textContent = game.name;
 
                 card.append(pattern, name);
