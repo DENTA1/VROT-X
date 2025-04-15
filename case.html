@@ -156,7 +156,7 @@
             background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
             padding: 30px;
             border-radius: 10px;
-            max-width: 400px;
+            max-width: 500px;
             width: 90%;
             text-align: center;
             border: 2px solid #4cc9f0;
@@ -169,28 +169,32 @@
             color: #4cc9f0;
         }
         
-        .prizes-title {
-            font-size: 18px;
-            margin: 15px 0 10px;
-            color: #4cc9f0;
-        }
-        
         .prizes-grid {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 8px;
-            margin: 15px 0;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 20px 0;
         }
         
-        .prize-chip {
-            padding: 6px 12px;
+        .prize-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 15px;
             background-color: #1a56a7;
             border-radius: 20px;
             font-size: 14px;
-            font-weight: bold;
-            border: 1px solid #4cc9f0;
         }
+        
+        .prize-amount {
+            font-weight: bold;
+        }
+        
+        .prize-chance {
+            color: #2ecc71;
+        }
+        .prize-chance.low { color: #e94560; }
+        .prize-chance.medium { color: #f1c40f; }
         
         .modal-buttons {
             display: flex;
@@ -263,10 +267,10 @@
             transition: transform 0.1s linear;
         }
         
-        .prize-item {
+        .slot-item {
             width: 280px;
-            height: 90px;
-            margin: 15px auto;
+            height: 80px;
+            margin: 10px auto;
             background-color: #16213e;
             border: 2px solid #4cc9f0;
             border-radius: 10px;
@@ -274,13 +278,13 @@
             justify-content: center;
             align-items: center;
             font-weight: bold;
-            font-size: 26px;
+            font-size: 24px;
             color: white;
             transition: all 0.5s;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
         
-        .prize-item.active {
+        .slot-item.active {
             transform: scale(1.08);
             box-shadow: 0 0 25px rgba(46, 204, 113, 0.8);
             border-color: #2ecc71;
@@ -321,6 +325,13 @@
             font-size: 24px;
             margin-bottom: 15px;
             color: #4cc9f0;
+            animation: titlePulse 1.5s infinite;
+        }
+        
+        @keyframes titlePulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
         }
         
         .result-amount {
@@ -328,24 +339,37 @@
             font-weight: bold;
             color: #2ecc71;
             margin: 20px 0;
-            text-shadow: 0 0 10px rgba(46, 204, 113, 0.5);
+        }
+        
+        .result-chance {
+            color: #f1c40f;
+            margin-bottom: 20px;
+        }
+        
+        .result-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
         }
         
         .result-button {
             padding: 12px 24px;
-            background: linear-gradient(135deg, #4cc9f0 0%, #2a9fd8 100%);
-            color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 18px;
-            transition: transform 0.2s, box-shadow 0.2s;
+            font-size: 16px;
+            transition: transform 0.2s;
         }
         
-        .result-button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 15px rgba(76, 201, 240, 0.5);
+        .result-button.primary {
+            background: linear-gradient(135deg, #4cc9f0 0%, #2a9fd8 100%);
+            color: white;
+        }
+        
+        .result-button.secondary {
+            background: linear-gradient(135deg, #e94560 0%, #b32e46 100%);
+            color: white;
         }
     </style>
 </head>
@@ -370,7 +394,7 @@
         <div class="case">
             <div class="case-image" style="background-image: url('https://via.placeholder.com/200/0f3460/e94560?text=Новичок');"></div>
             <div class="case-name">Новичок</div>
-            <div class="case-range">Выигрыш: от 10р до 500р</div>
+            <div class="case-range">Выигрыш: от 10р до 1000р</div>
             <button class="open-button" onclick="openCaseModal('beginner')">Открыть за 50р</button>
         </div>
     </div>
@@ -380,7 +404,6 @@
             <div class="modal-title" id="modalCaseName">Подтверждение</div>
             <p id="modalCaseDescription">Вы уверены, что хотите открыть этот кейс?</p>
             
-            <div class="prizes-title">Содержимое:</div>
             <div class="prizes-grid" id="prizesGrid"></div>
             
             <div class="modal-buttons">
@@ -400,9 +423,12 @@
     <div class="result-modal" id="resultModal">
         <div class="result-content">
             <div class="result-title">Поздравляем!</div>
-            <p>Ваш выигрыш:</p>
-            <div class="result-amount" id="resultAmount">+50р</div>
-            <button class="result-button" onclick="closeResultModal()">OK</button>
+            <div class="result-amount" id="resultAmount"></div>
+            <div class="result-chance" id="resultChance"></div>
+            <div class="result-buttons">
+                <button class="result-button primary" onclick="closeResultModal()">OK</button>
+                <button class="result-button secondary" onclick="openAgain()">Открыть еще</button>
+            </div>
         </div>
     </div>
     
@@ -441,15 +467,16 @@
                 name: "Новичок",
                 price: 50,
                 prizes: [
-                    { amount: 10, weight: 15 },
-                    { amount: 15, weight: 14 },
-                    { amount: 20, weight: 13 },
+                    { amount: 5, weight: 15 },
+                    { amount: 10, weight: 14 },
+                    { amount: 15, weight: 13 },
                     { amount: 25, weight: 12 },
                     { amount: 50, weight: 10 },
                     { amount: 100, weight: 8 },
                     { amount: 150, weight: 7 },
                     { amount: 250, weight: 4 },
-                    { amount: 500, weight: 2 }
+                    { amount: 500, weight: 2 },
+                    { amount: 1000, weight: 1 }
                 ]
             }
         };
@@ -458,6 +485,7 @@
         let userBalance = 0;
         let currentCase = null;
         let currentPrize = null;
+        let currentChance = 0;
 
         const balanceElement = document.getElementById('userBalance');
         const confirmationModal = document.getElementById('confirmationModal');
@@ -469,6 +497,7 @@
         const modalCaseDescription = document.getElementById('modalCaseDescription');
         const confirmOpenButton = document.getElementById('confirmOpen');
         const resultAmount = document.getElementById('resultAmount');
+        const resultChance = document.getElementById('resultChance');
 
         document.addEventListener('DOMContentLoaded', function() {
             userId = getCookie('tg_user_id');
@@ -507,11 +536,26 @@
         function openCaseModal(caseType) {
             currentCase = caseType;
             const caseData = cases[caseType];
+            
             modalCaseName.textContent = caseData.name;
             modalCaseDescription.textContent = `Вы уверены, что хотите открыть кейс "${caseData.name}" за ${caseData.price}р?`;
-            prizesGrid.innerHTML = caseData.prizes.map(prize => 
-                `<div class="prize-chip">${prize.amount}р</div>`
-            ).join('');
+            
+            const totalWeight = caseData.prizes.reduce((sum, p) => sum + p.weight, 0);
+            prizesGrid.innerHTML = caseData.prizes.map(prize => {
+                const chance = ((prize.weight / totalWeight) * 100).toFixed(1);
+                let chanceClass = '';
+                if (chance > 15) chanceClass = 'high';
+                else if (chance > 5) chanceClass = 'medium';
+                else chanceClass = 'low';
+                
+                return `
+                    <div class="prize-item">
+                        <span class="prize-amount">${prize.amount}р</span>
+                        <span class="prize-chance ${chanceClass}">${chance}%</span>
+                    </div>
+                `;
+            }).join('');
+            
             confirmationModal.style.display = 'flex';
         }
 
@@ -522,30 +566,32 @@
         function openCase() {
             closeModal();
             const caseData = cases[currentCase];
+            
             database.ref('users/' + userId).update({
                 balance: userBalance - caseData.price
             });
-            showAnimation(caseData);
+            
+            startAnimation(caseData);
         }
 
-        function showAnimation(caseData) {
+        function startAnimation(caseData) {
             animationContainer.style.display = 'flex';
             prizeContainer.innerHTML = '';
 
-            const prizeSequence = generatePrizeSequence(caseData);
-            const targetIndex = Math.floor(prizeSequence.length * 0.7);
-            const itemHeight = 120;
+            const { sequence, totalWeight } = generatePrizeSequence(caseData);
+            const targetIndex = Math.floor(Math.random() * (sequence.length - 20) + 10);
+            const itemHeight = 100;
 
-            prizeSequence.forEach((prize, index) => {
+            sequence.forEach((prize, index) => {
                 const element = document.createElement('div');
-                element.className = 'prize-item';
+                element.className = 'slot-item';
                 element.textContent = prize.amount + 'р';
                 element.dataset.amount = prize.amount;
                 element.style.top = `${index * itemHeight}px`;
                 prizeContainer.appendChild(element);
             });
 
-            prizeContainer.style.height = `${prizeSequence.length * itemHeight}px`;
+            prizeContainer.style.height = `${sequence.length * itemHeight}px`;
             
             const startPosition = 0;
             const targetPosition = -(targetIndex * itemHeight) + 200;
@@ -564,59 +610,61 @@
                 if (progress < 1) {
                     requestAnimationFrame(animate);
                 } else {
-                    const centerLine = window.innerHeight / 2;
-                    prizeContainer.querySelectorAll('.prize-item').forEach(item => {
-                        const rect = item.getBoundingClientRect();
-                        if (rect.top <= centerLine && rect.bottom >= centerLine) {
-                            item.classList.add('active');
-                            currentPrize = { amount: parseInt(item.dataset.amount) };
-                        }
-                    });
-                    setTimeout(() => {
-                        animationContainer.style.display = 'none';
-                        showResult(currentPrize.amount);
-                    }, 1500);
+                    finalizeAnimation();
                 }
             }
+
+            function finalizeAnimation() {
+                const centerLine = window.innerHeight / 2;
+                prizeContainer.querySelectorAll('.slot-item').forEach(item => {
+                    const rect = item.getBoundingClientRect();
+                    if (rect.top <= centerLine && rect.bottom >= centerLine) {
+                        item.classList.add('active');
+                        currentPrize = caseData.prizes.find(p => p.amount === parseInt(item.dataset.amount));
+                    }
+                });
+                
+                setTimeout(() => {
+                    animationContainer.style.display = 'none';
+                    showResult();
+                }, 1500);
+            }
+
             requestAnimationFrame(animate);
         }
 
         function generatePrizeSequence(caseData) {
-            let totalWeight = caseData.prizes.reduce((sum, prize) => sum + prize.weight, 0);
-            let random = Math.random() * totalWeight;
-            let weightSum = 0;
-
-            for (const prize of caseData.prizes) {
-                weightSum += prize.weight;
-                if (random <= weightSum) {
-                    currentPrize = prize;
-                    break;
-                }
-            }
-
-            const sequence = caseData.prizes.flatMap(prize => 
-                Array(Math.ceil(prize.weight * 1.2)).fill(prize)
-            );
+            const totalWeight = caseData.prizes.reduce((sum, p) => sum + p.weight, 0);
+            let sequence = [];
+            
+            caseData.prizes.forEach(prize => {
+                sequence.push(...Array(prize.weight * 2).fill(prize));
+            });
 
             for (let i = sequence.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [sequence[i], sequence[j]] = [sequence[j], sequence[i]];
             }
 
-            sequence.push(...Array(5).fill(currentPrize));
-            return sequence;
+            return { sequence, totalWeight };
         }
 
-        function showResult(amount) {
-            database.ref('users/' + userId).update({
-                balance: userBalance - cases[currentCase].price + amount
-            });
-            resultAmount.textContent = `+${amount}р`;
+        function showResult() {
+            const totalWeight = cases[currentCase].prizes.reduce((sum, p) => sum + p.weight, 0);
+            currentChance = ((currentPrize.weight / totalWeight) * 100).toFixed(1);
+            
+            resultAmount.textContent = `${currentPrize.amount}р`;
+            resultChance.textContent = `Шанс выпадения: ${currentChance}%`;
             resultModal.style.display = 'flex';
         }
 
         function closeResultModal() {
             resultModal.style.display = 'none';
+        }
+
+        function openAgain() {
+            closeResultModal();
+            openCaseModal(currentCase);
         }
     </script>
 </body>
