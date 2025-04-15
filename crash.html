@@ -329,6 +329,32 @@
         .notification-text {
             color: white;
         }
+            .slot-item {
+            width: 120px;
+            height: 160px;
+            margin: 10px;
+            background-color: #16213e;
+            border: 2px solid #4cc9f0;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 28px;
+            color: white;
+            transition: transform 0.2s, box-shadow 0.2s;
+            flex-shrink: 0;
+        }
+
+        .animation-box {
+            width: 90%;
+            max-width: 800px;
+            height: 200px;
+        }
+
+        .slots-container {
+            transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
+        }
     </style>
 </head>
 <body>
@@ -377,7 +403,110 @@
         </div>
     </div>
     
-    <script>
+   <script>
+        // Измененная функция showAnimation
+        function showAnimation(caseData) {
+            animationContainer.style.display = 'flex';
+            slotsContainer.innerHTML = '';
+
+            // Генерация последовательности призов
+            const prizeSequence = generatePrizeSequence(caseData);
+            
+            // Создание элементов
+            prizeSequence.forEach(prize => {
+                const slotItem = document.createElement('div');
+                slotItem.className = 'slot-item';
+                slotItem.textContent = prize.amount + 'р';
+                slotItem.dataset.amount = prize.amount;
+                slotsContainer.appendChild(slotItem);
+            });
+
+            // Настройка анимации
+            const itemWidth = 140; // Ширина элемента с учетом margin
+            const totalItems = prizeSequence.length;
+            const totalWidth = totalItems * itemWidth * 2;
+            slotsContainer.style.width = `${totalWidth}px`;
+
+            let startPosition = -totalWidth / 2 + 400;
+            slotsContainer.style.left = `${startPosition}px`;
+
+            // Параметры анимации
+            const duration = 5000; // 5 секунд
+            const acceleration = 0.0004;
+            let startTime = null;
+            let currentSpeed = 0;
+            let currentPosition = startPosition;
+            let targetPosition = -((totalItems - 15) * itemWidth) + 400;
+
+            function animate(timestamp) {
+                if (!startTime) startTime = timestamp;
+                const elapsed = timestamp - startTime;
+                const progress = elapsed / duration;
+
+                if (elapsed < 1500) {
+                    // Фаза ускорения
+                    currentSpeed += acceleration;
+                } else if (elapsed < 3500) {
+                    // Постоянная скорость
+                    currentSpeed = 2.5;
+                } else {
+                    // Фаза замедления
+                    currentSpeed = Math.max(currentSpeed - acceleration * 2, 0.2);
+                }
+
+                currentPosition -= currentSpeed;
+                
+                if (elapsed < duration) {
+                    slotsContainer.style.left = `${currentPosition}px`;
+                    requestAnimationFrame(animate);
+                } else {
+                    // Финишная позиция
+                    slotsContainer.style.left = `${targetPosition}px`;
+                    
+                    // Подсветка выигрыша
+                    const slotItems = slotsContainer.querySelectorAll('.slot-item');
+                    slotItems.forEach(item => {
+                        if (parseInt(item.dataset.amount) === currentPrize.amount) {
+                            item.classList.add('active');
+                        }
+                    });
+
+                    // Показать уведомление
+                    setTimeout(() => {
+                        animationContainer.style.display = 'none';
+                        showNotification(currentPrize.amount, caseData.name);
+                    }, 1000);
+                }
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        // Новая функция генерации последовательности
+        function generatePrizeSequence(caseData) {
+            let sequence = [];
+            
+            // Заполняем последовательность согласно весам
+            caseData.prizes.forEach(prize => {
+                for (let i = 0; i < prize.weight * 2; i++) {
+                    sequence.push(prize);
+                }
+            });
+
+            // Перемешиваем
+            for (let i = sequence.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [sequence[i], sequence[j]] = [sequence[j], sequence[i]];
+            }
+
+            // Добавляем 20 копий выигрышного приза в конец
+            for (let i = 0; i < 20; i++) {
+                sequence.push(currentPrize);
+            }
+
+            return sequence;
+        }
+
         // Firebase initialization
         const firebaseConfig = {
             apiKey: "AIzaSyCMos6Y7C-krTLuKCI4VJG-TFLo6QI--k8",
