@@ -26,7 +26,6 @@
             padding: 15px 20px;
             background-color: #16213e;
             border-bottom: 2px solid #0f3460;
-            position: relative;
         }
         
         .back-button {
@@ -95,15 +94,10 @@
             width: 200px;
             height: 200px;
             margin: 0 auto 15px;
-            background-color: #0f3460;
+            background-size: cover;
+            background-position: center;
             border-radius: 5px;
             border: 2px solid #4cc9f0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
-            font-weight: bold;
-            color: #4cc9f0;
         }
         
         .case-name {
@@ -221,8 +215,8 @@
         }
         
         .animation-box {
-            width: 90%;
-            max-width: 800px;
+            width: 80%;
+            max-width: 600px;
             height: 200px;
             position: relative;
             overflow: hidden;
@@ -239,97 +233,75 @@
             height: 100%;
             background-color: #e94560;
             z-index: 10;
-            box-shadow: 0 0 10px rgba(233, 69, 96, 0.8);
         }
         
-        .slots-container {
-            display: flex;
+        .prize-item {
             position: absolute;
-            top: 20px;
-            left: 0;
-            height: 160px;
-            transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
-        }
-        
-        .slot-item {
-            width: 140px;
-            height: 160px;
-            margin: 0 10px;
+            width: 100px;
+            height: 50px;
             background-color: #16213e;
-            border: 2px solid #4cc9f0;
-            border-radius: 8px;
+            border: 1px solid #4cc9f0;
+            border-radius: 5px;
             display: flex;
             justify-content: center;
             align-items: center;
             font-weight: bold;
-            font-size: 28px;
             color: white;
-            transition: all 0.3s;
-            flex-shrink: 0;
-        }
-        
-        .slot-item.active {
-            transform: scale(1.1);
-            box-shadow: 0 0 20px rgba(76, 201, 240, 0.8);
-            border-color: #e94560;
-            background-color: #1a56a7;
-        }
-        
-        /* Notification styles */
-        .notification {
-            position: fixed;
-            top: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
-            padding: 15px 20px;
-            border-radius: 8px;
-            border: 2px solid #4cc9f0;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-            z-index: 1003;
-            display: flex;
+            transition: transform 0.1s;
+        }
+        
+        .result-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1002;
+            justify-content: center;
             align-items: center;
-            max-width: 90%;
-            animation: slideIn 0.5s forwards;
         }
         
-        .notification.hide {
-            animation: slideOut 0.5s forwards;
+        .result-content {
+            background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            border: 2px solid #4cc9f0;
         }
         
-        @keyframes slideIn {
-            from { top: -100px; opacity: 0; }
-            to { top: 20px; opacity: 1; }
-        }
-        
-        @keyframes slideOut {
-            from { top: 20px; opacity: 1; }
-            to { top: -100px; opacity: 0; }
-        }
-        
-        .notification-close {
-            margin-left: 15px;
-            background: none;
-            border: none;
-            color: #e94560;
-            font-size: 20px;
-            cursor: pointer;
-            padding: 0 5px;
-        }
-        
-        .notification-content {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .notification-title {
-            font-weight: bold;
+        .result-title {
+            font-size: 24px;
+            margin-bottom: 15px;
             color: #4cc9f0;
-            margin-bottom: 5px;
         }
         
-        .notification-text {
+        .result-amount {
+            font-size: 36px;
+            font-weight: bold;
+            color: #e94560;
+            margin: 20px 0;
+        }
+        
+        .result-button {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #4cc9f0 0%, #2a9fd8 100%);
             color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            transition: transform 0.2s;
+        }
+        
+        .result-button:hover {
+            transform: scale(1.05);
         }
     </style>
 </head>
@@ -345,14 +317,14 @@
     
     <div class="cases-container">
         <div class="case">
-            <div class="case-image">Простой</div>
+            <div class="case-image" style="background-image: url('https://via.placeholder.com/200/16213e/4cc9f0?text=Простой');"></div>
             <div class="case-name">Простой</div>
             <div class="case-range">Выигрыш: от 1р до 100р</div>
             <button class="open-button" onclick="openCaseModal('simple')">Открыть за 10р</button>
         </div>
         
         <div class="case">
-            <div class="case-image">Новичок</div>
+            <div class="case-image" style="background-image: url('https://via.placeholder.com/200/0f3460/e94560?text=Новичок');"></div>
             <div class="case-name">Новичок</div>
             <div class="case-range">Выигрыш: от 50р до 500р</div>
             <button class="open-button" onclick="openCaseModal('beginner')">Открыть за 50р</button>
@@ -375,7 +347,17 @@
     <div class="animation-container" id="animationContainer">
         <div class="animation-box">
             <div class="center-line"></div>
-            <div class="slots-container" id="slotsContainer"></div>
+            <div id="prizeItems"></div>
+        </div>
+    </div>
+    
+    <!-- Result Modal -->
+    <div class="result-modal" id="resultModal">
+        <div class="result-content">
+            <div class="result-title">Поздравляем!</div>
+            <p>Ваш выигрыш:</p>
+            <div class="result-amount" id="resultAmount">+50р</div>
+            <button class="result-button" onclick="closeResultModal()">OK</button>
         </div>
     </div>
     
@@ -395,39 +377,21 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         
-        // Case definitions with prizes and weights
+        // Case definitions
         const cases = {
             simple: {
                 name: "Простой",
                 price: 10,
-                prizes: [
-                    { amount: 1, weight: 30 },
-                    { amount: 2, weight: 25 },
-                    { amount: 3, weight: 20 },
-                    { amount: 4, weight: 15 },
-                    { amount: 5, weight: 10 },
-                    { amount: 10, weight: 8 },
-                    { amount: 15, weight: 5 },
-                    { amount: 25, weight: 3 },
-                    { amount: 50, weight: 2 },
-                    { amount: 100, weight: 1 }
-                ]
+                minWin: 1,
+                maxWin: 100,
+                image: "https://via.placeholder.com/200/16213e/4cc9f0?text=Простой"
             },
             beginner: {
                 name: "Новичок",
                 price: 50,
-                prizes: [
-                    { amount: 50, weight: 30 },
-                    { amount: 75, weight: 25 },
-                    { amount: 100, weight: 20 },
-                    { amount: 150, weight: 15 },
-                    { amount: 200, weight: 10 },
-                    { amount: 250, weight: 8 },
-                    { amount: 300, weight: 5 },
-                    { amount: 400, weight: 3 },
-                    { amount: 450, weight: 2 },
-                    { amount: 500, weight: 1 }
-                ]
+                minWin: 50,
+                maxWin: 500,
+                image: "https://via.placeholder.com/200/0f3460/e94560?text=Новичок"
             }
         };
         
@@ -435,17 +399,17 @@
         let userId = null;
         let userBalance = 0;
         let currentCase = null;
-        let currentPrize = null;
-        let notificationTimeout = null;
         
         // DOM elements
         const balanceElement = document.getElementById('userBalance');
         const confirmationModal = document.getElementById('confirmationModal');
         const animationContainer = document.getElementById('animationContainer');
-        const slotsContainer = document.getElementById('slotsContainer');
+        const resultModal = document.getElementById('resultModal');
+        const prizeItemsContainer = document.getElementById('prizeItems');
         const modalCaseName = document.getElementById('modalCaseName');
         const modalCaseDescription = document.getElementById('modalCaseDescription');
         const confirmOpenButton = document.getElementById('confirmOpen');
+        const resultAmount = document.getElementById('resultAmount');
         
         // On page load
         document.addEventListener('DOMContentLoaded', function() {
@@ -533,184 +497,78 @@
         // Function to show animation
         function showAnimation(caseData) {
             animationContainer.style.display = 'flex';
-            slotsContainer.innerHTML = '';
+            prizeItemsContainer.innerHTML = '';
             
-            // Generate prize sequence based on weights
-            const prizeSequence = generatePrizeSequence(caseData);
+            // Generate random prizes for animation
+            const prizes = [];
+            for (let i = 0; i < 20; i++) {
+                prizes.push(Math.floor(Math.random() * (caseData.maxWin - caseData.minWin + 1) + caseData.minWin));
+            }
             
-            // Create slot items
-            prizeSequence.forEach(prize => {
-                const slotItem = document.createElement('div');
-                slotItem.className = 'slot-item';
-                slotItem.textContent = prize.amount + 'р';
-                slotItem.dataset.amount = prize.amount;
-                slotsContainer.appendChild(slotItem);
+            // Add the real prize at the end
+            const realPrize = Math.floor(Math.random() * (caseData.maxWin - caseData.minWin + 1) + caseData.minWin);
+            prizes.push(realPrize);
+            
+            // Create prize elements
+            prizes.forEach((prize, index) => {
+                const prizeElement = document.createElement('div');
+                prizeElement.className = 'prize-item';
+                prizeElement.textContent = prize + 'р';
+                prizeElement.style.top = `${index * 60}px`;
+                prizeItemsContainer.appendChild(prizeElement);
             });
             
-            // Duplicate items for seamless animation
-            const itemsToClone = slotsContainer.querySelectorAll('.slot-item');
-            itemsToClone.forEach(item => {
-                const clone = item.cloneNode(true);
-                slotsContainer.appendChild(clone);
-            });
-            
-            // Calculate total width
-            const itemWidth = 160; // 140px width + 20px margin
-            const totalItems = prizeSequence.length * 2;
-            const totalWidth = totalItems * itemWidth;
-            slotsContainer.style.width = `${totalWidth}px`;
-            
-            // Start position (middle)
-            const startPosition = -totalWidth / 2 + 400;
-            slotsContainer.style.left = `${startPosition}px`;
-            
-            // Animation parameters
-            const duration = 5000; // 5 seconds total
-            const accelerationPhase = 1500; // 1.5s acceleration
-            const constantPhase = 3000; // 1.5s constant speed (after acceleration)
-            const decelerationPhase = 500; // 0.5s deceleration
-            
+            // Animate
             let startTime = null;
-            let currentSpeed = 0;
-            const maxSpeed = 1.8;
-            const acceleration = maxSpeed / accelerationPhase;
-            const deceleration = maxSpeed / decelerationPhase;
-            
-            // Target position (aligned with center line)
-            const targetIndex = prizeSequence.length - 10;
-            const targetPosition = -targetIndex * itemWidth + 400;
+            const duration = 4000; // 4 seconds
             
             function animate(timestamp) {
                 if (!startTime) startTime = timestamp;
-                const elapsed = timestamp - startTime;
+                const progress = timestamp - startTime;
                 
-                // Calculate current speed
-                if (elapsed < accelerationPhase) {
-                    // Acceleration phase
-                    currentSpeed = acceleration * elapsed;
-                } else if (elapsed < constantPhase) {
-                    // Constant speed phase
-                    currentSpeed = maxSpeed;
-                } else if (elapsed < duration) {
-                    // Deceleration phase
-                    currentSpeed = maxSpeed - deceleration * (elapsed - constantPhase);
+                // Ease-out function (starts fast, ends slow)
+                const easeOutProgress = 1 - Math.pow(1 - Math.min(progress / duration, 1), 3);
+                
+                // Calculate how far to move
+                const moveDistance = easeOutProgress * (prizes.length * 60 - 100);
+                
+                // Move all prize items
+                const prizeElements = document.querySelectorAll('.prize-item');
+                prizeElements.forEach(element => {
+                    const originalTop = parseInt(element.style.top);
+                    element.style.transform = `translateX(-50%) translateY(${-moveDistance}px)`;
+                });
+                
+                if (progress < duration) {
+                    requestAnimationFrame(animate);
                 } else {
-                    // Final position
-                    slotsContainer.style.left = `${targetPosition}px`;
-                    
-                    // Highlight winning prize
-                    const slotItems = slotsContainer.querySelectorAll('.slot-item');
-                    slotItems.forEach(item => {
-                        if (parseInt(item.dataset.amount) === currentPrize.amount) {
-                            item.classList.add('active');
-                        }
-                    });
-                    
-                    // Show notification
+                    // Animation complete, show result
                     setTimeout(() => {
                         animationContainer.style.display = 'none';
-                        showNotification(currentPrize.amount, caseData.name);
-                    }, 1000);
-                    
-                    return;
+                        showResult(realPrize);
+                    }, 500);
                 }
-                
-                // Update position
-                const currentPosition = parseFloat(slotsContainer.style.left) - currentSpeed;
-                slotsContainer.style.left = `${currentPosition}px`;
-                
-                requestAnimationFrame(animate);
             }
             
             requestAnimationFrame(animate);
         }
         
-        // Function to generate prize sequence
-        function generatePrizeSequence(caseData) {
-            let sequence = [];
-            
-            // Calculate total weight
-            let totalWeight = 0;
-            caseData.prizes.forEach(prize => totalWeight += prize.weight);
-            
-            // Select random prize (weighted)
-            let random = Math.random() * totalWeight;
-            let weightSum = 0;
-            
-            for (const prize of caseData.prizes) {
-                weightSum += prize.weight;
-                if (random <= weightSum) {
-                    currentPrize = prize;
-                    break;
-                }
-            }
-            
-            // Fill sequence with prizes according to weights
-            caseData.prizes.forEach(prize => {
-                const count = Math.max(1, Math.floor(prize.weight * 2));
-                for (let i = 0; i < count; i++) {
-                    sequence.push(prize);
-                }
-            });
-            
-            // Shuffle sequence
-            for (let i = sequence.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [sequence[i], sequence[j]] = [sequence[j], sequence[i]];
-            }
-            
-            // Add winning prizes to the end
-            for (let i = 0; i < 10; i++) {
-                sequence.push(currentPrize);
-            }
-            
-            return sequence;
-        }
-        
-        // Function to show notification
-        function showNotification(amount, caseName) {
+        // Function to show result
+        function showResult(amount) {
             // Add winnings to balance
             const newBalance = userBalance - cases[currentCase].price + amount;
             database.ref('users/' + userId).update({
                 balance: newBalance
             });
             
-            // Create notification
-            const notification = document.createElement('div');
-            notification.className = 'notification';
-            
-            const content = document.createElement('div');
-            content.className = 'notification-content';
-            
-            const title = document.createElement('div');
-            title.className = 'notification-title';
-            title.textContent = 'Поздравляем!';
-            
-            const text = document.createElement('div');
-            text.className = 'notification-text';
-            text.textContent = `Вам выпало ${amount}р с кейса "${caseName}"`;
-            
-            const closeButton = document.createElement('button');
-            closeButton.className = 'notification-close';
-            closeButton.innerHTML = '&times;';
-            closeButton.onclick = () => {
-                notification.classList.add('hide');
-                clearTimeout(notificationTimeout);
-                setTimeout(() => notification.remove(), 500);
-            };
-            
-            content.appendChild(title);
-            content.appendChild(text);
-            notification.appendChild(content);
-            notification.appendChild(closeButton);
-            
-            document.body.appendChild(notification);
-            
-            // Auto-close after 5 seconds
-            notificationTimeout = setTimeout(() => {
-                notification.classList.add('hide');
-                setTimeout(() => notification.remove(), 500);
-            }, 5000);
+            // Show result modal
+            resultAmount.textContent = `+${amount}р`;
+            resultModal.style.display = 'flex';
+        }
+        
+        // Function to close result modal
+        function closeResultModal() {
+            resultModal.style.display = 'none';
         }
     </script>
 </body>
