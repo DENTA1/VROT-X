@@ -146,6 +146,12 @@
             color: #e94560;
         }
         
+        .case-price {
+            font-size: 16px;
+            color: #4cc9f0;
+            margin-bottom: 10px;
+        }
+        
         .open-button {
             padding: 10px 20px;
             background: linear-gradient(135deg, #e94560 0%, #b32e46 100%);
@@ -377,7 +383,7 @@
         .slot-item.low { background: rgba(233, 69, 96, 0.7); }
         
         .slot-item.active {
-            animation: highlight 2s infinite, pulse 1s infinite alternate;
+            animation: highlight 1s infinite, pulse 0.5s infinite alternate;
             background: linear-gradient(135deg, #4cc9f0 0%, #2a9fd8 100%);
             box-shadow: 0 0 25px rgba(76, 201, 240, 0.8);
         }
@@ -473,12 +479,6 @@
         .result-button.secondary {
             background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
             color: white;
-        }
-        
-        .case-price {
-            font-size: 16px;
-            color: #4cc9f0;
-            margin-bottom: 10px;
         }
     </style>
 </head>
@@ -720,7 +720,7 @@
                 if (chance > 15) chanceClass = 'high';
                 else if (chance > 5) chanceClass = 'medium';
                 
-                sequence.push(...Array(prize.weight * 30).fill({...prize, chanceClass}));
+                sequence.push(...Array(prize.weight * 15).fill({...prize, chanceClass}));
             });
 
             for (let i = sequence.length - 1; i > 0; i--) {
@@ -737,7 +737,7 @@
             animationCaseName.textContent = caseData.name;
 
             const { sequence, totalWeight } = generatePrizeSequence(caseData);
-            const targetIndex = Math.floor(Math.random() * (sequence.length - 150) + 75);
+            const targetIndex = Math.floor(Math.random() * (sequence.length - 60) + 30);
             const itemHeight = 90;
 
             sequence.forEach((prize, index) => {
@@ -754,7 +754,7 @@
             
             const startPosition = 0;
             const targetPosition = -(targetIndex * itemHeight) + (Math.random() * 100 + 150);
-            const duration = 12000; // 12 секунд анимации
+            const duration = 3000 + Math.random() * 1000; // 3-4 секунды
             let startTime = null;
 
             function animate(timestamp) {
@@ -764,12 +764,12 @@
                 
                 // Плавное ускорение и замедление
                 let eased;
-                if (progress < 0.2) {
+                if (progress < 0.3) {
                     // Ускорение в начале
-                    eased = easeInQuad(progress / 0.2) * 0.2;
-                } else if (progress > 0.8) {
+                    eased = easeInCubic(progress / 0.3) * 0.3;
+                } else if (progress > 0.7) {
                     // Замедление в конце
-                    eased = 0.8 + easeOutQuad((progress - 0.8) / 0.2) * 0.2;
+                    eased = 0.7 + easeOutCubic((progress - 0.7) / 0.3) * 0.3;
                 } else {
                     // Линейная часть в середине
                     eased = progress;
@@ -785,12 +785,12 @@
                 }
             }
 
-            function easeInQuad(t) {
-                return t * t;
+            function easeInCubic(t) {
+                return t * t * t;
             }
 
-            function easeOutQuad(t) {
-                return t * (2 - t);
+            function easeOutCubic(t) {
+                return 1 - Math.pow(1 - t, 3);
             }
 
             function finalizeAnimation() {
