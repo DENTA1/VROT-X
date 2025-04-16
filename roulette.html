@@ -173,6 +173,16 @@
             font-size: 14px;
             margin-top: 10px;
         }
+        
+        .retry-button {
+            background: none;
+            border: none;
+            color: #4299e1;
+            text-decoration: underline;
+            cursor: pointer;
+            padding: 0;
+            margin-left: 5px;
+        }
     </style>
 </head>
 <body>
@@ -190,7 +200,7 @@
                     <input type="text" id="message-input" placeholder="Напишите сообщение..." autocomplete="off" autofocus>
                     <button id="send-button">Отправить</button>
                 </div>
-                <p class="status-message" id="status-message">Используется бесплатный прокси для OpenRouter API</p>
+                <p class="status-message" id="status-message">Готов к общению</p>
             </div>
         </div>
     </div>
@@ -203,11 +213,16 @@
             const typingIndicator = document.getElementById('typing-indicator');
             const statusMessage = document.getElementById('status-message');
             
-            // Используем бесплатный прокси для OpenRouter API
-            const PROXY_URL = "https://api.openrouter-proxy.workers.dev";
+            // Список резервных API endpoints
+            const API_ENDPOINTS = [
+                "https://chatgpt.apinepdev.workers.dev",
+                "https://free.churchless.tech",
+                "https://api.openrouter-proxy.workers.dev"
+            ];
             
-            // История сообщений
+            let currentApiIndex = 0;
             let conversationHistory = [];
+            let lastMessage = null;
             
             function addMessage(content, isUser) {
                 const messageDiv = document.createElement('div');
@@ -224,54 +239,38 @@
             }
             
             function updateStatus(text, isError = false) {
-                statusMessage.textContent = text;
+                statusMessage.innerHTML = text;
                 statusMessage.style.color = isError ? '#e53e3e' : '#718096';
             }
             
-            async function queryAI(message) {
+            async function tryNextApiEndpoint(message) {
+                if (currentApiIndex >= API_ENDPOINTS.length) {
+                    throw new Error("Все API endpoints недоступны. Попробуйте позже.");
+                }
+                
+                const apiUrl = API_ENDPOINTS[currentApiIndex];
                 try {
-                    // Добавляем сообщение пользователя в историю
-                    conversationHistory.push({
-                        role: "user",
-                        content: message
-                    });
-                    
-                    updateStatus("ИИ набирает ответ...");
-                    typingIndicator.style.display = 'block';
-                    chatMessages.scrollTop = chatMessages.scrollHeight;
-                    
-                    const response = await fetch(PROXY_URL, {
+                    const response = await fetch(apiUrl, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
-                            model: "openai/gpt-3.5-turbo", // Используем GPT-3.5 по умолчанию
-                            messages: conversationHistory,
-                            temperature: 0.7
+                            question: message,
+                            api_key: "free"
                         })
                     });
                     
                     if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.error?.message || `Ошибка ${response.status}`);
+                        throw new Error(`Ошибка API: ${response.status}`);
                     }
                     
                     const data = await response.json();
-                    const aiResponse = data.choices[0].message.content;
-                    
-                    // Добавляем ответ ИИ в историю
-                    conversationHistory.push({
-                        role: "assistant",
-                        content: aiResponse
-                    });
-                    
-                    return aiResponse;
+                    return data.answer || data.response || "Не получилось обработать ответ API";
                 } catch (error) {
-                    console.error('API Error:', error);
-                    throw error;
-                } finally {
-                    typingIndicator.style.display = 'none';
+                    console.error(`Ошибка с API ${apiUrl}:`, error);
+                    currentApiIndex++;
+                    return tryNextApiEndpoint(message);
                 }
             }
             
@@ -279,19 +278,50 @@
                 const message = messageInput.value.trim();
                 if (!message) return;
                 
+                lastMessage = message;
                 addMessage(message, true);
                 messageInput.value = '';
                 sendButton.disabled = true;
+                typingIndicator.style.display = 'block';
                 
                 try {
-                    const aiResponse = await queryAI(message);
+                    const aiResponse = await tryNextApiEndpoint(message);
                     addMessage(aiResponse, false);
                     updateStatus("Готов к общению");
+                    currentApiIndex = 0; // Сброс индекса после успешного запроса
                 } catch (error) {
                     console.error('Error:', error);
-                    addMessage("Извините, произошла ошибка. Пожалуйста, попробуйте позже.", false);
-                    updateStatus(`Ошибка: ${error.message}`, true);
+                    addMessage(`Ошибка: ${error.message}`, false);
+                    updateStatus(`Ошибка соединения. <button class="retry-button" id="retry-button">Попробовать снова</button>`, true);
+                    
+                    document.getElementById('retry-button')?.addEventListener('click', function() {
+                        if (lastMessage) {
+                            sendMessageFromRetry(lastMessage);
+                        }
+                    });
                 } finally {
+                    typingIndicator.style.display = 'none';
+                    sendButton.disabled = false;
+                    messageInput.focus();
+                }
+            }
+            
+            async function sendMessageFromRetry(message) {
+                addMessage(message, true);
+                sendButton.disabled = true;
+                typingIndicator.style.display = 'block';
+                
+                try {
+                    const aiResponse = await tryNextApiEndpoint(message);
+                    addMessage(aiResponse, false);
+                    updateStatus("Готов к общению");
+                    currentApiIndex = 0;
+                } catch (error) {
+                    console.error('Retry Error:', error);
+                    addMessage(`Ошибка при повторной попытке: ${error.message}`, false);
+                    updateStatus(`Ошибка соединения. <button class="retry-button" id="retry-button">Попробовать снова</button>`, true);
+                } finally {
+                    typingIndicator.style.display = 'none';
                     sendButton.disabled = false;
                     messageInput.focus();
                 }
@@ -312,10 +342,6 @@
             // Приветственное сообщение
             setTimeout(() => {
                 addMessage("Привет! Я бесплатный ИИ-ассистент. Чем могу помочь?", false);
-                conversationHistory.push({
-                    role: "assistant",
-                    content: "Привет! Я бесплатный ИИ-ассистент. Чем могу помочь?"
-                });
             }, 800);
         });
     </script>
