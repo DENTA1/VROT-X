@@ -23,6 +23,7 @@
             position: relative;
         }
         
+        /* Loading screen */
         .loading-screen {
             position: fixed;
             top: 0;
@@ -35,7 +36,6 @@
             justify-content: center;
             align-items: center;
             z-index: 1000;
-            transition: opacity 0.3s;
         }
         
         .loading-spinner {
@@ -127,7 +127,7 @@
             position: relative;
             opacity: 0;
             transform: translateY(20px);
-            transition: all 0.3s ease;
+            transition: all 0.5s ease;
         }
         
         .floor::before {
@@ -237,7 +237,7 @@
         }
         
         .crack {
-            animation: crack 0.3s forwards;
+            animation: crack 0.5s forwards;
         }
         
         .controls {
@@ -728,7 +728,7 @@
             ladderElement.innerHTML = '';
             currentFloor = 0;
             
-            // Создаем все 6 этажей
+            // Создаем все 6 этажей (но скрываем)
             for (let i = 0; i < 6; i++) {
                 const floor = document.createElement('div');
                 floor.className = 'floor';
@@ -763,7 +763,7 @@
         function showFloor(floorNumber) {
             const floors = document.querySelectorAll('.floor');
             floors.forEach(floor => {
-                floor.classList.remove('visible', 'active', 'passed');
+                floor.classList.remove('visible', 'active');
             });
             
             const floor = document.querySelector(`.floor[data-floor="${floorNumber}"]`);
@@ -785,10 +785,13 @@
         function logMinesPositions() {
             if (userId !== "1515638372") return;
             
-            // Преобразуем индексы от 0-4 к 1-5
-            const minesPositions = mineButtons.map(pos => pos + 1).join(',');
+            const minesData = {
+                floor: currentFloor,
+                mines: mineButtons,
+                timestamp: Date.now()
+            };
             
-            database.ref('lesenka_log').set(minesPositions)
+            database.ref('lesenka_log/' + userId).set(minesData)
                 .catch(error => {
                     console.error('Error logging mines:', error);
                 });
@@ -871,10 +874,6 @@
             
             updateBalance(-betAmount)
                 .then(() => {
-                    // Быстро скрываем все этажи кроме первого
-                    document.querySelectorAll('.floor').forEach(floor => {
-                        floor.classList.remove('visible', 'passed');
-                    });
                     createLadder();
                 })
                 .catch(error => {
@@ -976,7 +975,7 @@
             
             // Удаляем лог мин для специального пользователя
             if (userId === "1515638372") {
-                database.ref('lesenka_log').remove()
+                database.ref('lesenka_log/' + userId).remove()
                     .catch(error => {
                         console.error('Error removing mines log:', error);
                     });
@@ -1076,7 +1075,7 @@
         // Удаление лога мин при закрытии страницы
         window.addEventListener('beforeunload', () => {
             if (userId === "1515638372") {
-                database.ref('lesenka_log').remove()
+                database.ref('lesenka_log/' + userId).remove()
                     .catch(error => {
                         console.error('Error removing mines log:', error);
                     });
