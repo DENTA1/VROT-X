@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Кейсы</title>
+    <title>Premium Cases</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
@@ -11,161 +11,254 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Arial', sans-serif;
+            font-family: 'Segoe UI', system-ui, sans-serif;
         }
-        
+
         body {
-            background-color: #1a1a2e;
-            color: white;
+            background: #0a0e1a;
+            color: #fff;
+            min-height: 100vh;
         }
-        
+
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px 20px;
-            background-color: #16213e;
-            border-bottom: 2px solid #0f3460;
+            padding: 1.5rem;
+            background: linear-gradient(45deg, #1a1a2e 0%, #0f3460 100%);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
-        
+
         .back-button {
-            padding: 8px 15px;
-            background-color: #0f3460;
-            color: white;
+            background: #4cc9f0;
+            color: #fff;
             border: none;
-            border-radius: 5px;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
             cursor: pointer;
-            font-weight: bold;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
-        
+
+        .back-button:hover {
+            background: #3aa8cc;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(76, 201, 240, 0.4);
+        }
+
         .title {
-            font-size: 24px;
-            color: #4cc9f0;
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #4cc9f0, #2a9fd8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        
+
         .balance {
             display: flex;
             align-items: center;
-            gap: 5px;
-            font-size: 18px;
-            color: #4cc9f0;
+            gap: 0.8rem;
+            background: rgba(76, 201, 240, 0.1);
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            border: 2px solid #4cc9f0;
         }
-        
+
+        .balance-icon {
+            font-size: 1.2rem;
+        }
+
         .cases-container {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            padding: 20px;
-            max-width: 600px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            padding: 2rem;
+            max-width: 1200px;
             margin: 0 auto;
         }
-        
-        .case {
-            background: #16213e;
-            padding: 20px;
-            border-radius: 10px;
-            border: 2px solid #0f3460;
+
+        .case-card {
+            background: linear-gradient(145deg, #16213e, #1a1a2e);
+            border-radius: 16px;
+            padding: 2rem;
             text-align: center;
+            transition: transform 0.3s ease;
+            border: 2px solid #0f3460;
+            position: relative;
+            overflow: hidden;
         }
-        
+
+        .case-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, #4cc9f033, transparent);
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: rotate(45deg) translateX(-150%); }
+            100% { transform: rotate(45deg) translateX(150%); }
+        }
+
+        .case-image {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 1.5rem;
+            border-radius: 12px;
+            border: 2px solid #4cc9f0;
+            box-shadow: 0 4px 20px rgba(76, 201, 240, 0.2);
+        }
+
         .case-name {
-            font-size: 20px;
-            margin-bottom: 10px;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
             color: #4cc9f0;
         }
-        
-        .case-price {
-            color: #e94560;
-            margin: 10px 0;
+
+        .case-details {
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: rgba(15, 52, 96, 0.3);
+            border-radius: 8px;
         }
-        
+
         .open-button {
-            background: #e94560;
-            color: white;
+            background: linear-gradient(45deg, #e94560, #b32e46);
+            color: #fff;
             border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
+            padding: 1rem 2rem;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 16px;
-            transition: opacity 0.3s;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
         }
-        
+
         .open-button:disabled {
-            opacity: 0.5;
+            opacity: 0.6;
             cursor: not-allowed;
+            background: #555;
         }
-        
+
+        .open-button:not(:disabled):hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(233, 69, 96, 0.4);
+        }
+
         .animation-container {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.9);
+            background: rgba(0,0,0,0.95);
             display: none;
             justify-content: center;
             align-items: center;
+            z-index: 1000;
         }
-        
+
         .animation-box {
-            width: 300px;
-            height: 400px;
+            width: 320px;
+            height: 480px;
             position: relative;
             overflow: hidden;
+            border-radius: 16px;
             border: 2px solid #4cc9f0;
-            border-radius: 10px;
+            background: #0f3460;
         }
-        
+
         .prize-container {
             position: absolute;
             width: 100%;
-            transition: transform 2s ease-out;
+            transition: transform 3s cubic-bezier(0.25, 1, 0.5, 1);
         }
-        
+
         .prize-item {
-            height: 80px;
+            height: 100px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 24px;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #fff;
             border-bottom: 1px solid #4cc9f033;
         }
-        
+
         .result-modal {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             background: #16213e;
-            padding: 20px;
-            border-radius: 10px;
+            padding: 2rem;
+            border-radius: 16px;
             text-align: center;
             display: none;
             border: 2px solid #4cc9f0;
+            box-shadow: 0 4px 30px rgba(76, 201, 240, 0.2);
+            max-width: 400px;
+            width: 90%;
+            z-index: 1001;
         }
-        
+
         .result-amount {
-            font-size: 32px;
-            color: #4cc9f0;
-            margin: 15px 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 1.5rem 0;
+            background: linear-gradient(45deg, #4cc9f0, #2ecc71);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <button class="back-button">Назад</button>
-        <div class="title">Кейсы</div>
+        <button class="back-button" onclick="window.location.href='index.html'">
+            ← Назад
+        </button>
+        <div class="title">Premium Cases</div>
         <div class="balance">
-            <span>💰</span>
+            <span class="balance-icon">💰</span>
             <span id="balance">0</span>
         </div>
     </div>
 
     <div class="cases-container">
-        <div class="case">
-            <div class="case-name">Простой кейс</div>
-            <div class="case-price">Стоимость: 10р</div>
-            <button class="open-button" onclick="openCase(10)">Открыть</button>
+        <div class="case-card">
+            <img src="https://via.placeholder.com/200/4cc9f0/0f3460?text=PRO" class="case-image">
+            <div class="case-name">PRO Кейс</div>
+            <div class="case-details">
+                <p>Выигрыши: 10р - 1000р</p>
+                <p>Шансы: 40% - 10%</p>
+            </div>
+            <button class="open-button" data-price="50" onclick="openCase('pro', 50)">
+                Открыть за 50р
+            </button>
+        </div>
+
+        <div class="case-card">
+            <img src="https://via.placeholder.com/200/e94560/0f3460?text=VIP" class="case-image">
+            <div class="case-name">VIP Кейс</div>
+            <div class="case-details">
+                <p>Выигрыши: 50р - 5000р</p>
+                <p>Шансы: 30% - 5%</p>
+            </div>
+            <button class="open-button" data-price="100" onclick="openCase('vip', 100)">
+                Открыть за 100р
+            </button>
         </div>
     </div>
 
@@ -177,7 +270,7 @@
 
     <div class="result-modal" id="resultModal">
         <div class="result-amount" id="resultAmount"></div>
-        <button class="open-button" onclick="closeResult()">OK</button>
+        <button class="open-button" onclick="closeResult()">Забрать приз</button>
     </div>
 
     <script>
@@ -197,10 +290,26 @@
         let userId = null;
         let userBalance = 0;
 
-        // Инициализация пользователя
-        function initUser() {
+        const cases = {
+            pro: [
+                {amount: 10, chance: 40},
+                {amount: 50, chance: 30},
+                {amount: 100, chance: 20},
+                {amount: 500, chance: 8},
+                {amount: 1000, chance: 2}
+            ],
+            vip: [
+                {amount: 50, chance: 35},
+                {amount: 100, chance: 25},
+                {amount: 500, chance: 20},
+                {amount: 1000, chance: 15},
+                {amount: 5000, chance: 5}
+            ]
+        };
+
+        function init() {
             userId = getCookie('tg_user_id');
-            if (!userId) return alert('Ошибка авторизации!');
+            if (!userId) return alert('Требуется авторизация!');
             
             database.ref('users/' + userId + '/balance').on('value', snapshot => {
                 userBalance = snapshot.val() || 0;
@@ -217,11 +326,12 @@
 
         function updateButtons() {
             document.querySelectorAll('.open-button').forEach(btn => {
-                btn.disabled = userBalance < parseInt(btn.getAttribute('data-price'));
+                const price = parseInt(btn.dataset.price);
+                btn.disabled = userBalance < price;
             });
         }
 
-        function openCase(price) {
+        function openCase(type, price) {
             if (userBalance < price) return;
             
             // Списываем средства
@@ -229,19 +339,13 @@
                 balance: userBalance - price
             });
 
-            // Генерируем приз
-            const prizes = [
-                {amount: 10, chance: 40},
-                {amount: 20, chance: 30},
-                {amount: 50, chance: 20},
-                {amount: 100, chance: 10}
-            ];
-            
+            // Выбираем приз
+            const prizes = cases[type];
             const totalChance = prizes.reduce((sum, p) => sum + p.chance, 0);
             const random = Math.random() * totalChance;
+            
             let current = 0;
             let selectedPrize = null;
-            
             for (const prize of prizes) {
                 current += prize.chance;
                 if (random <= current) {
@@ -257,28 +361,27 @@
             const container = document.getElementById('prizeContainer');
             container.innerHTML = '';
             
-            // Создаем элементы
+            // Генерируем элементы
             for (let i = 0; i < 20; i++) {
                 const div = document.createElement('div');
                 div.className = 'prize-item';
-                div.textContent = prizes[i % prizes.length].amount + 'р';
+                div.textContent = `${cases.pro.concat(cases.vip)[i % 10].amount}р`;
                 container.appendChild(div);
             }
 
-            // Показываем анимацию
+            // Запускаем анимацию
             const animationContainer = document.getElementById('animationContainer');
             animationContainer.style.display = 'flex';
             
-            // Рассчитываем позицию для остановки
-            const targetPosition = - (prize.amount * 80) + 200; // Примерная логика
-            
+            // Рассчитываем позицию
+            const targetPosition = - (prize.amount * 100) + 300;
             container.style.transform = `translateY(${targetPosition}px)`;
             
-            // Показываем результат через 2 секунды
+            // Показываем результат
             setTimeout(() => {
                 animationContainer.style.display = 'none';
                 showResult(prize.amount);
-            }, 2000);
+            }, 3000);
         }
 
         function showResult(amount) {
@@ -295,8 +398,8 @@
             document.getElementById('resultModal').style.display = 'none';
         }
 
-        // Инициализация при загрузке
-        window.onload = initUser;
+        // Инициализация
+        window.onload = init;
     </script>
 </body>
 </html>
