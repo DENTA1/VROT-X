@@ -19,39 +19,6 @@
             color: white;
         }
         
-        .loading-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #1a1a2e 0%, #4cc9f0 100%);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
-        
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
-            margin-bottom: 20px;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        .loading-text {
-            font-size: 18px;
-            color: white;
-        }
-        
         .header {
             display: flex;
             justify-content: space-between;
@@ -69,489 +36,150 @@
             border-radius: 5px;
             cursor: pointer;
             font-weight: bold;
-            transition: background-color 0.3s;
-        }
-        
-        .back-button:hover {
-            background-color: #1a56a7;
         }
         
         .title {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
             font-size: 24px;
-            font-weight: bold;
             color: #4cc9f0;
         }
         
         .balance {
             display: flex;
             align-items: center;
+            gap: 5px;
             font-size: 18px;
-            font-weight: bold;
             color: #4cc9f0;
-            padding: 8px 15px;
-            border: 2px solid #4cc9f0;
-            border-radius: 5px;
-            background-color: rgba(76, 201, 240, 0.1);
-        }
-        
-        .balance-icon {
-            margin-right: 5px;
-            font-size: 20px;
         }
         
         .cases-container {
             display: flex;
             flex-direction: column;
-            padding: 30px 0;
-            max-width: 1200px;
+            gap: 20px;
+            padding: 20px;
+            max-width: 600px;
             margin: 0 auto;
         }
         
         .case {
-            background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
-            width: 100%;
+            background: #16213e;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #0f3460;
             text-align: center;
-            padding: 30px 0;
-            border-bottom: 2px solid #0f3460;
-        }
-        
-        .case:last-child {
-            border-bottom: none;
-        }
-        
-        .case-image {
-            width: 200px;
-            height: 200px;
-            margin: 0 auto 15px;
-            background-size: cover;
-            background-position: center;
-            border-radius: 5px;
-            border: 2px solid #4cc9f0;
         }
         
         .case-name {
-            font-size: 22px;
-            font-weight: bold;
+            font-size: 20px;
             margin-bottom: 10px;
             color: #4cc9f0;
-            text-shadow: 0 0 5px rgba(76, 201, 240, 0.5);
-        }
-        
-        .case-range {
-            font-size: 16px;
-            margin-bottom: 15px;
-            color: #e94560;
         }
         
         .case-price {
-            font-size: 16px;
-            color: #4cc9f0;
-            margin-bottom: 10px;
+            color: #e94560;
+            margin: 10px 0;
         }
         
         .open-button {
-            padding: 10px 20px;
-            background: linear-gradient(135deg, #e94560 0%, #b32e46 100%);
+            background: #e94560;
             color: white;
             border: none;
+            padding: 10px 20px;
             border-radius: 5px;
             cursor: pointer;
-            font-weight: bold;
             font-size: 16px;
-            transition: transform 0.2s, box-shadow 0.2s;
-            width: 200px;
-        }
-        
-        .open-button:hover {
-            transform: scale(1.03);
-            box-shadow: 0 0 15px rgba(233, 69, 96, 0.5);
+            transition: opacity 0.3s;
         }
         
         .open-button:disabled {
-            background: #555;
+            opacity: 0.5;
             cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-        
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .modal-content {
-            background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
-            padding: 30px;
-            border-radius: 10px;
-            max-width: 500px;
-            width: 90%;
-            text-align: center;
-            border: 2px solid #4cc9f0;
-            box-shadow: 0 0 30px rgba(76, 201, 240, 0.5);
-        }
-        
-        .modal-title {
-            font-size: 24px;
-            margin-bottom: 10px;
-            color: #4cc9f0;
-        }
-        
-        .prizes-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin: 20px 0;
-        }
-        
-        .prize-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 14px;
-        }
-        
-        .prize-item.high { 
-            background: rgba(46, 204, 113, 0.7); 
-            border: 1px solid #2ecc71;
-            color: white;
-        }
-        .prize-item.medium { 
-            background: rgba(241, 196, 15, 0.7); 
-            border: 1px solid #f1c40f;
-            color: white;
-        }
-        .prize-item.low { 
-            background: rgba(233, 69, 96, 0.7); 
-            border: 1px solid #e94560;
-            color: white;
-        }
-        
-        .prize-amount {
-            font-weight: bold;
-        }
-        
-        .prize-chance {
-            font-weight: bold;
-        }
-        
-        .modal-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 20px;
-        }
-        
-        .modal-button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: transform 0.2s;
-        }
-        
-        .modal-button:hover {
-            transform: scale(1.05);
-        }
-        
-        .confirm-button {
-            background: linear-gradient(135deg, #4cc9f0 0%, #2a9fd8 100%);
-            color: white;
-        }
-        
-        .cancel-button {
-            background: linear-gradient(135deg, #e94560 0%, #b32e46 100%);
-            color: white;
         }
         
         .animation-container {
-            display: none;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.9);
-            z-index: 1001;
+            background: rgba(0,0,0,0.9);
+            display: none;
             justify-content: center;
             align-items: center;
-            flex-direction: column;
-        }
-        
-        .animation-header {
-            text-align: center;
-            color: #4cc9f0;
-            font-size: 24px;
-            font-weight: bold;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .animation-spinner {
-            width: 24px;
-            height: 24px;
-            border: 3px solid rgba(76, 201, 240, 0.3);
-            border-radius: 50%;
-            border-top-color: #4cc9f0;
-            animation: spin 1s linear infinite;
         }
         
         .animation-box {
-            width: 320px;
-            height: 450px;
+            width: 300px;
+            height: 400px;
             position: relative;
             overflow: hidden;
-            border: 3px solid #4cc9f0;
+            border: 2px solid #4cc9f0;
             border-radius: 10px;
-            background-color: #0f3460;
-        }
-        
-        .horizontal-line {
-            position: absolute;
-            top: 50%;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: linear-gradient(90deg, transparent, #4cc9f0, transparent);
-            z-index: 10;
-            box-shadow: 0 0 15px rgba(76, 201, 240, 0.8);
-            transform: translateY(calc(-50% + ${Math.random() * 40 - 20}px));
-        }
-        
-        .horizontal-line::before,
-        .horizontal-line::after {
-            content: '';
-            position: absolute;
-            top: -6px;
-            width: 0;
-            height: 0;
-            border: 8px solid transparent;
-        }
-        
-        .horizontal-line::before {
-            left: 10px;
-            border-right-color: #4cc9f0;
-        }
-        
-        .horizontal-line::after {
-            right: 10px;
-            border-left-color: #4cc9f0;
         }
         
         .prize-container {
             position: absolute;
             width: 100%;
-            transition: transform 0.1s linear;
+            transition: transform 2s ease-out;
         }
         
-        .slot-item {
-            width: 280px;
-            height: 90px;
-            margin: 0 auto;
+        .prize-item {
+            height: 80px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-weight: bold;
             font-size: 24px;
-            color: white;
-            transition: all 0.5s;
-            border-bottom: 2px solid #4cc9f0;
-        }
-        
-        .slot-item:last-child {
-            border-bottom: none;
-        }
-        
-        .slot-item.high { background: rgba(46, 204, 113, 0.7); }
-        .slot-item.medium { background: rgba(241, 196, 15, 0.7); }
-        .slot-item.low { background: rgba(233, 69, 96, 0.7); }
-        
-        .slot-item.active {
-            animation: highlight 1s infinite, pulse 0.5s infinite alternate;
-            background: linear-gradient(135deg, #4cc9f0 0%, #2a9fd8 100%);
-            box-shadow: 0 0 25px rgba(76, 201, 240, 0.8);
-        }
-        
-        @keyframes highlight {
-            0% { box-shadow: 0 0 15px rgba(76, 201, 240, 0.5); }
-            50% { box-shadow: 0 0 30px rgba(76, 201, 240, 0.9); }
-            100% { box-shadow: 0 0 15px rgba(76, 201, 240, 0.5); }
-        }
-        
-        @keyframes pulse {
-            from { transform: scale(1.05); }
-            to { transform: scale(1.1); }
+            border-bottom: 1px solid #4cc9f033;
         }
         
         .result-modal {
-            display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.9);
-            z-index: 1002;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .result-content {
-            background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
-            padding: 30px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #16213e;
+            padding: 20px;
             border-radius: 10px;
-            max-width: 400px;
-            width: 90%;
             text-align: center;
+            display: none;
             border: 2px solid #4cc9f0;
-            box-shadow: 0 0 30px rgba(76, 201, 240, 0.5);
-        }
-        
-        .result-title {
-            font-size: 24px;
-            margin-bottom: 15px;
-            color: #4cc9f0;
-            animation: titlePulse 1.5s infinite;
-        }
-        
-        @keyframes titlePulse {
-            0% { transform: scale(1); opacity: 0.8; }
-            50% { transform: scale(1.05); opacity: 1; }
-            100% { transform: scale(1); opacity: 0.8; }
         }
         
         .result-amount {
-            font-size: 48px;
-            font-weight: bold;
-            margin: 20px 0;
-        }
-        
-        .result-amount.high { color: #2ecc71; }
-        .result-amount.medium { color: #f1c40f; }
-        .result-amount.low { color: #e94560; }
-        
-        .result-chance {
-            font-size: 18px;
-            margin-bottom: 30px;
-        }
-        
-        .result-chance.high { color: #2ecc71; }
-        .result-chance.medium { color: #f1c40f; }
-        .result-chance.low { color: #e94560; }
-        
-        .result-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-        }
-        
-        .result-button {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 16px;
-            transition: transform 0.2s;
-        }
-        
-        .result-button.primary {
-            background: linear-gradient(135deg, #4cc9f0 0%, #2a9fd8 100%);
-            color: white;
-        }
-        
-        .result-button.secondary {
-            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
-            color: white;
+            font-size: 32px;
+            color: #4cc9f0;
+            margin: 15px 0;
         }
     </style>
 </head>
 <body>
-    <div class="loading-screen">
-        <div class="loading-spinner"></div>
-        <div class="loading-text">Подготавливаем кейсы...</div>
-    </div>
-    
     <div class="header">
-        <button class="back-button" onclick="window.location.href='index.html'">Назад</button>
+        <button class="back-button">Назад</button>
         <div class="title">Кейсы</div>
         <div class="balance">
-            <span class="balance-icon">💰</span>
-            <span id="userBalance">0</span>
+            <span>💰</span>
+            <span id="balance">0</span>
         </div>
     </div>
-    
+
     <div class="cases-container">
         <div class="case">
-            <div class="case-image" style="background-image: url('https://via.placeholder.com/200/16213e/4cc9f0?text=Простой');"></div>
-            <div class="case-name">Простой</div>
-            <div class="case-range">Выигрыш: от 1р до 50р</div>
-            <div class="case-price">Цена: 10р</div>
-            <button class="open-button" onclick="openCaseModal('simple')">Открыть за 10р</button>
-        </div>
-        
-        <div class="case">
-            <div class="case-image" style="background-image: url('https://via.placeholder.com/200/0f3460/e94560?text=Новичок');"></div>
-            <div class="case-name">Новичок</div>
-            <div class="case-range">Выигрыш: от 10р до 1000р</div>
-            <div class="case-price">Цена: 50р</div>
-            <button class="open-button" onclick="openCaseModal('beginner')">Открыть за 50р</button>
+            <div class="case-name">Простой кейс</div>
+            <div class="case-price">Стоимость: 10р</div>
+            <button class="open-button" onclick="openCase(10)">Открыть</button>
         </div>
     </div>
-    
-    <div class="modal" id="confirmationModal">
-        <div class="modal-content">
-            <div class="modal-title" id="modalCaseName">Подтверждение</div>
-            <p id="modalCaseDescription">Вы уверены, что хотите открыть этот кейс?</p>
-            
-            <div class="prizes-grid" id="prizesGrid"></div>
-            
-            <div class="modal-buttons">
-                <button class="modal-button confirm-button" id="confirmOpen">Открыть</button>
-                <button class="modal-button cancel-button" onclick="closeModal()">Отмена</button>
-            </div>
-        </div>
-    </div>
-    
+
     <div class="animation-container" id="animationContainer">
-        <div class="animation-header">
-            <span id="animationCaseName"></span>
-            <div class="animation-spinner"></div>
-        </div>
         <div class="animation-box">
-            <div class="horizontal-line"></div>
             <div class="prize-container" id="prizeContainer"></div>
         </div>
     </div>
-    
+
     <div class="result-modal" id="resultModal">
-        <div class="result-content">
-            <div class="result-title">Поздравляем!</div>
-            <div class="result-amount" id="resultAmount"></div>
-            <div class="result-chance" id="resultChance"></div>
-            <div class="result-buttons">
-                <button class="result-button primary" onclick="closeResultModal()">OK</button>
-                <button class="result-button secondary" onclick="openAgain()">Открыть еще</button>
-            </div>
-        </div>
+        <div class="result-amount" id="resultAmount"></div>
+        <button class="open-button" onclick="closeResult()">OK</button>
     </div>
-    
+
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyCMos6Y7C-krTLuKCI4VJG-TFLo6QI--k8",
@@ -566,304 +194,109 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        const cases = {
-            simple: {
-                name: "Простой",
-                price: 10,
-                prizes: [
-                    { amount: 1, weight: 15 },
-                    { amount: 2, weight: 14 },
-                    { amount: 3, weight: 13 },
-                    { amount: 4, weight: 12 },
-                    { amount: 5, weight: 10 },
-                    { amount: 8, weight: 8 },
-                    { amount: 10, weight: 7 },
-                    { amount: 15, weight: 6 },
-                    { amount: 25, weight: 4 },
-                    { amount: 50, weight: 2 }
-                ]
-            },
-            beginner: {
-                name: "Новичок",
-                price: 50,
-                prizes: [
-                    { amount: 5, weight: 15 },
-                    { amount: 10, weight: 14 },
-                    { amount: 15, weight: 13 },
-                    { amount: 25, weight: 12 },
-                    { amount: 50, weight: 10 },
-                    { amount: 100, weight: 8 },
-                    { amount: 150, weight: 7 },
-                    { amount: 250, weight: 4 },
-                    { amount: 500, weight: 2 },
-                    { amount: 1000, weight: 1 }
-                ]
-            }
-        };
-
         let userId = null;
         let userBalance = 0;
-        let currentCase = null;
-        let currentPrize = null;
-        let currentChance = 0;
-        let currentChanceClass = '';
 
-        const balanceElement = document.getElementById('userBalance');
-        const confirmationModal = document.getElementById('confirmationModal');
-        const animationContainer = document.getElementById('animationContainer');
-        const resultModal = document.getElementById('resultModal');
-        const prizeContainer = document.getElementById('prizeContainer');
-        const prizesGrid = document.getElementById('prizesGrid');
-        const modalCaseName = document.getElementById('modalCaseName');
-        const modalCaseDescription = document.getElementById('modalCaseDescription');
-        const confirmOpenButton = document.getElementById('confirmOpen');
-        const resultAmount = document.getElementById('resultAmount');
-        const resultChance = document.getElementById('resultChance');
-        const animationCaseName = document.getElementById('animationCaseName');
-        const loadingScreen = document.querySelector('.loading-screen');
-
-        // Показываем загрузочный экран на 1 секунду
-        setTimeout(() => {
-            loadingScreen.style.display = 'none';
-        }, 1000);
-
-        document.addEventListener('DOMContentLoaded', function() {
+        // Инициализация пользователя
+        function initUser() {
             userId = getCookie('tg_user_id');
-            if (!userId) alert('Пользователь не идентифицирован!');
-            else {
-                loadUserBalance();
-                confirmOpenButton.addEventListener('click', openCase);
-            }
-        });
+            if (!userId) return alert('Ошибка авторизации!');
+            
+            database.ref('users/' + userId + '/balance').on('value', snapshot => {
+                userBalance = snapshot.val() || 0;
+                document.getElementById('balance').textContent = userBalance;
+                updateButtons();
+            });
+        }
 
         function getCookie(name) {
             const value = `; ${document.cookie}`;
             const parts = value.split(`; ${name}=`);
-            return parts.length === 2 ? parts.pop().split(';').shift() : null;
+            if (parts.length === 2) return parts.pop().split(';').shift();
         }
 
-        function loadUserBalance() {
-            database.ref('users/' + userId + '/balance').on('value', snapshot => {
-                userBalance = snapshot.val() || 0;
-                balanceElement.textContent = userBalance + 'р';
-                updateButtonStates();
+        function updateButtons() {
+            document.querySelectorAll('.open-button').forEach(btn => {
+                btn.disabled = userBalance < parseInt(btn.getAttribute('data-price'));
             });
         }
 
-        function updateButtonStates() {
-            document.querySelectorAll('.open-button').forEach(button => {
-                const caseType = button.getAttribute('onclick').match(/'(.*?)'/)[1];
-                const caseData = cases[caseType];
-                button.disabled = userBalance < caseData.price;
-                button.textContent = userBalance < caseData.price 
-                    ? 'Недостаточно средств' 
-                    : `Открыть за ${caseData.price}р`;
-            });
-        }
-
-        function openCaseModal(caseType) {
-            currentCase = caseType;
-            const caseData = cases[caseType];
-            const totalWeight = caseData.prizes.reduce((sum, p) => sum + p.weight, 0);
-            
-            modalCaseName.textContent = caseData.name;
-            modalCaseDescription.textContent = `Вы уверены, что хотите открыть кейс "${caseData.name}" за ${caseData.price}р?`;
-            
-            prizesGrid.innerHTML = caseData.prizes.map(prize => {
-                const chance = ((prize.weight / totalWeight) * 100).toFixed(1);
-                let chanceClass = 'low';
-                if (chance > 15) chanceClass = 'high';
-                else if (chance > 5) chanceClass = 'medium';
-                
-                return `
-                    <div class="prize-item ${chanceClass}">
-                        <span class="prize-amount">${prize.amount}р</span>
-                        <span class="prize-chance">${chance}%</span>
-                    </div>
-                `;
-            }).join('');
-            
-            confirmationModal.style.display = 'flex';
-        }
-
-        function closeModal() {
-            confirmationModal.style.display = 'none';
-        }
-
-        function openCase() {
-            closeModal();
-            const caseData = cases[currentCase];
-            
-            // Проверяем баланс перед списанием
-            if (userBalance < caseData.price) {
-                alert('Недостаточно средств!');
-                return;
-            }
+        function openCase(price) {
+            if (userBalance < price) return;
             
             // Списываем средства
             database.ref('users/' + userId).update({
-                balance: userBalance - caseData.price
-            }).then(() => {
-                startAnimation(caseData);
-            }).catch(error => {
-                console.error('Ошибка при списании средств:', error);
+                balance: userBalance - price
             });
-        }
 
-        function generatePrizeSequence(caseData) {
-            const totalWeight = caseData.prizes.reduce((sum, p) => sum + p.weight, 0);
-            let sequence = [];
+            // Генерируем приз
+            const prizes = [
+                {amount: 10, chance: 40},
+                {amount: 20, chance: 30},
+                {amount: 50, chance: 20},
+                {amount: 100, chance: 10}
+            ];
             
-            caseData.prizes.forEach(prize => {
-                const chance = (prize.weight / totalWeight * 100);
-                let chanceClass = 'low';
-                if (chance > 15) chanceClass = 'high';
-                else if (chance > 5) chanceClass = 'medium';
-                
-                // Уменьшаем количество элементов для более медленной анимации
-                sequence.push(...Array(prize.weight * 8).fill({...prize, chanceClass}));
-            });
-
-            for (let i = sequence.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [sequence[i], sequence[j]] = [sequence[j], sequence[i]];
+            const totalChance = prizes.reduce((sum, p) => sum + p.chance, 0);
+            const random = Math.random() * totalChance;
+            let current = 0;
+            let selectedPrize = null;
+            
+            for (const prize of prizes) {
+                current += prize.chance;
+                if (random <= current) {
+                    selectedPrize = prize;
+                    break;
+                }
             }
 
-            return { sequence, totalWeight };
+            startAnimation(selectedPrize);
         }
 
-        function startAnimation(caseData) {
+        function startAnimation(prize) {
+            const container = document.getElementById('prizeContainer');
+            container.innerHTML = '';
+            
+            // Создаем элементы
+            for (let i = 0; i < 20; i++) {
+                const div = document.createElement('div');
+                div.className = 'prize-item';
+                div.textContent = prizes[i % prizes.length].amount + 'р';
+                container.appendChild(div);
+            }
+
+            // Показываем анимацию
+            const animationContainer = document.getElementById('animationContainer');
             animationContainer.style.display = 'flex';
-            prizeContainer.innerHTML = '';
-            animationCaseName.textContent = caseData.name;
-
-            const { sequence, totalWeight } = generatePrizeSequence(caseData);
-            const targetIndex = Math.floor(Math.random() * (sequence.length - 40) + 20);
-            const itemHeight = 90;
-
-            sequence.forEach((prize, index) => {
-                const element = document.createElement('div');
-                element.className = `slot-item ${prize.chanceClass}`;
-                element.textContent = prize.amount + 'р';
-                element.dataset.amount = prize.amount;
-                element.dataset.chanceClass = prize.chanceClass;
-                element.style.top = `${index * itemHeight}px`;
-                prizeContainer.appendChild(element);
-            });
-
-            prizeContainer.style.height = `${sequence.length * itemHeight}px`;
             
-            const startPosition = 0;
-            const targetPosition = -(targetIndex * itemHeight) + 200;
-            const duration = 4000; // Фиксированные 4 секунды
-            let startTime = null;
-            let lastTimestamp = 0;
-            let itemsPassed = 0;
-            let maxSpeed = 0;
-
-            function animate(timestamp) {
-                if (!startTime) startTime = timestamp;
-                const elapsed = timestamp - startTime;
-                const progress = Math.min(elapsed / duration, 1);
-                
-                // Рассчитываем скорость (сколько ячеек прошло за последний кадр)
-                if (lastTimestamp > 0) {
-                    const deltaTime = (timestamp - lastTimestamp) / 1000; // в секундах
-                    const deltaY = Math.abs(prizeContainer.style.transform.match(/translateY\(([-\d.]+)px\)/)[1] - (startPosition + (targetPosition - startPosition) * progress));
-                    const currentSpeed = deltaY / (itemHeight * deltaTime);
-                    
-                    // Ограничиваем максимальную скорость (не более 10 ячеек в секунду)
-                    if (currentSpeed > 10) {
-                        progress = (10 * itemHeight * (timestamp - lastTimestamp) / 1000) / Math.abs(targetPosition - startPosition) + (progress - (timestamp - lastTimestamp) / duration);
-                    }
-                    
-                    maxSpeed = Math.max(maxSpeed, currentSpeed);
-                }
-                lastTimestamp = timestamp;
-                
-                // Плавное ускорение и замедление
-                let eased;
-                if (progress < 0.3) {
-                    // Ускорение в начале
-                    eased = easeInQuad(progress / 0.3) * 0.3;
-                } else if (progress > 0.7) {
-                    // Замедление в конце
-                    eased = 0.7 + easeOutQuad((progress - 0.7) / 0.3) * 0.3;
-                } else {
-                    // Линейная часть в середине
-                    eased = progress;
-                }
-                
-                const currentY = startPosition + (targetPosition - startPosition) * eased;
-                prizeContainer.style.transform = `translateY(${currentY}px)`;
-
-                if (progress < 1) {
-                    requestAnimationFrame(animate);
-                } else {
-                    finalizeAnimation();
-                }
-            }
-
-            function easeInQuad(t) {
-                return t * t;
-            }
-
-            function easeOutQuad(t) {
-                return t * (2 - t);
-            }
-
-            function finalizeAnimation() {
-                const centerLine = window.innerHeight / 2;
-                prizeContainer.querySelectorAll('.slot-item').forEach(item => {
-                    const rect = item.getBoundingClientRect();
-                    if (rect.top <= centerLine && rect.bottom >= centerLine) {
-                        item.classList.add('active');
-                        currentPrize = caseData.prizes.find(p => p.amount === parseInt(item.dataset.amount));
-                        currentChance = (currentPrize.weight / totalWeight * 100).toFixed(1);
-                        currentChanceClass = item.dataset.chanceClass;
-                    }
-                });
-                
-                setTimeout(() => {
-                    animationContainer.style.display = 'none';
-                    showResult();
-                }, 1000);
-            }
-
-            requestAnimationFrame(animate);
+            // Рассчитываем позицию для остановки
+            const targetPosition = - (prize.amount * 80) + 200; // Примерная логика
+            
+            container.style.transform = `translateY(${targetPosition}px)`;
+            
+            // Показываем результат через 2 секунды
+            setTimeout(() => {
+                animationContainer.style.display = 'none';
+                showResult(prize.amount);
+            }, 2000);
         }
 
-        function showResult() {
+        function showResult(amount) {
             // Начисляем выигрыш
             database.ref('users/' + userId).update({
-                balance: userBalance + currentPrize.amount
-            }).then(() => {
-                resultAmount.textContent = `${currentPrize.amount}р`;
-                resultAmount.className = `result-amount ${currentChanceClass}`;
-                resultChance.textContent = `Шанс выпадения: ${currentChance}%`;
-                resultChance.className = `result-chance ${currentChanceClass}`;
-                resultModal.style.display = 'flex';
-            }).catch(error => {
-                console.error('Ошибка при начислении выигрыша:', error);
+                balance: userBalance + amount
             });
+
+            document.getElementById('resultAmount').textContent = `${amount}р`;
+            document.getElementById('resultModal').style.display = 'block';
         }
 
-        function closeResultModal() {
-            resultModal.style.display = 'none';
+        function closeResult() {
+            document.getElementById('resultModal').style.display = 'none';
         }
 
-        function openAgain() {
-            closeResultModal();
-            const caseData = cases[currentCase];
-            
-            // Проверяем баланс перед повторным открытием
-            if (userBalance < caseData.price) {
-                alert('Недостаточно средств!');
-                return;
-            }
-            
-            openCaseModal(currentCase);
-        }
+        // Инициализация при загрузке
+        window.onload = initUser;
     </script>
 </body>
 </html>
