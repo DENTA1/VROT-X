@@ -523,7 +523,7 @@
     <div class="game-container">
         <div class="game-board">
             <div class="ladder" id="ladder">
-                <!-- Этажи будут с��зданы динамически -->
+                <!-- Этажи будут созданы динамически -->
             </div>
         </div>
         
@@ -764,13 +764,16 @@
         function showFloor(floorNumber) {
             const floors = document.querySelectorAll('.floor');
             floors.forEach(floor => {
-                floor.classList.remove('visible', 'active', 'passed');
+                floor.classList.remove('active');
+                if (parseInt(floor.dataset.floor) < floorNumber) {
+                    floor.classList.add('passed');
+                }
             });
             
             const floor = document.querySelector(`.floor[data-floor="${floorNumber}"]`);
             if (floor) {
                 floor.classList.add('visible');
-                generateFloor();
+                generateFloor(floorNumber);
                 
                 // Подсвечиваем овал с текущим множителем
                 floor.classList.add('active');
@@ -814,12 +817,13 @@
         }
         
         // Генерация этажа
-        function generateFloor() {
+        function generateFloor(floorNumber) {
             const settings = difficultySettings[difficulty];
             const minesCount = settings.mines;
             
             safeButtons = [];
             mineButtons = [];
+            canClick = false;
             
             const allPositions = [0, 1, 2, 3, 4]; // Всегда 5 кнопок
             
@@ -833,19 +837,20 @@
             safeButtons = allPositions.slice(minesCount);
             
             // Активируем кнопки на текущем этаже
-            const currentFloorButtons = document.querySelectorAll(`.btn[data-floor="${currentFloor}"]`);
+            const currentFloorButtons = document.querySelectorAll(`.btn[data-floor="${floorNumber}"]`);
             currentFloorButtons.forEach(btn => {
                 btn.disabled = true; // Сначала блокируем все кнопки
                 btn.classList.remove('selected', 'mine', 'safe', 'crack');
             });
             
-            // Разблокируем кнопки через 0.5 секунды
+            // Разблокируем кнопки через разное время для разных этажей
+            const delay = floorNumber === 0 ? 500 : 300; // 0.5с для первого этажа, 0.3с для остальных
             setTimeout(() => {
                 currentFloorButtons.forEach(btn => {
                     btn.disabled = false;
                 });
                 canClick = true;
-            }, 500);
+            }, delay);
         }
         
         // Начало игры
@@ -891,6 +896,7 @@
                     console.error('Update balance error:', error);
                 });
         }
+        
         // Выбор кнопки
         function selectButton(button) {
             if (!gameActive || !canClick) return;
