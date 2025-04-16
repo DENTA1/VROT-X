@@ -3,10 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Premium Cases</title>
+    <title>Golden Unbox</title>
+    
+    <!-- Библиотеки -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
     <style>
+        /* === Основные стили === */
+        :root {
+            --primary: #4cc9f0;
+            --secondary: #e94560;
+            --accent: #2ecc71;
+            --bg: #0a0e1a;
+            --card-bg: linear-gradient(145deg, #16213e 30%, #1a1a2e 100%);
+            --text: #ffffff;
+            --shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -15,22 +32,26 @@
         }
 
         body {
-            background: #0a0e1a;
-            color: #fff;
+            background: var(--bg);
+            color: var(--text);
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
+        /* === Хедер === */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1.5rem;
+            padding: 1.5rem 5%;
             background: linear-gradient(45deg, #1a1a2e 0%, #0f3460 100%);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            box-shadow: var(--shadow);
+            position: relative;
+            z-index: 1000;
         }
 
         .back-button {
-            background: #4cc9f0;
+            background: var(--primary);
             color: #fff;
             border: none;
             padding: 0.8rem 1.5rem;
@@ -41,123 +62,84 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-        }
-
-        .back-button:hover {
-            background: #3aa8cc;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 15px rgba(76, 201, 240, 0.4);
-        }
-
-        .title {
-            font-size: 1.8rem;
-            font-weight: 700;
-            background: linear-gradient(45deg, #4cc9f0, #2a9fd8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .balance {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            background: rgba(76, 201, 240, 0.1);
-            padding: 0.8rem 1.5rem;
-            border-radius: 8px;
-            border: 2px solid #4cc9f0;
-        }
-
-        .balance-icon {
-            font-size: 1.2rem;
-        }
-
-        .cases-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            padding: 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .case-card {
-            background: linear-gradient(145deg, #16213e, #1a1a2e);
-            border-radius: 16px;
-            padding: 2rem;
-            text-align: center;
-            transition: transform 0.3s ease;
-            border: 2px solid #0f3460;
             position: relative;
             overflow: hidden;
         }
 
-        .case-card::before {
+        .back-button::after {
             content: '';
             position: absolute;
             top: -50%;
             left: -50%;
             width: 200%;
             height: 200%;
-            background: linear-gradient(45deg, transparent, #4cc9f033, transparent);
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent);
             transform: rotate(45deg);
-            animation: shine 3s infinite;
+            transition: all 0.5s;
         }
 
-        @keyframes shine {
-            0% { transform: rotate(45deg) translateX(-150%); }
-            100% { transform: rotate(45deg) translateX(150%); }
+        .back-button:hover::after {
+            animation: shine 1.5s;
         }
 
-        .case-image {
-            width: 200px;
-            height: 200px;
-            margin: 0 auto 1.5rem;
-            border-radius: 12px;
-            border: 2px solid #4cc9f0;
-            box-shadow: 0 4px 20px rgba(76, 201, 240, 0.2);
+        /* === Контейнер кейсов === */
+        .cases-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 3rem;
+            padding: 3rem 5%;
+            max-width: 1600px;
+            margin: 0 auto;
         }
 
-        .case-name {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            color: #4cc9f0;
-        }
-
-        .case-details {
-            margin: 1.5rem 0;
-            padding: 1rem;
-            background: rgba(15, 52, 96, 0.3);
-            border-radius: 8px;
-        }
-
-        .open-button {
-            background: linear-gradient(45deg, #e94560, #b32e46);
-            color: #fff;
-            border: none;
-            padding: 1rem 2rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 1.1rem;
-            transition: all 0.3s ease;
-            width: 100%;
+        /* === Карточка кейса === */
+        .case-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
             overflow: hidden;
+            cursor: pointer;
+            transform-style: preserve-3d;
         }
 
-        .open-button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            background: #555;
+        .case-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent 40%, rgba(76, 201, 240, 0.1) 60%, transparent 70%);
+            opacity: 0;
+            transition: all 0.5s;
         }
 
-        .open-button:not(:disabled):hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(233, 69, 96, 0.4);
+        .case-card:hover {
+            transform: perspective(1000px) translateZ(30px) rotateX(5deg) rotateY(5deg);
+            box-shadow: 0 25px 50px rgba(76, 201, 240, 0.2);
         }
 
-        .animation-container {
+        .case-card:hover::before {
+            opacity: 1;
+            animation: glow 2s infinite;
+        }
+
+        /* === Анимации === */
+        @keyframes glow {
+            0% { background-position: -100% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* === Модальные окна === */
+        .unbox-modal {
             position: fixed;
             top: 0;
             left: 0;
@@ -167,113 +149,55 @@
             display: none;
             justify-content: center;
             align-items: center;
-            z-index: 1000;
+            z-index: 2000;
+            perspective: 1000px;
         }
 
-        .animation-box {
-            width: 320px;
-            height: 480px;
-            position: relative;
-            overflow: hidden;
-            border-radius: 16px;
-            border: 2px solid #4cc9f0;
-            background: #0f3460;
-        }
+        /* Дополнительные стили... */
 
-        .prize-container {
-            position: absolute;
-            width: 100%;
-            transition: transform 3s cubic-bezier(0.25, 1, 0.5, 1);
-        }
-
-        .prize-item {
-            height: 100px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #fff;
-            border-bottom: 1px solid #4cc9f033;
-        }
-
-        .result-modal {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #16213e;
-            padding: 2rem;
-            border-radius: 16px;
-            text-align: center;
-            display: none;
-            border: 2px solid #4cc9f0;
-            box-shadow: 0 4px 30px rgba(76, 201, 240, 0.2);
-            max-width: 400px;
-            width: 90%;
-            z-index: 1001;
-        }
-
-        .result-amount {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin: 1.5rem 0;
-            background: linear-gradient(45deg, #4cc9f0, #2ecc71);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <button class="back-button" onclick="window.location.href='index.html'">
+    <!-- Хедер -->
+    <header class="header">
+        <button class="back-button" onclick="window.history.back()">
             ← Назад
         </button>
-        <div class="title">Premium Cases</div>
-        <div class="balance">
-            <span class="balance-icon">💰</span>
-            <span id="balance">0</span>
-        </div>
-    </div>
-
-    <div class="cases-container">
-        <div class="case-card">
-            <img src="https://via.placeholder.com/200/4cc9f0/0f3460?text=PRO" class="case-image">
-            <div class="case-name">PRO Кейс</div>
-            <div class="case-details">
-                <p>Выигрыши: 10р - 1000р</p>
-                <p>Шансы: 40% - 10%</p>
+        <div class="title">Golden Unbox</div>
+        <div class="user-panel">
+            <div class="balance">
+                <span class="currency">₽</span>
+                <span id="balance">0</span>
             </div>
-            <button class="open-button" data-price="50" onclick="openCase('pro', 50)">
-                Открыть за 50р
-            </button>
+            <div class="level">Ур. <span id="level">1</span></div>
         </div>
+    </header>
 
-        <div class="case-card">
-            <img src="https://via.placeholder.com/200/e94560/0f3460?text=VIP" class="case-image">
-            <div class="case-name">VIP Кейс</div>
-            <div class="case-details">
-                <p>Выигрыши: 50р - 5000р</p>
-                <p>Шансы: 30% - 5%</p>
-            </div>
-            <button class="open-button" data-price="100" onclick="openCase('vip', 100)">
-                Открыть за 100р
-            </button>
+    <!-- Основной контент -->
+    <main class="container">
+        <section class="cases-grid" id="casesContainer"></section>
+        
+        <!-- История открытий -->
+        <section class="history-section">
+            <h3>Последние открытия</h3>
+            <div class="history-list" id="historyList"></div>
+        </section>
+    </main>
+
+    <!-- Модальное окно открытия -->
+    <div class="unbox-modal" id="unboxModal">
+        <div class="unbox-content">
+            <div class="case-3d" id="case3d"></div>
+            <div class="particles-container" id="particles"></div>
+            <div class="prize-reveal" id="prizeReveal"></div>
         </div>
     </div>
 
-    <div class="animation-container" id="animationContainer">
-        <div class="animation-box">
-            <div class="prize-container" id="prizeContainer"></div>
-        </div>
-    </div>
-
-    <div class="result-modal" id="resultModal">
-        <div class="result-amount" id="resultAmount"></div>
-        <button class="open-button" onclick="closeResult()">Забрать приз</button>
-    </div>
+    <!-- Достижения -->
+    <div class="achievements-toast" id="achievementsToast"></div>
 
     <script>
+        // Конфигурация Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyCMos6Y7C-krTLuKCI4VJG-TFLo6QI--k8",
             authDomain: "vrot-x-7a48f.firebaseapp.com",
@@ -284,122 +208,163 @@
             appId: "1:622297225288:web:5df6a5b02ffddedd96e07d"
         };
 
+        // Инициализация Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        let userId = null;
-        let userBalance = 0;
+        class CaseSystem {
+            constructor() {
+                this.user = null;
+                this.cases = [];
+                this.history = [];
+                this.achievements = [];
+                this.sounds = {
+                    open: new Howl({ src: ['https://assets.mixkit.co/sfx/preview/mixkit-game-show-wrong-answer-buzz-950.mp3'] }),
+                    success: new Howl({ src: ['https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3'] })
+                };
+                this.init();
+            }
 
-        const cases = {
-            pro: [
-                {amount: 10, chance: 40},
-                {amount: 50, chance: 30},
-                {amount: 100, chance: 20},
-                {amount: 500, chance: 8},
-                {amount: 1000, chance: 2}
-            ],
-            vip: [
-                {amount: 50, chance: 35},
-                {amount: 100, chance: 25},
-                {amount: 500, chance: 20},
-                {amount: 1000, chance: 15},
-                {amount: 5000, chance: 5}
-            ]
-        };
+            async init() {
+                await this.loadUserData();
+                this.loadCases();
+                this.setupEventListeners();
+                this.render();
+                this.initAnimations();
+            }
 
-        function init() {
-            userId = getCookie('tg_user_id');
-            if (!userId) return alert('Требуется авторизация!');
-            
-            database.ref('users/' + userId + '/balance').on('value', snapshot => {
-                userBalance = snapshot.val() || 0;
-                document.getElementById('balance').textContent = userBalance;
-                updateButtons();
-            });
-        }
+            async loadUserData() {
+                const userId = this.getUserId();
+                if (!userId) return this.showAuthError();
+                
+                const snapshot = await database.ref(`users/${userId}`).once('value');
+                this.user = snapshot.val() || { balance: 0, level: 1, xp: 0 };
+                this.updateUI();
+            }
 
-        function getCookie(name) {
-            const value = `; ${document.cookie}`;
-            const parts = value.split(`; ${name}=`);
-            if (parts.length === 2) return parts.pop().split(';').shift();
-        }
+            loadCases() {
+                this.cases = [
+                    {
+                        id: 'gold',
+                        name: 'Золотой кейс',
+                        price: 299,
+                        items: [
+                            { type: 'currency', value: 500, chance: 30 },
+                            { type: 'skin', value: 'Gold AK-47', chance: 15 },
+                            { type: 'currency', value: 1000, chance: 5 }
+                        ]
+                    },
+                    // Другие кейсы...
+                ];
+            }
 
-        function updateButtons() {
-            document.querySelectorAll('.open-button').forEach(btn => {
-                const price = parseInt(btn.dataset.price);
-                btn.disabled = userBalance < price;
-            });
-        }
+            initAnimations() {
+                this.caseOpenTimeline = anime.timeline({
+                    easing: 'spring(1, 80, 10, 0)',
+                    autoplay: false
+                });
 
-        function openCase(type, price) {
-            if (userBalance < price) return;
-            
-            // Списываем средства
-            database.ref('users/' + userId).update({
-                balance: userBalance - price
-            });
+                this.caseOpenTimeline
+                    .add({ targets: '#case3d', rotateY: 1080, duration: 1500 })
+                    .add({ targets: '.particle', scale: [0, 2], opacity: [1, 0], duration: 1000 }, '-=500')
+                    .add({ targets: '#prizeReveal', opacity: [0, 1], scale: [0.5, 1], duration: 500 });
+            }
 
-            // Выбираем приз
-            const prizes = cases[type];
-            const totalChance = prizes.reduce((sum, p) => sum + p.chance, 0);
-            const random = Math.random() * totalChance;
-            
-            let current = 0;
-            let selectedPrize = null;
-            for (const prize of prizes) {
-                current += prize.chance;
-                if (random <= current) {
-                    selectedPrize = prize;
-                    break;
+            async openCase(caseId) {
+                const selectedCase = this.cases.find(c => c.id === caseId);
+                if (!selectedCase || this.user.balance < selectedCase.price) return;
+
+                // Списание средств
+                await this.updateBalance(-selectedCase.price);
+
+                // Выбор приза
+                const prize = this.selectPrize(selectedCase.items);
+                
+                // Анимация
+                this.playUnboxAnimation(selectedCase, prize);
+
+                // Обновление данных
+                this.addToHistory(selectedCase, prize);
+                this.checkAchievements();
+                this.updateUI();
+            }
+
+            selectPrize(items) {
+                const totalChance = items.reduce((sum, item) => sum + item.chance, 0);
+                const random = Math.random() * totalChance;
+                let current = 0;
+                
+                for (const item of items) {
+                    current += item.chance;
+                    if (random <= current) return item;
                 }
             }
 
-            startAnimation(selectedPrize);
-        }
+            playUnboxAnimation(caseData, prize) {
+                this.sounds.open.play();
+                document.getElementById('unboxModal').style.display = 'flex';
 
-        function startAnimation(prize) {
-            const container = document.getElementById('prizeContainer');
-            container.innerHTML = '';
-            
-            // Генерируем элементы
-            for (let i = 0; i < 20; i++) {
-                const div = document.createElement('div');
-                div.className = 'prize-item';
-                div.textContent = `${cases.pro.concat(cases.vip)[i % 10].amount}р`;
-                container.appendChild(div);
+                anime({
+                    targets: '#case3d',
+                    rotateY: '+=1080',
+                    duration: 2000,
+                    easing: 'easeInOutExpo',
+                    complete: () => {
+                        this.revealPrize(prize);
+                    }
+                });
+
+                this.createParticles();
             }
 
-            // Запускаем анимацию
-            const animationContainer = document.getElementById('animationContainer');
-            animationContainer.style.display = 'flex';
-            
-            // Рассчитываем позицию
-            const targetPosition = - (prize.amount * 100) + 300;
-            container.style.transform = `translateY(${targetPosition}px)`;
-            
-            // Показываем результат
-            setTimeout(() => {
-                animationContainer.style.display = 'none';
-                showResult(prize.amount);
-            }, 3000);
+            createParticles() {
+                const particles = document.getElementById('particles');
+                particles.innerHTML = '';
+                
+                for (let i = 0; i < 100; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    particle.style.left = `${Math.random() * 100}%`;
+                    particle.style.top = `${Math.random() * 100}%`;
+                    particles.appendChild(particle);
+
+                    anime({
+                        targets: particle,
+                        translateX: () => anime.random(-100, 100),
+                        translateY: () => anime.random(-100, 100),
+                        scale: [0, 1],
+                        opacity: [1, 0],
+                        duration: 2000,
+                        easing: 'easeOutExpo'
+                    });
+                }
+            }
+
+            // Дополнительные методы...
         }
 
-        function showResult(amount) {
-            // Начисляем выигрыш
-            database.ref('users/' + userId).update({
-                balance: userBalance + amount
+        // Инициализация системы
+        const caseSystem = new CaseSystem();
+
+        // Вспомогательные функции
+        function getRandomGradient() {
+            const gradients = [
+                'linear-gradient(45deg, #4cc9f0, #3f5efb)',
+                'linear-gradient(45deg, #e94560, #ff6b6b)',
+                'linear-gradient(45deg, #2ecc71, #27ae60)'
+            ];
+            return gradients[Math.floor(Math.random() * gradients.length)];
+        }
+
+        // Обработчики событий
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.case-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    const caseId = this.dataset.caseId;
+                    caseSystem.openCase(caseId);
+                });
             });
-
-            document.getElementById('resultAmount').textContent = `${amount}р`;
-            document.getElementById('resultModal').style.display = 'block';
-        }
-
-        function closeResult() {
-            document.getElementById('resultModal').style.display = 'none';
-        }
-
-        // Инициализация
-        window.onload = init;
+        });
     </script>
 </body>
 </html>
