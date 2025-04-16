@@ -1,1 +1,246 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Чат с ИИ</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #444;
+        }
+        
+        .chat-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            height: 500px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+        }
+        
+        .user-message {
+            justify-content: flex-end;
+        }
+        
+        .ai-message {
+            justify-content: flex-start;
+        }
+        
+        .message-content {
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 18px;
+            line-height: 1.4;
+        }
+        
+        .user-message .message-content {
+            background-color: #007bff;
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .ai-message .message-content {
+            background-color: #e9ecef;
+            color: #333;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .chat-input {
+            display: flex;
+            padding: 15px;
+            border-top: 1px solid #eee;
+        }
+        
+        #message-input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            outline: none;
+            font-size: 16px;
+        }
+        
+        #send-button {
+            margin-left: 10px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        #send-button:hover {
+            background-color: #0056b3;
+        }
+        
+        #send-button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        .typing-indicator {
+            display: none;
+            padding: 10px 15px;
+            background-color: #e9ecef;
+            color: #333;
+            border-radius: 18px;
+            border-bottom-left-radius: 5px;
+            margin-bottom: 15px;
+            width: fit-content;
+        }
+        
+        .typing-indicator span {
+            animation: typing-dots 1.5s infinite;
+            display: inline-block;
+        }
+        
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes typing-dots {
+            0%, 60%, 100% { opacity: 0.3; }
+            30% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Чат с ИИ</h1>
+        <div class="chat-container">
+            <div class="chat-messages" id="chat-messages">
+                <div class="typing-indicator" id="typing-indicator">
+                    <span>.</span><span>.</span><span>.</span>
+                </div>
+            </div>
+            <div class="chat-input">
+                <input type="text" id="message-input" placeholder="Введите ваше сообщение..." autocomplete="off">
+                <button id="send-button">Отправить</button>
+            </div>
+        </div>
+    </div>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatMessages = document.getElementById('chat-messages');
+            const messageInput = document.getElementById('message-input');
+            const sendButton = document.getElementById('send-button');
+            const typingIndicator = document.getElementById('typing-indicator');
+            
+            // Бесплатный API от Hugging Face (нужно заменить на свой токен после тестирования)
+            const API_URL = "https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium";
+            // Для работы в продакшене вам нужно будет получить свой API ключ на Hugging Face
+            const API_TOKEN = ""; // Оставьте пустым для тестирования (будет работать ограниченно)
+            
+            function addMessage(content, isUser) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
+                
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'message-content';
+                contentDiv.textContent = content;
+                
+                messageDiv.appendChild(contentDiv);
+                chatMessages.insertBefore(messageDiv, typingIndicator);
+                
+                // Прокрутка вниз
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+            
+            async function sendMessage() {
+                const message = messageInput.value.trim();
+                if (!message) return;
+                
+                // Добавляем сообщение пользователя
+                addMessage(message, true);
+                messageInput.value = '';
+                sendButton.disabled = true;
+                
+                // Показываем индикатор набора
+                typingIndicator.style.display = 'block';
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                
+                try {
+                    // Отправляем запрос к API ИИ
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${API_TOKEN}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ inputs: message })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`Ошибка API: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    
+                    // Добавляем ответ ИИ
+                    if (data.generated_text) {
+                        addMessage(data.generated_text, false);
+                    } else {
+                        addMessage("Извините, я не смог обработать ваш запрос.", false);
+                    }
+                } catch (error) {
+                    console.error('Ошибка:', error);
+                    addMessage(`Ошибка при подключении к ИИ: ${error.message}`, false);
+                } finally {
+                    // Скрываем индикатор набора
+                    typingIndicator.style.display = 'none';
+                    sendButton.disabled = false;
+                    messageInput.focus();
+                }
+            }
+            
+            // Обработчики событий
+            sendButton.addEventListener('click', sendMessage);
+            
+            messageInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+            
+            // Приветственное сообщение
+            setTimeout(() => {
+                addMessage("Привет! Я ИИ, готовый ответить на ваши вопросы. Чем могу помочь?", false);
+            }, 500);
+        });
+    </script>
+</body>
+</html>
