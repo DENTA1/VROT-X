@@ -325,7 +325,7 @@
             background: linear-gradient(90deg, transparent, #4cc9f0, transparent);
             z-index: 10;
             box-shadow: 0 0 15px rgba(76, 201, 240, 0.8);
-            transform: translateY(-50%);
+            transform: translateY(calc(-50% + ${Math.random() * 40 - 20}px));
         }
         
         .horizontal-line::before,
@@ -377,14 +377,20 @@
         .slot-item.low { background: rgba(233, 69, 96, 0.7); }
         
         .slot-item.active {
-            transform: scale(1.08);
-            box-shadow: 0 0 25px rgba(255, 255, 255, 0.8);
-            animation: pulse 1s infinite alternate;
+            animation: highlight 2s infinite, pulse 1s infinite alternate;
+            background: linear-gradient(135deg, #4cc9f0 0%, #2a9fd8 100%);
+            box-shadow: 0 0 25px rgba(76, 201, 240, 0.8);
+        }
+        
+        @keyframes highlight {
+            0% { box-shadow: 0 0 15px rgba(76, 201, 240, 0.5); }
+            50% { box-shadow: 0 0 30px rgba(76, 201, 240, 0.9); }
+            100% { box-shadow: 0 0 15px rgba(76, 201, 240, 0.5); }
         }
         
         @keyframes pulse {
-            from { transform: scale(1.08); }
-            to { transform: scale(1.12); }
+            from { transform: scale(1.05); }
+            to { transform: scale(1.1); }
         }
         
         .result-modal {
@@ -424,9 +430,20 @@
             100% { transform: scale(1); opacity: 0.8; }
         }
         
+        .result-amount {
+            font-size: 48px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        
         .result-amount.high { color: #2ecc71; }
         .result-amount.medium { color: #f1c40f; }
         .result-amount.low { color: #e94560; }
+        
+        .result-chance {
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
         
         .result-chance.high { color: #2ecc71; }
         .result-chance.medium { color: #f1c40f; }
@@ -454,8 +471,14 @@
         }
         
         .result-button.secondary {
-            background: linear-gradient(135deg, #e94560 0%, #b32e46 100%);
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
             color: white;
+        }
+        
+        .case-price {
+            font-size: 16px;
+            color: #4cc9f0;
+            margin-bottom: 10px;
         }
     </style>
 </head>
@@ -479,6 +502,7 @@
             <div class="case-image" style="background-image: url('https://via.placeholder.com/200/16213e/4cc9f0?text=Простой');"></div>
             <div class="case-name">Простой</div>
             <div class="case-range">Выигрыш: от 1р до 50р</div>
+            <div class="case-price">Цена: 10р</div>
             <button class="open-button" onclick="openCaseModal('simple')">Открыть за 10р</button>
         </div>
         
@@ -486,6 +510,7 @@
             <div class="case-image" style="background-image: url('https://via.placeholder.com/200/0f3460/e94560?text=Новичок');"></div>
             <div class="case-name">Новичок</div>
             <div class="case-range">Выигрыш: от 10р до 1000р</div>
+            <div class="case-price">Цена: 50р</div>
             <button class="open-button" onclick="openCaseModal('beginner')">Открыть за 50р</button>
         </div>
     </div>
@@ -695,7 +720,7 @@
                 if (chance > 15) chanceClass = 'high';
                 else if (chance > 5) chanceClass = 'medium';
                 
-                sequence.push(...Array(prize.weight * 20).fill({...prize, chanceClass}));
+                sequence.push(...Array(prize.weight * 30).fill({...prize, chanceClass}));
             });
 
             for (let i = sequence.length - 1; i > 0; i--) {
@@ -712,7 +737,7 @@
             animationCaseName.textContent = caseData.name;
 
             const { sequence, totalWeight } = generatePrizeSequence(caseData);
-            const targetIndex = Math.floor(Math.random() * (sequence.length - 100) + 50);
+            const targetIndex = Math.floor(Math.random() * (sequence.length - 150) + 75);
             const itemHeight = 90;
 
             sequence.forEach((prize, index) => {
@@ -728,8 +753,8 @@
             prizeContainer.style.height = `${sequence.length * itemHeight}px`;
             
             const startPosition = 0;
-            const targetPosition = -(targetIndex * itemHeight) + 225;
-            const duration = 10000; // 10 секунд анимации
+            const targetPosition = -(targetIndex * itemHeight) + (Math.random() * 100 + 150);
+            const duration = 12000; // 12 секунд анимации
             let startTime = null;
 
             function animate(timestamp) {
@@ -739,12 +764,12 @@
                 
                 // Плавное ускорение и замедление
                 let eased;
-                if (progress < 0.3) {
+                if (progress < 0.2) {
                     // Ускорение в начале
-                    eased = easeInQuad(progress / 0.3) * 0.3;
-                } else if (progress > 0.7) {
+                    eased = easeInQuad(progress / 0.2) * 0.2;
+                } else if (progress > 0.8) {
                     // Замедление в конце
-                    eased = 0.7 + easeOutQuad((progress - 0.7) / 0.3) * 0.3;
+                    eased = 0.8 + easeOutQuad((progress - 0.8) / 0.2) * 0.2;
                 } else {
                     // Линейная часть в середине
                     eased = progress;
@@ -769,7 +794,7 @@
             }
 
             function finalizeAnimation() {
-                const centerLine = window.innerHeight / 2;
+                const centerLine = window.innerHeight / 2 + (Math.random() * 40 - 20);
                 prizeContainer.querySelectorAll('.slot-item').forEach(item => {
                     const rect = item.getBoundingClientRect();
                     if (rect.top <= centerLine && rect.bottom >= centerLine) {
@@ -783,7 +808,7 @@
                 setTimeout(() => {
                     animationContainer.style.display = 'none';
                     showResult();
-                }, 2000);
+                }, 1000);
             }
 
             requestAnimationFrame(animate);
