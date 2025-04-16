@@ -282,6 +282,28 @@
             z-index: 1001;
             justify-content: center;
             align-items: center;
+            flex-direction: column;
+        }
+        
+        .animation-header {
+            text-align: center;
+            color: #4cc9f0;
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .animation-spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(76, 201, 240, 0.3);
+            border-radius: 50%;
+            border-top-color: #4cc9f0;
+            animation: spin 1s linear infinite;
         }
         
         .animation-box {
@@ -292,30 +314,6 @@
             border: 3px solid #4cc9f0;
             border-radius: 10px;
             background-color: #0f3460;
-        }
-        
-        .animation-header {
-            position: absolute;
-            top: 10px;
-            left: 0;
-            width: 100%;
-            text-align: center;
-            color: #4cc9f0;
-            font-size: 20px;
-            font-weight: bold;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .animation-spinner {
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(76, 201, 240, 0.3);
-            border-radius: 50%;
-            border-top-color: #4cc9f0;
-            animation: spin 1s linear infinite;
         }
         
         .horizontal-line {
@@ -454,6 +452,7 @@
             background: linear-gradient(135deg, #4cc9f0 0%, #2a9fd8 100%);
             color: white;
         }
+        
         .result-button.secondary {
             background: linear-gradient(135deg, #e94560 0%, #b32e46 100%);
             color: white;
@@ -506,11 +505,11 @@
     </div>
     
     <div class="animation-container" id="animationContainer">
+        <div class="animation-header">
+            <span id="animationCaseName"></span>
+            <div class="animation-spinner"></div>
+        </div>
         <div class="animation-box">
-            <div class="animation-header">
-                <span id="animationCaseName"></span>
-                <div class="animation-spinner"></div>
-            </div>
             <div class="horizontal-line"></div>
             <div class="prize-container" id="prizeContainer"></div>
         </div>
@@ -696,7 +695,7 @@
                 if (chance > 15) chanceClass = 'high';
                 else if (chance > 5) chanceClass = 'medium';
                 
-                sequence.push(...Array(prize.weight * 15).fill({...prize, chanceClass}));
+                sequence.push(...Array(prize.weight * 20).fill({...prize, chanceClass}));
             });
 
             for (let i = sequence.length - 1; i > 0; i--) {
@@ -713,7 +712,7 @@
             animationCaseName.textContent = caseData.name;
 
             const { sequence, totalWeight } = generatePrizeSequence(caseData);
-            const targetIndex = Math.floor(Math.random() * (sequence.length - 80) + 40);
+            const targetIndex = Math.floor(Math.random() * (sequence.length - 100) + 50);
             const itemHeight = 90;
 
             sequence.forEach((prize, index) => {
@@ -730,16 +729,28 @@
             
             const startPosition = 0;
             const targetPosition = -(targetIndex * itemHeight) + 225;
-            const duration = 9000; // Увеличили длительность анимации
+            const duration = 10000; // 10 секунд анимации
             let startTime = null;
 
             function animate(timestamp) {
                 if (!startTime) startTime = timestamp;
                 const elapsed = timestamp - startTime;
                 const progress = Math.min(elapsed / duration, 1);
-                const eased = 1 - Math.pow(1 - progress, 5);
-                const currentY = startPosition + (targetPosition - startPosition) * eased;
                 
+                // Плавное ускорение и замедление
+                let eased;
+                if (progress < 0.3) {
+                    // Ускорение в начале
+                    eased = easeInQuad(progress / 0.3) * 0.3;
+                } else if (progress > 0.7) {
+                    // Замедление в конце
+                    eased = 0.7 + easeOutQuad((progress - 0.7) / 0.3) * 0.3;
+                } else {
+                    // Линейная часть в середине
+                    eased = progress;
+                }
+                
+                const currentY = startPosition + (targetPosition - startPosition) * eased;
                 prizeContainer.style.transform = `translateY(${currentY}px)`;
 
                 if (progress < 1) {
@@ -747,6 +758,14 @@
                 } else {
                     finalizeAnimation();
                 }
+            }
+
+            function easeInQuad(t) {
+                return t * t;
+            }
+
+            function easeOutQuad(t) {
+                return t * (2 - t);
             }
 
             function finalizeAnimation() {
@@ -791,6 +810,14 @@
 
         function openAgain() {
             closeResultModal();
+            const caseData = cases[currentCase];
+            
+            // Проверяем баланс перед повторным открытием
+            if (userBalance < caseData.price) {
+                alert('Недостаточно средств!');
+                return;
+            }
+            
             openCaseModal(currentCase);
         }
     </script>
