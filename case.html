@@ -3,27 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Golden Unbox Pro</title>
-    
-    <!-- Библиотеки -->
+    <title>Case Opening</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
     <style>
         /* === Глобальные стили === */
         :root {
             --primary: #4cc9f0;
+            --primary-dark: #3aa8cc;
             --secondary: #e94560;
+            --secondary-dark: #b32e46;
             --accent: #2ecc71;
+            --accent-dark: #27ae60;
             --bg: #0a0e1a;
             --card-bg: linear-gradient(145deg, #16213e 30%, #1a1a2e 100%);
             --text: #ffffff;
-            --shadow: 0 10px 30px rgba(0,0,0,0.3);
+            --text-muted: rgba(255, 255, 255, 0.7);
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             --success: #27ae60;
             --warning: #f1c40f;
             --danger: #e74c3c;
+            --bronze: #cd7f32;
+            --silver: #c0c0c0;
+            --gold: #ffd700;
         }
 
         * {
@@ -31,6 +35,7 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', system-ui, sans-serif;
+            user-select: none;
         }
 
         body {
@@ -38,6 +43,9 @@
             color: var(--text);
             min-height: 100vh;
             overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(76, 201, 240, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(233, 69, 96, 0.1) 0%, transparent 20%);
         }
 
         /* === Хедер === */
@@ -46,10 +54,8 @@
             justify-content: space-between;
             align-items: center;
             padding: 1.5rem 5%;
-            background: linear-gradient(45deg, #1a1a2e 0%, #0f3460 100%);
-            box-shadow: var(--shadow);
             position: relative;
-            z-index: 1000;
+            z-index: 100;
         }
 
         .back-button {
@@ -66,63 +72,210 @@
             gap: 0.5rem;
             position: relative;
             overflow: hidden;
+            box-shadow: 0 4px 15px rgba(76, 201, 240, 0.3);
         }
 
-        .back-button::after {
+        .back-button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 201, 240, 0.4);
+        }
+
+        .back-button:active {
+            transform: translateY(0);
+        }
+
+        .balance-container {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            background: rgba(76, 201, 240, 0.1);
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            border: 2px solid var(--primary);
+            box-shadow: var(--shadow);
+        }
+
+        .balance-icon {
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+
+        .balance-amount {
+            font-weight: 700;
+            font-size: 1.1rem;
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* === Основной контент === */
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 80px);
+            padding: 2rem 5%;
+            position: relative;
+        }
+
+        .cases-title {
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            text-align: center;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 4px 20px rgba(76, 201, 240, 0.3);
+        }
+
+        .cases-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 3rem;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* === Карточка кейса === */
+        .case-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transform-style: preserve-3d;
+            box-shadow: var(--shadow);
+            border: 2px solid transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .case-card::before {
             content: '';
             position: absolute;
             top: -50%;
             left: -50%;
             width: 200%;
             height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent);
+            background: linear-gradient(45deg, transparent, rgba(76, 201, 240, 0.1), transparent);
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .case-card:hover::before {
+            opacity: 1;
+        }
+
+        .case-card:hover {
+            transform: translateY(-10px) scale(1.03);
+            box-shadow: 0 20px 40px rgba(76, 201, 240, 0.2);
+        }
+
+        .case-card.bronze {
+            border-color: var(--bronze);
+        }
+
+        .case-card.silver {
+            border-color: var(--silver);
+        }
+
+        .case-card.gold {
+            border-color: var(--gold);
+        }
+
+        .case-image {
+            width: 180px;
+            height: 180px;
+            object-fit: contain;
+            margin-bottom: 1.5rem;
+            filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.5));
+            transition: all 0.3s ease;
+        }
+
+        .case-card:hover .case-image {
+            transform: scale(1.1) rotate(5deg);
+            filter: drop-shadow(0 10px 20px rgba(76, 201, 240, 0.5));
+        }
+
+        .case-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+
+        .case-price {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .case-items {
+            margin-bottom: 2rem;
+            width: 100%;
+        }
+
+        .case-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .open-button {
+            background: linear-gradient(45deg, var(--secondary), var(--secondary-dark));
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: auto;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(233, 69, 96, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .open-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(233, 69, 96, 0.4);
+        }
+
+        .open-button:disabled {
+            background: #555;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .open-button::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent);
             transform: rotate(45deg);
             transition: all 0.5s;
         }
 
-        .back-button:hover::after {
+        .open-button:not(:disabled):hover::after {
             animation: shine 1.5s;
-        }
-
-        /* === Основной контент === */
-        .container {
-            max-width: 1600px;
-            margin: 0 auto;
-            padding: 2rem 5%;
-        }
-
-        /* === Сетка кейсов === */
-        .cases-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin: 2rem 0;
-        }
-
-        /* === Карточка кейса === */
-        .case-card {
-            background: var(--card-bg);
-            border-radius: 15px;
-            padding: 1.5rem;
-            text-align: center;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-            cursor: pointer;
-            transform-style: preserve-3d;
-        }
-
-        .case-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(76, 201, 240, 0.2);
-        }
-
-        .case-image {
-            width: 200px;
-            height: 200px;
-            object-fit: contain;
-            margin: 1rem auto;
-            filter: drop-shadow(0 5px 15px rgba(76, 201, 240, 0.3));
         }
 
         /* === Анимации === */
@@ -136,63 +289,302 @@
             50% { transform: translateY(-10px); }
         }
 
-        /* === Модальное окно === */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* === Модальное окно подтверждения === */
+        .confirm-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .confirm-content {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--primary);
+            transform: scale(0.9);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .confirm-modal.active .confirm-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .confirm-title {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+        }
+
+        .confirm-text {
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .confirm-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .confirm-button {
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .confirm-yes {
+            background: var(--accent);
+            color: white;
+        }
+
+        .confirm-no {
+            background: transparent;
+            color: var(--text);
+            border: 2px solid var(--text-muted);
+        }
+
+        /* === Анимация открытия кейса === */
         .unbox-modal {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.95);
+            background: rgba(0, 0, 0, 0.95);
             display: none;
             justify-content: center;
             align-items: center;
             z-index: 2000;
         }
 
-        /* === Дополнительные элементы === */
-        .balance {
+        .unbox-container {
+            width: 90%;
+            max-width: 600px;
+            height: 300px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            border: 3px solid var(--primary);
+            box-shadow: 0 0 50px rgba(76, 201, 240, 0.5);
+        }
+
+        .unbox-slots {
             display: flex;
+            height: 100%;
+            position: relative;
+        }
+
+        .unbox-slot {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .unbox-items {
+            position: absolute;
+            width: 100%;
+            transition: transform 3s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+        }
+
+        .unbox-item {
+            height: 100px;
+            display: flex;
+            justify-content: center;
             align-items: center;
-            gap: 0.5rem;
-            font-size: 1.2rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .currency {
+        .unbox-center {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            transform: translateY(-50%);
+            background: linear-gradient(180deg, 
+                rgba(76, 201, 240, 0.3) 0%, 
+                transparent 50%, 
+                rgba(76, 201, 240, 0.3) 100%);
+            pointer-events: none;
+            border-top: 2px solid var(--primary);
+            border-bottom: 2px solid var(--primary);
+        }
+
+        /* === Результат открытия === */
+        .result-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+        }
+
+        .result-content {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 3rem;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            border: 3px solid var(--primary);
+            box-shadow: 0 0 50px rgba(76, 201, 240, 0.5);
+            transform: scale(0.8);
+            opacity: 0;
+            transition: all 0.5s ease;
+        }
+
+        .result-modal.active .result-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .result-title {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
             color: var(--primary);
-            font-weight: bold;
         }
 
-        /* ... ещё 300 строк стилей ... */
+        .result-prize {
+            font-size: 3rem;
+            font-weight: 700;
+            margin: 2rem 0;
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 4px 20px rgba(76, 201, 240, 0.3);
+        }
+
+        .result-button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1.5rem;
+        }
+
+        .result-button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(76, 201, 240, 0.4);
+        }
+
+        /* === Адаптивность === */
+        @media (max-width: 768px) {
+            .cases-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+            
+            .cases-title {
+                font-size: 2rem;
+                margin-bottom: 2rem;
+            }
+        }
+
+        /* === Специальные классы для анимаций === */
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .animate-pulse {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        /* ... дополнительные стили ... */
     </style>
 </head>
 <body>
+    <!-- Хедер -->
     <header class="header">
-        <button class="back-button" onclick="history.back()">
+        <button class="back-button" onclick="window.history.back()">
             ← Назад
         </button>
-        <h1 class="title">Golden Unbox</h1>
-        <div class="user-panel">
-            <div class="balance">
-                <span class="currency">₽</span>
-                <span id="balance">0</span>
-            </div>
+        <div class="balance-container">
+            <span class="balance-icon">💰</span>
+            <span class="balance-amount" id="balance">0</span>
         </div>
     </header>
 
-    <main class="container">
-        <section class="cases-grid" id="casesGrid"></section>
+    <!-- Основной контент -->
+    <main class="main-container">
+        <h1 class="cases-title">Выберите кейс</h1>
         
-        <section class="history-section">
-            <h2>История открытий</h2>
-            <div class="history-list" id="historyList"></div>
-        </section>
+        <div class="cases-grid" id="casesGrid">
+            <!-- Кейсы будут добавлены через JS -->
+        </div>
     </main>
 
+    <!-- Модальное окно подтверждения -->
+    <div class="confirm-modal" id="confirmModal">
+        <div class="confirm-content">
+            <h2 class="confirm-title">Подтверждение</h2>
+            <p class="confirm-text" id="confirmText">Вы уверены, что хотите открыть этот кейс?</p>
+            <div class="confirm-buttons">
+                <button class="confirm-button confirm-yes" id="confirmYes">Да</button>
+                <button class="confirm-button confirm-no" id="confirmNo">Нет</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Анимация открытия кейса -->
     <div class="unbox-modal" id="unboxModal">
-        <div class="unbox-content">
-            <div class="case-3d" id="case3d"></div>
-            <div class="prize-reveal" id="prizeReveal"></div>
+        <div class="unbox-container">
+            <div class="unbox-slots" id="unboxSlots">
+                <!-- Слоты будут добавлены через JS -->
+            </div>
+            <div class="unbox-center"></div>
+        </div>
+    </div>
+
+    <!-- Результат открытия -->
+    <div class="result-modal" id="resultModal">
+        <div class="result-content">
+            <h2 class="result-title">Поздравляем!</h2>
+            <p>Вы выиграли:</p>
+            <div class="result-prize" id="resultPrize">0₽</div>
+            <button class="result-button" id="resultButton">Забрать приз</button>
         </div>
     </div>
 
@@ -212,94 +604,179 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        class Game {
+        class CaseOpeningGame {
             constructor() {
                 this.userId = this.getUserId();
-                this.userData = null;
+                this.userBalance = 0;
+                this.currentCase = null;
+                this.selectedPrize = null;
                 this.cases = [
                     {
-                        id: 'basic',
-                        name: 'Базовый кейс',
-                        price: 50,
-                        image: 'https://via.placeholder.com/200/4cc9f0/0a0e1a?text=Basic',
+                        id: 'simple',
+                        name: 'Простой кейс',
+                        price: 10,
+                        rarity: 'bronze',
+                        image: 'https://via.placeholder.com/200/cd7f32/ffffff?text=Simple',
                         items: [
-                            { type: 'currency', value: 10, chance: 40 },
-                            { type: 'currency', value: 50, chance: 30 },
-                            { type: 'currency', value: 100, chance: 20 },
-                            { type: 'currency', value: 500, chance: 8 },
-                            { type: 'special', value: 'Golden Key', chance: 2 }
+                            { value: 5, chance: 40, type: 'currency' },
+                            { value: 10, chance: 30, type: 'currency' },
+                            { value: 20, chance: 20, type: 'currency' },
+                            { value: 50, chance: 8, type: 'currency' },
+                            { value: 100, chance: 2, type: 'currency' }
                         ]
                     },
-                    // ... ещё 5 кейсов
+                    {
+                        id: 'medium',
+                        name: 'Средний кейс',
+                        price: 50,
+                        rarity: 'silver',
+                        image: 'https://via.placeholder.com/200/c0c0c0/000000?text=Medium',
+                        items: [
+                            { value: 20, chance: 35, type: 'currency' },
+                            { value: 50, chance: 30, type: 'currency' },
+                            { value: 100, chance: 20, type: 'currency' },
+                            { value: 200, chance: 10, type: 'currency' },
+                            { value: 500, chance: 5, type: 'currency' }
+                        ]
+                    },
+                    {
+                        id: 'pro',
+                        name: 'Про кейс',
+                        price: 100,
+                        rarity: 'gold',
+                        image: 'https://via.placeholder.com/200/ffd700/000000?text=Pro',
+                        items: [
+                            { value: 50, chance: 30, type: 'currency' },
+                            { value: 100, chance: 25, type: 'currency' },
+                            { value: 200, chance: 20, type: 'currency' },
+                            { value: 500, chance: 15, type: 'currency' },
+                            { value: 1000, chance: 10, type: 'currency' }
+                        ]
+                    }
                 ];
-                
+
                 this.init();
             }
 
-            async init() {
-                if (!this.userId) return this.showAuthError();
-                
-                await this.loadUserData();
+            init() {
+                if (!this.userId) {
+                    alert('Требуется авторизация через Telegram');
+                    return;
+                }
+
+                this.setupDOMReferences();
                 this.setupEventListeners();
+                this.loadUserData();
                 this.renderCases();
-                this.initAnimations();
             }
 
             getUserId() {
-                const cookie = document.cookie.split('; ')
-                    .find(row => row.startsWith('tg_user_id='));
-                return cookie ? cookie.split('=')[1] : null;
+                const cookies = document.cookie.split('; ');
+                for (const cookie of cookies) {
+                    const [name, value] = cookie.split('=');
+                    if (name === 'tg_user_id') return value;
+                }
+                return null;
             }
 
-            async loadUserData() {
-                try {
-                    const snapshot = await database.ref(`users/${this.userId}`).once('value');
-                    if (!snapshot.exists()) {
-                        await database.ref(`users/${this.userId}`).set({
-                            balance: 1000,
-                            level: 1,
-                            openedCases: 0
-                        });
-                    }
-                    this.userData = snapshot.val();
+            setupDOMReferences() {
+                this.dom = {
+                    balance: document.getElementById('balance'),
+                    casesGrid: document.getElementById('casesGrid'),
+                    confirmModal: document.getElementById('confirmModal'),
+                    confirmText: document.getElementById('confirmText'),
+                    confirmYes: document.getElementById('confirmYes'),
+                    confirmNo: document.getElementById('confirmNo'),
+                    unboxModal: document.getElementById('unboxModal'),
+                    unboxSlots: document.getElementById('unboxSlots'),
+                    resultModal: document.getElementById('resultModal'),
+                    resultPrize: document.getElementById('resultPrize'),
+                    resultButton: document.getElementById('resultButton')
+                };
+            }
+
+            setupEventListeners() {
+                this.dom.confirmYes.addEventListener('click', () => this.startUnboxing());
+                this.dom.confirmNo.addEventListener('click', () => this.closeConfirmModal());
+                this.dom.resultButton.addEventListener('click', () => this.closeResultModal());
+            }
+
+            loadUserData() {
+                database.ref(`users/${this.userId}/balance`).on('value', snapshot => {
+                    this.userBalance = snapshot.val() || 0;
                     this.updateUI();
-                } catch (error) {
-                    console.error('Ошибка загрузки данных:', error);
-                }
+                });
+            }
+
+            updateUI() {
+                this.dom.balance.textContent = this.userBalance;
+                this.updateCaseButtons();
             }
 
             renderCases() {
-                const grid = document.getElementById('casesGrid');
-                grid.innerHTML = this.cases.map(caseItem => `
-                    <div class="case-card" data-case-id="${caseItem.id}">
-                        <img src="${caseItem.image}" class="case-image">
-                        <h3>${caseItem.name}</h3>
-                        <p>Цена: ${caseItem.price}₽</p>
-                        <button class="open-button" 
-                            ${this.userData.balance < caseItem.price ? 'disabled' : ''}
-                            onclick="game.openCase('${caseItem.id}')">
-                            Открыть
+                this.dom.casesGrid.innerHTML = this.cases.map(caseItem => `
+                    <div class="case-card ${caseItem.rarity}" data-case-id="${caseItem.id}">
+                        <img src="${caseItem.image}" class="case-image animate-float" alt="${caseItem.name}">
+                        <h3 class="case-name">${caseItem.name}</h3>
+                        <p class="case-price">${caseItem.price}₽</p>
+                        <div class="case-items">
+                            ${caseItem.items.map(item => `
+                                <div class="case-item">
+                                    <span>${item.value}₽</span>
+                                    <span>${item.chance}%</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <button class="open-button" data-case-id="${caseItem.id}" 
+                            ${this.userBalance < caseItem.price ? 'disabled' : ''}>
+                            Открыть за ${caseItem.price}₽
                         </button>
                     </div>
                 `).join('');
+
+                document.querySelectorAll('.open-button').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const caseId = e.currentTarget.dataset.caseId;
+                        this.showConfirmModal(caseId);
+                    });
+                });
             }
 
-            async openCase(caseId) {
-                const selectedCase = this.cases.find(c => c.id === caseId);
-                if (!selectedCase || this.userData.balance < selectedCase.price) return;
+            updateCaseButtons() {
+                document.querySelectorAll('.open-button').forEach(button => {
+                    const caseId = button.dataset.caseId;
+                    const caseItem = this.cases.find(c => c.id === caseId);
+                    button.disabled = this.userBalance < caseItem.price;
+                });
+            }
 
+            showConfirmModal(caseId) {
+                this.currentCase = this.cases.find(c => c.id === caseId);
+                this.dom.confirmText.textContent = `Вы уверены, что хотите открыть "${this.currentCase.name}" за ${this.currentCase.price}₽?`;
+                this.dom.confirmModal.style.display = 'flex';
+                setTimeout(() => {
+                    this.dom.confirmModal.classList.add('active');
+                }, 10);
+            }
+
+            closeConfirmModal() {
+                this.dom.confirmModal.classList.remove('active');
+                setTimeout(() => {
+                    this.dom.confirmModal.style.display = 'none';
+                }, 300);
+            }
+
+            async startUnboxing() {
+                this.closeConfirmModal();
+                
                 // Списание средств
-                await this.updateBalance(-selectedCase.price);
+                await this.updateBalance(-this.currentCase.price);
                 
                 // Выбор приза
-                const prize = this.selectPrize(selectedCase.items);
+                this.selectedPrize = this.selectPrize(this.currentCase.items);
                 
-                // Анимация
-                this.playUnboxAnimation(prize);
-                
-                // Обновление данных
-                await this.addToHistory(prize);
-                this.updateUI();
+                // Показываем анимацию
+                this.showUnboxAnimation();
             }
 
             selectPrize(items) {
@@ -314,30 +791,102 @@
             }
 
             async updateBalance(amount) {
-                try {
-                    await database.ref(`users/${this.userId}/balance`).transaction(balance => {
-                        return (balance || 0) + amount;
-                    });
-                } catch (error) {
-                    console.error('Ошибка обновления баланса:', error);
-                }
+                await database.ref(`users/${this.userId}/balance`).transaction(balance => {
+                    return (balance || 0) + amount;
+                });
             }
 
-            // ... ещё 200 строк методов ...
+            showUnboxAnimation() {
+                this.dom.unboxSlots.innerHTML = '';
+                
+                // Создаем 3 слота
+                for (let i = 0; i < 3; i++) {
+                    const slot = document.createElement('div');
+                    slot.className = 'unbox-slot';
+                    
+                    const items = document.createElement('div');
+                    items.className = 'unbox-items';
+                    
+                    // Добавляем 20 случайных предметов в каждый слот
+                    for (let j = 0; j < 20; j++) {
+                        const randomItem = this.getRandomItem();
+                        const item = document.createElement('div');
+                        item.className = 'unbox-item';
+                        item.textContent = `${randomItem.value}₽`;
+                        items.appendChild(item);
+                    }
+                    
+                    // Добавляем выигрышный предмет в конец
+                    const prizeItem = document.createElement('div');
+                    prizeItem.className = 'unbox-item';
+                    prizeItem.textContent = `${this.selectedPrize.value}₽`;
+                    prizeItem.style.color = this.getPrizeColor(this.selectedPrize.value);
+                    items.appendChild(prizeItem);
+                    
+                    slot.appendChild(items);
+                    this.dom.unboxSlots.appendChild(slot);
+                }
+                
+                // Показываем модальное окно
+                this.dom.unboxModal.style.display = 'flex';
+                
+                // Запускаем анимацию
+                setTimeout(() => {
+                    const slots = document.querySelectorAll('.unbox-items');
+                    const positions = [
+                        -100 * (20 + Math.floor(Math.random() * 5)),
+                        -100 * (20 + Math.floor(Math.random() * 5)),
+                        -100 * (20 + Math.floor(Math.random() * 5))
+                    ];
+                    
+                    slots.forEach((slot, index) => {
+                        slot.style.transform = `translateY(${positions[index]}px)`;
+                    });
+                    
+                    // Показываем результат через 3 секунды
+                    setTimeout(() => {
+                        this.showResult();
+                    }, 3000);
+                }, 100);
+            }
 
-            updateUI() {
-                document.getElementById('balance').textContent = this.userData.balance;
+            getRandomItem() {
+                const allItems = this.cases.flatMap(c => c.items);
+                return allItems[Math.floor(Math.random() * allItems.length)];
+            }
+
+            getPrizeColor(value) {
+                if (value >= 500) return '#ffd700'; // gold
+                if (value >= 100) return '#c0c0c0'; // silver
+                return '#cd7f32'; // bronze
+            }
+
+            showResult() {
+                this.dom.unboxModal.style.display = 'none';
+                
+                // Начисляем выигрыш
+                this.updateBalance(this.selectedPrize.value);
+                
+                // Показываем результат
+                this.dom.resultPrize.textContent = `${this.selectedPrize.value}₽`;
+                this.dom.resultPrize.style.color = this.getPrizeColor(this.selectedPrize.value);
+                this.dom.resultModal.style.display = 'flex';
+                
+                setTimeout(() => {
+                    this.dom.resultModal.classList.add('active');
+                }, 10);
+            }
+
+            closeResultModal() {
+                this.dom.resultModal.classList.remove('active');
+                setTimeout(() => {
+                    this.dom.resultModal.style.display = 'none';
+                }, 300);
             }
         }
 
         // Инициализация игры
-        const game = new Game();
-
-        // Инициализация анимаций
-        AOS.init({
-            duration: 1000,
-            once: true
-        });
+        const game = new CaseOpeningGame();
     </script>
 </body>
 </html>
