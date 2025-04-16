@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Чат с ИИ</title>
+    <title>Чат с DeepSeek AI</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -22,6 +22,7 @@
         h1 {
             text-align: center;
             color: #444;
+            margin-bottom: 30px;
         }
         
         .chat-container {
@@ -37,85 +38,94 @@
             flex: 1;
             padding: 20px;
             overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
         
         .message {
-            margin-bottom: 15px;
             display: flex;
+            max-width: 80%;
         }
         
         .user-message {
+            align-self: flex-end;
             justify-content: flex-end;
         }
         
         .ai-message {
+            align-self: flex-start;
             justify-content: flex-start;
         }
         
         .message-content {
-            max-width: 70%;
-            padding: 10px 15px;
+            padding: 12px 16px;
             border-radius: 18px;
             line-height: 1.4;
+            word-wrap: break-word;
         }
         
         .user-message .message-content {
-            background-color: #007bff;
+            background-color: #3b82f6;
             color: white;
             border-bottom-right-radius: 5px;
         }
         
         .ai-message .message-content {
-            background-color: #e9ecef;
+            background-color: #f3f4f6;
             color: #333;
             border-bottom-left-radius: 5px;
         }
         
-        .chat-input {
+        .chat-input-container {
             display: flex;
             padding: 15px;
             border-top: 1px solid #eee;
+            background-color: #f9fafb;
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
         }
         
         #message-input {
             flex: 1;
-            padding: 10px 15px;
+            padding: 12px 15px;
             border: 1px solid #ddd;
             border-radius: 20px;
             outline: none;
             font-size: 16px;
+            background-color: white;
         }
         
         #send-button {
             margin-left: 10px;
-            padding: 10px 20px;
-            background-color: #007bff;
+            padding: 12px 20px;
+            background-color: #3b82f6;
             color: white;
             border: none;
             border-radius: 20px;
             cursor: pointer;
             font-size: 16px;
-            transition: background-color 0.3s;
+            transition: background-color 0.2s;
         }
         
         #send-button:hover {
-            background-color: #0056b3;
+            background-color: #2563eb;
         }
         
         #send-button:disabled {
-            background-color: #cccccc;
+            background-color: #9ca3af;
             cursor: not-allowed;
         }
         
         .typing-indicator {
             display: none;
-            padding: 10px 15px;
-            background-color: #e9ecef;
+            padding: 12px 16px;
+            background-color: #f3f4f6;
             color: #333;
             border-radius: 18px;
             border-bottom-left-radius: 5px;
-            margin-bottom: 15px;
             width: fit-content;
+            margin-bottom: 5px;
         }
         
         .typing-indicator span {
@@ -135,18 +145,55 @@
             0%, 60%, 100% { opacity: 0.3; }
             30% { opacity: 1; }
         }
+        
+        .api-key-container {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        #api-key-input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            outline: none;
+            font-size: 14px;
+        }
+        
+        #save-key-button {
+            padding: 10px 15px;
+            background-color: #10b981;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .info-text {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Чат с ИИ</h1>
+        <h1>Чат с DeepSeek AI</h1>
+        
+        <div class="api-key-container">
+            <input type="password" id="api-key-input" placeholder="Введите ваш DeepSeek API ключ">
+            <button id="save-key-button">Сохранить</button>
+        </div>
+        <p class="info-text">Получить API ключ можно на <a href="https://platform.deepseek.com/" target="_blank">platform.deepseek.com</a></p>
+        
         <div class="chat-container">
             <div class="chat-messages" id="chat-messages">
                 <div class="typing-indicator" id="typing-indicator">
                     <span>.</span><span>.</span><span>.</span>
                 </div>
             </div>
-            <div class="chat-input">
+            <div class="chat-input-container">
                 <input type="text" id="message-input" placeholder="Введите ваше сообщение..." autocomplete="off">
                 <button id="send-button">Отправить</button>
             </div>
@@ -159,11 +206,14 @@
             const messageInput = document.getElementById('message-input');
             const sendButton = document.getElementById('send-button');
             const typingIndicator = document.getElementById('typing-indicator');
+            const apiKeyInput = document.getElementById('api-key-input');
+            const saveKeyButton = document.getElementById('save-key-button');
             
-            // Бесплатный API от Hugging Face (нужно заменить на свой токен после тестирования)
-            const API_URL = "https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium";
-            // Для работы в продакшене вам нужно будет получить свой API ключ на Hugging Face
-            const API_TOKEN = "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"; // Оставьте пустым для тестирования (будет работать ограниченно)
+            // Проверяем сохраненный API ключ
+            const savedApiKey = localStorage.getItem('deepseek_api_key');
+            if (savedApiKey) {
+                apiKeyInput.value = savedApiKey;
+            }
             
             function addMessage(content, isUser) {
                 const messageDiv = document.createElement('div');
@@ -176,56 +226,76 @@
                 messageDiv.appendChild(contentDiv);
                 chatMessages.insertBefore(messageDiv, typingIndicator);
                 
-                // Прокрутка вниз
                 chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+            
+            async function queryDeepSeekAPI(message, apiKey) {
+                try {
+                    const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${apiKey}`
+                        },
+                        body: JSON.stringify({
+                            model: "deepseek-chat",
+                            messages: [{role: "user", content: message}],
+                            temperature: 0.7,
+                            max_tokens: 2048,
+                            stream: false
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`Ошибка API: ${response.status} ${response.statusText}`);
+                    }
+                    
+                    const data = await response.json();
+                    return data.choices[0].message.content;
+                } catch (error) {
+                    console.error('API Error:', error);
+                    throw error;
+                }
             }
             
             async function sendMessage() {
                 const message = messageInput.value.trim();
                 if (!message) return;
                 
-                // Добавляем сообщение пользователя
+                const apiKey = apiKeyInput.value.trim();
+                if (!apiKey) {
+                    addMessage("Пожалуйста, введите ваш DeepSeek API ключ", false);
+                    apiKeyInput.focus();
+                    return;
+                }
+                
                 addMessage(message, true);
                 messageInput.value = '';
                 sendButton.disabled = true;
-                
-                // Показываем индикатор набора
                 typingIndicator.style.display = 'block';
                 chatMessages.scrollTop = chatMessages.scrollHeight;
                 
                 try {
-                    // Отправляем запрос к API ИИ
-                    const response = await fetch(API_URL, {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${API_TOKEN}`,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ inputs: message })
-                    });
-                    
-                    if (!response.ok) {
-                        throw new Error(`Ошибка API: ${response.status}`);
-                    }
-                    
-                    const data = await response.json();
-                    
-                    // Добавляем ответ ИИ
-                    if (data.generated_text) {
-                        addMessage(data.generated_text, false);
-                    } else {
-                        addMessage("Извините, я не смог обработать ваш запрос.", false);
-                    }
+                    const aiResponse = await queryDeepSeekAPI(message, apiKey);
+                    addMessage(aiResponse, false);
                 } catch (error) {
-                    console.error('Ошибка:', error);
-                    addMessage(`Ошибка при подключении к ИИ: ${error.message}`, false);
+                    console.error('Error:', error);
+                    addMessage(`Ошибка: ${error.message}. Проверьте API ключ и попробуйте снова.`, false);
                 } finally {
-                    // Скрываем индикатор набора
                     typingIndicator.style.display = 'none';
                     sendButton.disabled = false;
                     messageInput.focus();
                 }
             }
+            
+            // Сохранение API ключа
+            saveKeyButton.addEventListener('click', function() {
+                const apiKey = apiKeyInput.value.trim();
+                if (apiKey) {
+                    localStorage.setItem('deepseek_api_key', apiKey);
+                    addMessage("API ключ сохранен", false);
+                }
+            });
             
             // Обработчики событий
             sendButton.addEventListener('click', sendMessage);
@@ -238,7 +308,7 @@
             
             // Приветственное сообщение
             setTimeout(() => {
-                addMessage("Привет! Я ИИ, готовый ответить на ваши вопросы. Чем могу помочь?", false);
+                addMessage("Привет! Я DeepSeek AI. Задайте мне любой вопрос.", false);
             }, 500);
         });
     </script>
