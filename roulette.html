@@ -213,15 +213,47 @@
             const typingIndicator = document.getElementById('typing-indicator');
             const statusMessage = document.getElementById('status-message');
             
-            // Список резервных API endpoints
+            // Надежные API endpoints с разными форматами ответов
             const API_ENDPOINTS = [
-                "https://chatgpt.apinepdev.workers.dev",
-                "https://free.churchless.tech",
-                "https://api.openrouter-proxy.workers.dev"
+                {
+                    url: "https://api.together.xyz/v1/chat/completions",
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer 5a6d95a5a1f0e5b2a079b25a5a1f0e5b2a079b25"
+                    },
+                    body: (message) => JSON.stringify({
+                        model: "mistralai/Mixtral-8x7B-Instruct-v0.1",
+                        messages: [{role: "user", content: message}],
+                        temperature: 0.7,
+                        max_tokens: 1024
+                    }),
+                    parseResponse: (data) => data.choices[0].message.content
+                },
+                {
+                    url: "https://free.churchless.tech/v1/chat/completions",
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: (message) => JSON.stringify({
+                        model: "gpt-3.5-turbo",
+                        messages: [{role: "user", content: message}],
+                        temperature: 0.7
+                    }),
+                    parseResponse: (data) => data.choices[0].message.content
+                },
+                {
+                    url: "https://chatgpt.apinepdev.workers.dev",
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: (message) => JSON.stringify({
+                        question: message,
+                        api_key: "free"
+                    }),
+                    parseResponse: (data) => data.answer || data.response
+                }
             ];
             
             let currentApiIndex = 0;
-            let conversationHistory = [];
             let lastMessage = null;
             
             function addMessage(content, isUser) {
@@ -243,34 +275,29 @@
                 statusMessage.style.color = isError ? '#e53e3e' : '#718096';
             }
             
-            async function tryNextApiEndpoint(message) {
-                if (currentApiIndex >= API_ENDPOINTS.length) {
-                    throw new Error("Все API endpoints недоступны. Попробуйте позже.");
-                }
-                
-                const apiUrl = API_ENDPOINTS[currentApiIndex];
+            async function tryApiRequest(message, apiConfig) {
                 try {
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            question: message,
-                            api_key: "free"
-                        })
+                    const response = await fetch(apiConfig.url, {
+                        method: apiConfig.method,
+                        headers: apiConfig.headers,
+                        body: apiConfig.body(message)
                     });
                     
                     if (!response.ok) {
-                        throw new Error(`Ошибка API: ${response.status}`);
+                        throw new Error(`HTTP error! status: ${response.status}`);
                     }
                     
                     const data = await response.json();
-                    return data.answer || data.response || "Не получилось обработать ответ API";
+                    const result = apiConfig.parseResponse(data);
+                    
+                    if (!result) {
+                        throw new Error("Неверный формат ответа API");
+                    }
+                    
+                    return result;
                 } catch (error) {
-                    console.error(`Ошибка с API ${apiUrl}:`, error);
-                    currentApiIndex++;
-                    return tryNextApiEndpoint(message);
+                    console.error(`Ошибка с API ${apiConfig.url}:`, error);
+                    throw error;
                 }
             }
             
@@ -283,14 +310,32 @@
                 messageInput.value = '';
                 sendButton.disabled = true;
                 typingIndicator.style.display = 'block';
+                updateStatus("ИИ набирает ответ...");
                 
                 try {
-                    const aiResponse = await tryNextApiEndpoint(message);
+                    let aiResponse = null;
+                    let attempts = 0;
+                    const maxAttempts = API_ENDPOINTS.length;
+                    
+                    while (!aiResponse && attempts < maxAttempts) {
+                        try {
+                            const apiConfig = API_ENDPOINTS[currentApiIndex];
+                            aiResponse = await tryApiRequest(message, apiConfig);
+                        } catch (error) {
+                            console.error(`Attempt ${attempts + 1} failed:`, error);
+                            currentApiIndex = (currentApiIndex + 1) % API_ENDPOINTS.length;
+                            attempts++;
+                        }
+                    }
+                    
+                    if (!aiResponse) {
+                        throw new Error("Все API endpoints недоступны. Попробуйте позже.");
+                    }
+                    
                     addMessage(aiResponse, false);
                     updateStatus("Готов к общению");
-                    currentApiIndex = 0; // Сброс индекса после успешного запроса
                 } catch (error) {
-                    console.error('Error:', error);
+                    console.error('Final error:', error);
                     addMessage(`Ошибка: ${error.message}`, false);
                     updateStatus(`Ошибка соединения. <button class="retry-button" id="retry-button">Попробовать снова</button>`, true);
                     
@@ -310,14 +355,16 @@
                 addMessage(message, true);
                 sendButton.disabled = true;
                 typingIndicator.style.display = 'block';
+                updateStatus("Повторная попытка...");
                 
                 try {
-                    const aiResponse = await tryNextApiEndpoint(message);
+                    const apiConfig = API_ENDPOINTS[currentApiIndex];
+                    const aiResponse = await tryApiRequest(message, apiConfig);
+                    
                     addMessage(aiResponse, false);
                     updateStatus("Готов к общению");
-                    currentApiIndex = 0;
                 } catch (error) {
-                    console.error('Retry Error:', error);
+                    console.error('Retry error:', error);
                     addMessage(`Ошибка при повторной попытке: ${error.message}`, false);
                     updateStatus(`Ошибка соединения. <button class="retry-button" id="retry-button">Попробовать снова</button>`, true);
                 } finally {
