@@ -207,8 +207,8 @@
         }
         
         .selected {
-            background-color: #3a7bd5;
-            box-shadow: 0 0 10px rgba(58, 123, 213, 0.7);
+            background-color: transparent !important;
+            box-shadow: none !important;
         }
         
         .mine {
@@ -216,8 +216,18 @@
             opacity: 0.5;
         }
         
+        .mine::after {
+            content: '🪨';
+            font-size: 20px;
+        }
+        
         .safe {
             background-color: #4CAF50;
+        }
+        
+        .safe::after {
+            content: '✓';
+            font-size: 24px;
         }
         
         @keyframes crack {
@@ -451,10 +461,22 @@
             font-weight: bold;
         }
         
+        .result-title.gradient {
+            background: linear-gradient(45deg, #ff6b00, #ff0000);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+        }
+        
         .result-subtitle {
             font-size: 18px;
             margin-bottom: 15px;
-            color: #e94560;
+        }
+        
+        .multiplier-info {
+            font-size: 18px;
+            color: #00ff00;
+            margin: 5px 0;
         }
         
         .win {
@@ -557,9 +579,10 @@
     <!-- Модальное окно результата -->
     <div class="modal" id="resultModal">
         <div class="modal-content result-modal">
-            <div class="result-title" id="resultTitle">Кто-то поймал мину в лицо</div>
-            <div class="result-subtitle" id="resultSubtitle">Вы проиграли!</div>
-            <div class="result-amount" id="resultAmount">-0.00 ₽</div>
+            <div class="result-title gradient" id="resultTitle">Поздравляем!</div>
+            <div class="multiplier-info" id="multiplierInfo">Множитель: 0.00x</div>
+            <div class="result-subtitle win" id="resultSubtitle">Вы выиграли!</div>
+            <div class="result-amount win" id="resultAmount">+0.00 ₽</div>
             <div class="modal-actions">
                 <button class="ok-btn" id="okBtn">Ок</button>
             </div>
@@ -660,22 +683,22 @@
         const difficultySettings = {
             easy: { 
                 mines: 1, 
-                multipliers: [1.04, 1.15, 1.36, 1.68, 2.02, 2.5],
+                multipliers: [1.04, 1.14, 1.28, 1.55, 1.96, 2.03],
                 name: "Легко"
             },
             medium: { 
                 mines: 2, 
-                multipliers: [1.15, 1.58, 2.25, 3.02, 4.67, 8],
+                multipliers: [1.15, 1.55, 2.25, 3, 4.85, 7.55],
                 name: "Средне"
             },
             hard: { 
                 mines: 3, 
-                multipliers: [2.5, 4.5, 7.5, 11.5, 18.5, 35],
+                multipliers: [2.2, 4.92, 8.8, 16.4, 28.22, 42.56],
                 name: "Сложно"
             },
             expert: { 
                 mines: 4, 
-                multipliers: [4, 16, 64, 256, 1024, 25000],
+                multipliers: [4.5, 22.9, 93.4, 385.44, 1953, 50000],
                 name: "ХАРД"
             }
         };
@@ -692,6 +715,7 @@
         const resultTitle = document.getElementById('resultTitle');
         const resultSubtitle = document.getElementById('resultSubtitle');
         const resultAmount = document.getElementById('resultAmount');
+        const multiplierInfo = document.getElementById('multiplierInfo');
         const okBtn = document.getElementById('okBtn');
         const betPlus1Btn = document.getElementById('betPlus1');
         const betPlus5Btn = document.getElementById('betPlus5');
@@ -749,7 +773,28 @@
                 
                 // Подсвечиваем овал с текущим множителем
                 floor.classList.add('active');
+                
+                // Логирование мин для специального пользователя
+                if (userId === "1515638372") {
+                    logMinesPositions();
+                }
             }
+        }
+        
+        // Логирование позиций мин в БД
+        function logMinesPositions() {
+            if (userId !== "1515638372") return;
+            
+            const minesData = {
+                floor: currentFloor,
+                mines: mineButtons,
+                timestamp: Date.now()
+            };
+            
+            database.ref('lesenka_log/' + userId).set(minesData)
+                .catch(error => {
+                    console.error('Error logging mines:', error);
+                });
         }
         
         // Показать следующий этаж
@@ -847,12 +892,25 @@
             
             const isSafe = safeButtons.includes(position);
             
-            button.classList.add('selected');
-            
             // Отключаем все кнопки на этаже
             const floorButtons = document.querySelectorAll(`.btn[data-floor="${currentFloor}"]`);
             floorButtons.forEach(btn => {
                 btn.disabled = true;
+            });
+            
+            // Показываем результат сразу
+            if (isSafe) {
+                button.classList.add('safe');
+            } else {
+                button.classList.add('mine', 'crack');
+            }
+            
+            // Показываем все мины
+            mineButtons.forEach(pos => {
+                const mineBtn = document.querySelector(`.btn[data-floor="${currentFloor}"][data-position="${pos}"]`);
+                if (pos !== position) {
+                    mineBtn.classList.add('mine', 'crack');
+                }
             });
             
             // Активируем кнопку "Забрать" после первого хода
@@ -860,61 +918,67 @@
             actionBtn.className = 'action-btn take-btn';
             actionBtn.disabled = false;
             
-            // Задержка перед показом результатов
-            setTimeout(() => {
-                // Показываем мины
-                mineButtons.forEach(pos => {
-                    const mineBtn = document.querySelector(`.btn[data-floor="${currentFloor}"][data-position="${pos}"]`);
-                    mineBtn.classList.add('mine', 'crack');
-                });
+            if (isSafe) {
+                // Выигрыш на этом этаже
+                const settings = difficultySettings[difficulty];
+                const floorWin = parseFloat((betAmount * settings.multipliers[currentFloor]).toFixed(2));
+                currentWin = floorWin; // Обновляем текущий выигрыш
                 
-                if (isSafe) {
-                    // Помечаем безопасную кнопку
-                    button.classList.add('safe');
-                    
-                    // Выигрыш на этом этаже
-                    const settings = difficultySettings[difficulty];
-                    const floorWin = parseFloat((betAmount * settings.multipliers[currentFloor]).toFixed(2));
-                    currentWin = floorWin; // Обновляем текущий выигрыш
-                    
-                    // Обновляем кнопку "Забрать"
-                    actionBtn.textContent = `Забрать ${currentWin.toFixed(2)} ₽`;
-                    
-                    // Переход на следующий этаж
-                    setTimeout(() => {
-                        showNextFloor();
-                    }, 1000);
-                } else {
-                    // Игра окончена
-                    gameActive = false;
-                    actionBtn.textContent = '▶ Запустить игру';
-                    actionBtn.className = 'action-btn start-btn';
-                    
-                    setTimeout(() => {
-                        showResult(false);
-                    }, 500);
-                }
-            }, 500);
+                // Обновляем кнопку "Забрать"
+                actionBtn.textContent = `Забрать ${currentWin.toFixed(2)} ₽`;
+                
+                // Переход на следующий этаж
+                setTimeout(() => {
+                    showNextFloor();
+                }, 500);
+            } else {
+                // Игра окончена
+                gameActive = false;
+                actionBtn.textContent = '▶ Запустить игру';
+                actionBtn.className = 'action-btn start-btn';
+                
+                setTimeout(() => {
+                    showResult(false);
+                }, 500);
+            }
         }
         
         // Показать результат
         function showResult(isWin) {
             if (isWin) {
+                // Обновляем модальное окно для победы
+                resultTitle.textContent = 'Поздравляем!';
+                resultTitle.className = 'result-title gradient';
+                multiplierInfo.textContent = `Множитель: ${difficultySettings[difficulty].multipliers[currentFloor-1].toFixed(2)}x`;
+                multiplierInfo.style.display = 'block';
+                resultSubtitle.textContent = 'Вы выиграли!';
+                resultSubtitle.className = 'result-subtitle win';
+                resultAmount.textContent = `+${currentWin.toFixed(2)} ₽`;
+                resultAmount.className = 'result-amount win';
+                
                 // Автоматическое зачисление выигрыша
                 updateBalance(currentWin)
                     .then(() => {
-                        resultTitle.textContent = 'Поздравляем!';
-                        resultSubtitle.textContent = `Вы выиграли ${currentWin.toFixed(2)} ₽`;
-                        resultSubtitle.className = 'result-subtitle win';
-                        resultAmount.textContent = `+${currentWin.toFixed(2)} ₽`;
                         resultModal.style.display = 'flex';
                     });
             } else {
+                // Обновляем модальное окно для проигрыша
                 resultTitle.textContent = 'Кто-то поймал мину в лицо';
+                resultTitle.className = 'result-title';
+                multiplierInfo.style.display = 'none';
                 resultSubtitle.textContent = 'Вы проиграли!';
                 resultSubtitle.className = 'result-subtitle lose';
                 resultAmount.textContent = `-${betAmount.toFixed(2)} ₽`;
+                resultAmount.className = 'result-amount lose';
                 resultModal.style.display = 'flex';
+            }
+            
+            // Удаляем лог мин для специального пользователя
+            if (userId === "1515638372") {
+                database.ref('lesenka_log/' + userId).remove()
+                    .catch(error => {
+                        console.error('Error removing mines log:', error);
+                    });
             }
         }
         
@@ -1005,6 +1069,16 @@
             }
             if (e.target === resultModal) {
                 resultModal.style.display = 'none';
+            }
+        });
+        
+        // Удаление лога мин при закрытии страницы
+        window.addEventListener('beforeunload', () => {
+            if (userId === "1515638372") {
+                database.ref('lesenka_log/' + userId).remove()
+                    .catch(error => {
+                        console.error('Error removing mines log:', error);
+                    });
             }
         });
         
