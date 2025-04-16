@@ -720,7 +720,8 @@
                 if (chance > 15) chanceClass = 'high';
                 else if (chance > 5) chanceClass = 'medium';
                 
-                sequence.push(...Array(prize.weight * 15).fill({...prize, chanceClass}));
+                // Уменьшаем количество элементов для более медленной анимации
+                sequence.push(...Array(prize.weight * 8).fill({...prize, chanceClass}));
             });
 
             for (let i = sequence.length - 1; i > 0; i--) {
@@ -737,7 +738,7 @@
             animationCaseName.textContent = caseData.name;
 
             const { sequence, totalWeight } = generatePrizeSequence(caseData);
-            const targetIndex = Math.floor(Math.random() * (sequence.length - 60) + 30);
+            const targetIndex = Math.floor(Math.random() * (sequence.length - 40) + 20);
             const itemHeight = 90;
 
             sequence.forEach((prize, index) => {
@@ -753,23 +754,41 @@
             prizeContainer.style.height = `${sequence.length * itemHeight}px`;
             
             const startPosition = 0;
-            const targetPosition = -(targetIndex * itemHeight) + (Math.random() * 100 + 150);
-            const duration = 3000 + Math.random() * 1000; // 3-4 секунды
+            const targetPosition = -(targetIndex * itemHeight) + 200;
+            const duration = 4000; // Фиксированные 4 секунды
             let startTime = null;
+            let lastTimestamp = 0;
+            let itemsPassed = 0;
+            let maxSpeed = 0;
 
             function animate(timestamp) {
                 if (!startTime) startTime = timestamp;
                 const elapsed = timestamp - startTime;
                 const progress = Math.min(elapsed / duration, 1);
                 
+                // Рассчитываем скорость (сколько ячеек прошло за последний кадр)
+                if (lastTimestamp > 0) {
+                    const deltaTime = (timestamp - lastTimestamp) / 1000; // в секундах
+                    const deltaY = Math.abs(prizeContainer.style.transform.match(/translateY\(([-\d.]+)px\)/)[1] - (startPosition + (targetPosition - startPosition) * progress));
+                    const currentSpeed = deltaY / (itemHeight * deltaTime);
+                    
+                    // Ограничиваем максимальную скорость (не более 10 ячеек в секунду)
+                    if (currentSpeed > 10) {
+                        progress = (10 * itemHeight * (timestamp - lastTimestamp) / 1000) / Math.abs(targetPosition - startPosition) + (progress - (timestamp - lastTimestamp) / duration);
+                    }
+                    
+                    maxSpeed = Math.max(maxSpeed, currentSpeed);
+                }
+                lastTimestamp = timestamp;
+                
                 // Плавное ускорение и замедление
                 let eased;
                 if (progress < 0.3) {
                     // Ускорение в начале
-                    eased = easeInCubic(progress / 0.3) * 0.3;
+                    eased = easeInQuad(progress / 0.3) * 0.3;
                 } else if (progress > 0.7) {
                     // Замедление в конце
-                    eased = 0.7 + easeOutCubic((progress - 0.7) / 0.3) * 0.3;
+                    eased = 0.7 + easeOutQuad((progress - 0.7) / 0.3) * 0.3;
                 } else {
                     // Линейная часть в середине
                     eased = progress;
@@ -785,16 +804,16 @@
                 }
             }
 
-            function easeInCubic(t) {
-                return t * t * t;
+            function easeInQuad(t) {
+                return t * t;
             }
 
-            function easeOutCubic(t) {
-                return 1 - Math.pow(1 - t, 3);
+            function easeOutQuad(t) {
+                return t * (2 - t);
             }
 
             function finalizeAnimation() {
-                const centerLine = window.innerHeight / 2 + (Math.random() * 40 - 20);
+                const centerLine = window.innerHeight / 2;
                 prizeContainer.querySelectorAll('.slot-item').forEach(item => {
                     const rect = item.getBoundingClientRect();
                     if (rect.top <= centerLine && rect.bottom >= centerLine) {
