@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Case Opener</title>
+    <title>Golden Case Opener</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
@@ -101,6 +101,9 @@
             background: linear-gradient(45deg, var(--primary), var(--accent));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .cases-grid {
@@ -140,8 +143,6 @@
         .case-header {
             margin-bottom: 1rem;
             text-align: center;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .case-name {
@@ -153,7 +154,7 @@
         .case-price {
             color: var(--text-muted);
             font-size: 1.2rem;
-            font-weight: 500;
+            margin-bottom: 1rem;
         }
 
         .case-items {
@@ -181,19 +182,13 @@
         .case-item {
             display: flex;
             justify-content: space-between;
-            padding: 0.5rem 0;
+            padding: 0.5rem;
             font-size: 0.95rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .case-item-value {
-            color: var(--text);
-            font-weight: 500;
-        }
-
-        .case-item-chance {
-            color: var(--text-muted);
-            font-weight: 400;
+        .case-item:nth-child(odd) {
+            background: rgba(255, 255, 255, 0.03);
         }
 
         .open-button {
@@ -515,29 +510,29 @@
                         price: 10,
                         rarity: 'bronze',
                         items: [
-                            { value: 1, chance: 10 },
-                            { value: 2, chance: 10 },
-                            { value: 3, chance: 10 },
-                            { value: 4, chance: 10 },
-                            { value: 5, chance: 10 },
-                            { value: 6, chance: 8 },
-                            { value: 7, chance: 8 },
-                            { value: 8, chance: 8 },
-                            { value: 9, chance: 8 },
-                            { value: 10, chance: 5 },
-                            { value: 11, chance: 3 },
-                            { value: 12, chance: 3 },
-                            { value: 13, chance: 2 },
-                            { value: 14, chance: 2 },
-                            { value: 15, chance: 1 },
-                            { value: 20, chance: 0.5 },
-                            { value: 30, chance: 0.3 },
-                            { value: 50, chance: 0.2 },
-                            { value: 75, chance: 0.1 },
-                            { value: 100, chance: 0.05 },
-                            { value: 150, chance: 0.03 },
-                            { value: 225, chance: 0.02 },
-                            { value: 300, chance: 0.01 }
+                            { value: 1, chance: 10, type: 'currency' },
+                            { value: 2, chance: 10, type: 'currency' },
+                            { value: 3, chance: 10, type: 'currency' },
+                            { value: 4, chance: 10, type: 'currency' },
+                            { value: 5, chance: 10, type: 'currency' },
+                            { value: 6, chance: 8, type: 'currency' },
+                            { value: 7, chance: 8, type: 'currency' },
+                            { value: 8, chance: 8, type: 'currency' },
+                            { value: 9, chance: 8, type: 'currency' },
+                            { value: 10, chance: 5, type: 'currency' },
+                            { value: 11, chance: 3, type: 'currency' },
+                            { value: 12, chance: 3, type: 'currency' },
+                            { value: 13, chance: 2, type: 'currency' },
+                            { value: 14, chance: 2, type: 'currency' },
+                            { value: 15, chance: 1, type: 'currency' },
+                            { value: 20, chance: 0.5, type: 'currency' },
+                            { value: 30, chance: 0.3, type: 'currency' },
+                            { value: 50, chance: 0.2, type: 'currency' },
+                            { value: 75, chance: 0.1, type: 'currency' },
+                            { value: 100, chance: 0.05, type: 'currency' },
+                            { value: 150, chance: 0.03, type: 'currency' },
+                            { value: 225, chance: 0.02, type: 'currency' },
+                            { value: 300, chance: 0.01, type: 'currency' }
                         ]
                     },
                     {
@@ -546,28 +541,28 @@
                         price: 50,
                         rarity: 'silver',
                         items: [
-                            { value: 5, chance: 10 },
-                            { value: 10, chance: 10 },
-                            { value: 15, chance: 10 },
-                            { value: 20, chance: 10 },
-                            { value: 25, chance: 8 },
-                            { value: 30, chance: 8 },
-                            { value: 35, chance: 8 },
-                            { value: 40, chance: 8 },
-                            { value: 45, chance: 5 },
-                            { value: 50, chance: 5 },
-                            { value: 55, chance: 3 },
-                            { value: 60, chance: 3 },
-                            { value: 65, chance: 2 },
-                            { value: 70, chance: 2 },
-                            { value: 75, chance: 1 },
-                            { value: 100, chance: 0.5 },
-                            { value: 150, chance: 0.3 },
-                            { value: 250, chance: 0.2 },
-                            { value: 375, chance: 0.1 },
-                            { value: 500, chance: 0.05 },
-                            { value: 1000, chance: 0.03 },
-                            { value: 1500, chance: 0.02 }
+                            { value: 5, chance: 10, type: 'currency' },
+                            { value: 10, chance: 10, type: 'currency' },
+                            { value: 15, chance: 10, type: 'currency' },
+                            { value: 20, chance: 10, type: 'currency' },
+                            { value: 25, chance: 8, type: 'currency' },
+                            { value: 30, chance: 8, type: 'currency' },
+                            { value: 35, chance: 8, type: 'currency' },
+                            { value: 40, chance: 8, type: 'currency' },
+                            { value: 45, chance: 5, type: 'currency' },
+                            { value: 50, chance: 5, type: 'currency' },
+                            { value: 55, chance: 3, type: 'currency' },
+                            { value: 60, chance: 3, type: 'currency' },
+                            { value: 65, chance: 2, type: 'currency' },
+                            { value: 70, chance: 2, type: 'currency' },
+                            { value: 75, chance: 1, type: 'currency' },
+                            { value: 100, chance: 0.5, type: 'currency' },
+                            { value: 150, chance: 0.3, type: 'currency' },
+                            { value: 250, chance: 0.2, type: 'currency' },
+                            { value: 375, chance: 0.1, type: 'currency' },
+                            { value: 500, chance: 0.05, type: 'currency' },
+                            { value: 1000, chance: 0.03, type: 'currency' },
+                            { value: 1500, chance: 0.02, type: 'currency' }
                         ]
                     },
                     {
@@ -576,28 +571,28 @@
                         price: 100,
                         rarity: 'gold',
                         items: [
-                            { value: 10, chance: 10 },
-                            { value: 20, chance: 10 },
-                            { value: 30, chance: 10 },
-                            { value: 40, chance: 8 },
-                            { value: 50, chance: 8 },
-                            { value: 60, chance: 8 },
-                            { value: 70, chance: 8 },
-                            { value: 80, chance: 5 },
-                            { value: 90, chance: 5 },
-                            { value: 100, chance: 5 },
-                            { value: 110, chance: 3 },
-                            { value: 120, chance: 3 },
-                            { value: 130, chance: 2 },
-                            { value: 150, chance: 2 },
-                            { value: 200, chance: 1 },
-                            { value: 300, chance: 0.5 },
-                            { value: 500, chance: 0.3 },
-                            { value: 750, chance: 0.2 },
-                            { value: 1000, chance: 0.1 },
-                            { value: 1500, chance: 0.05 },
-                            { value: 2250, chance: 0.03 },
-                            { value: 3000, chance: 0.02 }
+                            { value: 10, chance: 10, type: 'currency' },
+                            { value: 20, chance: 10, type: 'currency' },
+                            { value: 30, chance: 10, type: 'currency' },
+                            { value: 40, chance: 8, type: 'currency' },
+                            { value: 50, chance: 8, type: 'currency' },
+                            { value: 60, chance: 8, type: 'currency' },
+                            { value: 70, chance: 8, type: 'currency' },
+                            { value: 80, chance: 5, type: 'currency' },
+                            { value: 90, chance: 5, type: 'currency' },
+                            { value: 100, chance: 5, type: 'currency' },
+                            { value: 110, chance: 3, type: 'currency' },
+                            { value: 120, chance: 3, type: 'currency' },
+                            { value: 130, chance: 2, type: 'currency' },
+                            { value: 150, chance: 2, type: 'currency' },
+                            { value: 200, chance: 1, type: 'currency' },
+                            { value: 300, chance: 0.5, type: 'currency' },
+                            { value: 500, chance: 0.3, type: 'currency' },
+                            { value: 750, chance: 0.2, type: 'currency' },
+                            { value: 1000, chance: 0.1, type: 'currency' },
+                            { value: 1500, chance: 0.05, type: 'currency' },
+                            { value: 2250, chance: 0.03, type: 'currency' },
+                            { value: 3000, chance: 0.02, type: 'currency' }
                         ]
                     },
                     {
@@ -606,29 +601,29 @@
                         price: 250,
                         rarity: 'platinum',
                         items: [
-                            { value: 25, chance: 10 },
-                            { value: 50, chance: 10 },
-                            { value: 75, chance: 8 },
-                            { value: 100, chance: 8 },
-                            { value: 125, chance: 8 },
-                            { value: 150, chance: 8 },
-                            { value: 175, chance: 5 },
-                            { value: 200, chance: 5 },
-                            { value: 225, chance: 5 },
-                            { value: 250, chance: 5 },
-                            { value: 275, chance: 3 },
-                            { value: 300, chance: 3 },
-                            { value: 325, chance: 2 },
-                            { value: 350, chance: 2 },
-                            { value: 375, chance: 1 },
-                            { value: 500, chance: 0.5 },
-                            { value: 750, chance: 0.3 },
-                            { value: 1250, chance: 0.2 },
-                            { value: 1750, chance: 0.1 },
-                            { value: 2500, chance: 0.05 },
-                            { value: 3500, chance: 0.03 },
-                            { value: 5000, chance: 0.02 },
-                            { value: 7500, chance: 0.01 }
+                            { value: 25, chance: 10, type: 'currency' },
+                            { value: 50, chance: 10, type: 'currency' },
+                            { value: 75, chance: 8, type: 'currency' },
+                            { value: 100, chance: 8, type: 'currency' },
+                            { value: 125, chance: 8, type: 'currency' },
+                            { value: 150, chance: 8, type: 'currency' },
+                            { value: 175, chance: 5, type: 'currency' },
+                            { value: 200, chance: 5, type: 'currency' },
+                            { value: 225, chance: 5, type: 'currency' },
+                            { value: 250, chance: 5, type: 'currency' },
+                            { value: 275, chance: 3, type: 'currency' },
+                            { value: 300, chance: 3, type: 'currency' },
+                            { value: 325, chance: 2, type: 'currency' },
+                            { value: 350, chance: 2, type: 'currency' },
+                            { value: 375, chance: 1, type: 'currency' },
+                            { value: 500, chance: 0.5, type: 'currency' },
+                            { value: 750, chance: 0.3, type: 'currency' },
+                            { value: 1250, chance: 0.2, type: 'currency' },
+                            { value: 1750, chance: 0.1, type: 'currency' },
+                            { value: 2500, chance: 0.05, type: 'currency' },
+                            { value: 3500, chance: 0.03, type: 'currency' },
+                            { value: 5000, chance: 0.02, type: 'currency' },
+                            { value: 7500, chance: 0.01, type: 'currency' }
                         ]
                     }
                 ];
@@ -701,8 +696,8 @@
                         <div class="case-items">
                             ${caseItem.items.map(item => `
                                 <div class="case-item">
-                                    <span class="case-item-value">${item.value}₽</span>
-                                    <span class="case-item-chance">${item.chance}%</span>
+                                    <span>${item.value}₽</span>
+                                    <span>${item.chance}%</span>
                                 </div>
                             `).join('')}
                         </div>
@@ -770,6 +765,7 @@
                     if (random <= current) return item;
                 }
                 
+                // На всякий случай возвращаем последний элемент
                 return normalizedItems[normalizedItems.length - 1];
             }
 
