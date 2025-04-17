@@ -24,7 +24,6 @@
             --silver: #c0c0c0;
             --gold: #ffd700;
             --platinum: #e5e4e2;
-            --epic: #9b59b6;
         }
 
         * {
@@ -107,38 +106,22 @@
             text-overflow: ellipsis;
         }
 
-        .cases-row {
-            display: flex;
+        .cases-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 1.5rem;
-            overflow-x: auto;
-            padding-bottom: 1rem;
-            scrollbar-width: thin;
-            scrollbar-color: var(--primary) transparent;
-        }
-
-        .cases-row::-webkit-scrollbar {
-            height: 8px;
-        }
-
-        .cases-row::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .cases-row::-webkit-scrollbar-thumb {
-            background-color: var(--primary);
-            border-radius: 4px;
         }
 
         .case-card {
             background: var(--card-bg);
             border-radius: 12px;
             padding: 1.5rem;
-            text-align: center;
             border: 2px solid transparent;
             transition: all 0.3s;
             box-shadow: var(--shadow);
-            min-width: 300px;
-            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
         }
 
         .case-card.bronze {
@@ -157,40 +140,55 @@
             border-color: var(--platinum);
         }
 
-        .case-card.epic {
-            border-color: var(--epic);
-        }
-
-        .case-image {
-            width: 150px;
-            height: 150px;
-            object-fit: contain;
-            margin: 0 auto 1rem;
-            transition: transform 0.3s;
-        }
-
-        .case-card:hover .case-image {
-            transform: scale(1.1);
+        .case-header {
+            margin-bottom: 1rem;
+            text-align: center;
         }
 
         .case-name {
-            font-size: 1.3rem;
+            font-size: 1.5rem;
             margin-bottom: 0.5rem;
             font-weight: 600;
         }
 
         .case-price {
             color: var(--text-muted);
+            font-size: 1.2rem;
             margin-bottom: 1rem;
-            font-size: 1.1rem;
+        }
+
+        .case-items {
+            flex-grow: 1;
+            overflow-y: auto;
+            max-height: 300px;
+            margin-bottom: 1rem;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary) transparent;
+        }
+
+        .case-items::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .case-items::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .case-items::-webkit-scrollbar-thumb {
+            background-color: var(--primary);
+            border-radius: 3px;
         }
 
         .case-item {
             display: flex;
             justify-content: space-between;
-            padding: 0.3rem 0;
-            font-size: 0.9rem;
+            padding: 0.5rem;
+            font-size: 0.95rem;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .case-item:nth-child(odd) {
+            background: rgba(255, 255, 255, 0.03);
         }
 
         .open-button {
@@ -200,7 +198,7 @@
             padding: 0.8rem;
             width: 100%;
             border-radius: 6px;
-            margin-top: 1rem;
+            margin-top: auto;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
@@ -421,13 +419,8 @@
                 margin-bottom: 1rem;
             }
             
-            .cases-row {
-                gap: 1rem;
-            }
-            
-            .case-card {
-                min-width: 280px;
-                padding: 1rem;
+            .cases-grid {
+                grid-template-columns: 1fr;
             }
             
             .modal-content {
@@ -451,7 +444,7 @@
 
     <main class="main-container">
         <h1 class="cases-title">КОЛЛЕКЦИЯ КЕЙСОВ</h1>
-        <div class="cases-row" id="casesRow"></div>
+        <div class="cases-grid" id="casesGrid"></div>
     </main>
 
     <!-- Подтверждение открытия -->
@@ -494,7 +487,7 @@
             authDomain: "vrot-x-7a48f.firebaseapp.com",
             databaseURL: "https://vrot-x-7a48f-default-rtdb.firebaseio.com",
             projectId: "vrot-x-7a48f",
-            storageBucket: "vrot-x-7a48f.firebasestorage.app",
+            storageBucket: "vrot-x-7a48f.appspot.com",
             messagingSenderId: "622297225288",
             appId: "1:622297225288:web:5df6a5b02ffddedd96e07d"
         };
@@ -516,7 +509,6 @@
                         name: 'ПРОСТОЙ',
                         price: 10,
                         rarity: 'bronze',
-                        image: 'https://i.imgur.com/JDYAz5P.png',
                         items: [
                             { value: 1, chance: 10, type: 'currency' },
                             { value: 2, chance: 10, type: 'currency' },
@@ -548,7 +540,6 @@
                         name: 'СРЕДНЯЧОК',
                         price: 50,
                         rarity: 'silver',
-                        image: 'https://i.imgur.com/5XwW6bQ.png',
                         items: [
                             { value: 5, chance: 10, type: 'currency' },
                             { value: 10, chance: 10, type: 'currency' },
@@ -579,7 +570,6 @@
                         name: 'НЕОБЫЧНЫЙ',
                         price: 100,
                         rarity: 'gold',
-                        image: 'https://i.imgur.com/8Q6Yy3k.png',
                         items: [
                             { value: 10, chance: 10, type: 'currency' },
                             { value: 20, chance: 10, type: 'currency' },
@@ -610,7 +600,6 @@
                         name: 'РЕДКИЙ',
                         price: 250,
                         rarity: 'platinum',
-                        image: 'https://i.imgur.com/8Q6Yy3k.png',
                         items: [
                             { value: 25, chance: 10, type: 'currency' },
                             { value: 50, chance: 10, type: 'currency' },
@@ -635,38 +624,6 @@
                             { value: 3500, chance: 0.03, type: 'currency' },
                             { value: 5000, chance: 0.02, type: 'currency' },
                             { value: 7500, chance: 0.01, type: 'currency' }
-                        ]
-                    },
-                    {
-                        id: 'epic',
-                        name: 'ЭПИЧЕСКИЙ',
-                        price: 500,
-                        rarity: 'epic',
-                        image: 'https://i.imgur.com/8Q6Yy3k.png',
-                        items: [
-                            { value: 50, chance: 10, type: 'currency' },
-                            { value: 100, chance: 10, type: 'currency' },
-                            { value: 150, chance: 8, type: 'currency' },
-                            { value: 200, chance: 8, type: 'currency' },
-                            { value: 250, chance: 8, type: 'currency' },
-                            { value: 300, chance: 8, type: 'currency' },
-                            { value: 350, chance: 5, type: 'currency' },
-                            { value: 400, chance: 5, type: 'currency' },
-                            { value: 450, chance: 5, type: 'currency' },
-                            { value: 500, chance: 5, type: 'currency' },
-                            { value: 550, chance: 3, type: 'currency' },
-                            { value: 600, chance: 3, type: 'currency' },
-                            { value: 650, chance: 2, type: 'currency' },
-                            { value: 700, chance: 2, type: 'currency' },
-                            { value: 750, chance: 1, type: 'currency' },
-                            { value: 1000, chance: 0.5, type: 'currency' },
-                            { value: 1500, chance: 0.3, type: 'currency' },
-                            { value: 2250, chance: 0.2, type: 'currency' },
-                            { value: 3500, chance: 0.1, type: 'currency' },
-                            { value: 5000, chance: 0.05, type: 'currency' },
-                            { value: 7000, chance: 0.03, type: 'currency' },
-                            { value: 10000, chance: 0.02, type: 'currency' },
-                            { value: 15000, chance: 0.01, type: 'currency' }
                         ]
                     }
                 ];
@@ -693,7 +650,7 @@
             setupElements() {
                 this.elements = {
                     balance: document.getElementById('balance'),
-                    casesRow: document.getElementById('casesRow'),
+                    casesGrid: document.getElementById('casesGrid'),
                     confirmModal: document.getElementById('confirmModal'),
                     confirmText: document.getElementById('confirmText'),
                     confirmButton: document.getElementById('confirmButton'),
@@ -730,13 +687,14 @@
             }
 
             renderCases() {
-                this.elements.casesRow.innerHTML = this.cases.map(caseItem => `
+                this.elements.casesGrid.innerHTML = this.cases.map(caseItem => `
                     <div class="case-card ${caseItem.rarity}">
-                        <img src="${caseItem.image}" class="case-image" alt="${caseItem.name}">
-                        <h3 class="case-name">${caseItem.name}</h3>
-                        <p class="case-price">${caseItem.price}₽</p>
+                        <div class="case-header">
+                            <h3 class="case-name">${caseItem.name}</h3>
+                            <p class="case-price">${caseItem.price}₽</p>
+                        </div>
                         <div class="case-items">
-                            ${this.getTopItems(caseItem.items).map(item => `
+                            ${caseItem.items.map(item => `
                                 <div class="case-item">
                                     <span>${item.value}₽</span>
                                     <span>${item.chance}%</span>
@@ -757,11 +715,6 @@
                         this.showConfirmModal(caseId);
                     });
                 });
-            }
-
-            getTopItems(items, count = 5) {
-                // Сортируем по убыванию цены и берем топ 5
-                return [...items].sort((a, b) => b.value - a.value).slice(0, count);
             }
 
             updateCaseButtons() {
@@ -812,13 +765,18 @@
                     if (random <= current) return item;
                 }
                 
-                // На всякий случай возвращаем последний элемент, если из-за округления не попали ни в один диапазон
+                // На всякий случай возвращаем последний элемент
                 return normalizedItems[normalizedItems.length - 1];
             }
 
             async updateBalance(amount) {
-                await database.ref(`users/${this.userId}/balance`).transaction(balance => {
-                    return (balance || 0) + amount;
+                return new Promise((resolve) => {
+                    database.ref(`users/${this.userId}/balance`).transaction(balance => {
+                        const newBalance = (balance || 0) + amount;
+                        return newBalance;
+                    }, () => {
+                        resolve();
+                    });
                 });
             }
 
@@ -880,16 +838,16 @@
             getPrizeColor(value) {
                 if (value >= 5000) return 'var(--gold)';
                 if (value >= 1000) return 'var(--platinum)';
-                if (value >= 500) return 'var(--epic)';
+                if (value >= 500) return 'var(--gold)';
                 if (value >= 200) return 'var(--silver)';
                 return 'var(--bronze)';
             }
 
-            showResult() {
+            async showResult() {
                 this.closeModal('unboxModal');
                 
                 // Начисляем выигрыш
-                this.updateBalance(this.lastWinValue);
+                await this.updateBalance(this.lastWinValue);
                 
                 // Показываем результат
                 this.elements.resultPrize.textContent = `${this.lastWinValue}₽`;
