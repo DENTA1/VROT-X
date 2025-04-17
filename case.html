@@ -66,6 +66,11 @@
             transition: all 0.2s;
         }
 
+        .back-button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
         .balance-container {
             display: flex;
             align-items: center;
@@ -101,6 +106,11 @@
             gap: 1.5rem;
             overflow-x: auto;
             padding-bottom: 1rem;
+            scrollbar-width: none;
+        }
+
+        .cases-row::-webkit-scrollbar {
+            display: none;
         }
 
         .case-card {
@@ -110,6 +120,7 @@
             border: 2px solid transparent;
             min-width: 300px;
             flex-shrink: 0;
+            box-shadow: var(--shadow);
         }
 
         .case-card.bronze { border-color: var(--bronze); }
@@ -138,13 +149,13 @@
             grid-template-columns: repeat(2, 1fr);
             gap: 0.5rem;
             margin: 1rem 0;
+            font-size: 0.85rem;
         }
 
         .case-item {
             display: flex;
             justify-content: space-between;
             padding: 0.3rem;
-            font-size: 0.9rem;
             background: rgba(255,255,255,0.05);
             border-radius: 4px;
         }
@@ -159,6 +170,7 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
+            margin-top: 1rem;
         }
 
         .open-button:hover {
@@ -204,12 +216,14 @@
             border: 2px solid var(--primary);
             transform: scale(0.9);
             transition: transform 0.3s;
+            position: relative;
         }
 
         .modal.active .modal-content {
             transform: scale(1);
         }
 
+        /* Анимация открытия */
         .unbox-container {
             width: 100%;
             height: 300px;
@@ -237,6 +251,7 @@
             text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
         }
 
+        /* Результат */
         .result-prize {
             font-size: 2.5rem;
             text-align: center;
@@ -247,9 +262,30 @@
             -webkit-text-fill-color: transparent;
         }
 
+        .result-button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.8rem;
+            width: 100%;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+
         @media (max-width: 768px) {
+            .main-container {
+                padding: 5rem 1rem 1rem;
+            }
+            
+            .case-card {
+                min-width: 280px;
+                padding: 1rem;
+            }
+            
             .case-items {
-                grid-template-columns: 1fr;
+                font-size: 0.8rem;
             }
         }
     </style>
@@ -272,10 +308,8 @@
         <div class="modal-content">
             <h2>ПОДТВЕРЖДЕНИЕ</h2>
             <p id="confirmText"></p>
-            <div class="modal-buttons">
-                <button class="open-button confirm" id="confirmButton">Да</button>
-                <button class="open-button cancel" id="cancelButton">Отмена</button>
-            </div>
+            <button class="open-button" id="confirmButton">Да</button>
+            <button class="open-button cancel" id="cancelButton">Отмена</button>
         </div>
     </div>
 
@@ -292,11 +326,12 @@
         <div class="modal-content">
             <h2>РЕЗУЛЬТАТ</h2>
             <div class="result-prize" id="resultPrize"></div>
-            <button class="open-button" id="resultButton">ЗАБРАТЬ</button>
+            <button class="result-button" id="resultButton">ЗАБРАТЬ</button>
         </div>
     </div>
 
     <script>
+        // Инициализация Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyCMos6Y7C-krTLuKCI4VJG-TFLo6QI--k8",
             authDomain: "vrot-x-7a48f.firebaseapp.com",
@@ -328,15 +363,15 @@
             }
 
             createCase(name, price, rarity, items) {
-                const totalItems = items.length;
-                const baseChance = 100 / totalItems;
+                // Равномерно распределяем шансы с небольшим увеличением для меньших значений
+                const baseChance = 100 / items.length;
                 return {
                     name,
                     price,
                     rarity,
                     items: items.map((value, index) => ({
                         value,
-                        chance: index < totalItems - 5 ? baseChance : baseChance * (totalItems - index) / 2
+                        chance: index < items.length - 5 ? baseChance : baseChance * 0.5
                     }))
                 };
             }
@@ -349,7 +384,12 @@
             }
 
             getUserId() {
-                return localStorage.getItem('user_id') || `user_${Date.now()}`;
+                const cookies = document.cookie.split('; ');
+                for (const cookie of cookies) {
+                    const [name, value] = cookie.split('=');
+                    if (name === 'tg_user_id') return value;
+                }
+                return 'user_' + Math.floor(Math.random() * 1000000);
             }
 
             setupElements() {
@@ -358,22 +398,37 @@
                     casesRow: document.getElementById('casesRow'),
                     confirmModal: document.getElementById('confirmModal'),
                     confirmText: document.getElementById('confirmText'),
+                    confirmButton: document.getElementById('confirmButton'),
+                    cancelButton: document.getElementById('cancelButton'),
                     unboxModal: document.getElementById('unboxModal'),
+                    unboxItems: document.getElementById('unboxItems'),
                     resultModal: document.getElementById('resultModal'),
-                    resultPrize: document.getElementById('resultPrize')
+                    resultPrize: document.getElementById('resultPrize'),
+                    resultButton: document.getElementById('resultButton'),
+                    backButton: document.getElementById('backButton')
                 };
             }
 
             setupEvents() {
-                document.getElementById('confirmButton').addEventListener('click', () => this.startUnbox());
-                document.getElementById('cancelButton').addEventListener('click', () => this.closeModal('confirm'));
-                document.getElementById('resultButton').addEventListener('click', () => this.closeModal('result'));
+                this.elements.confirmButton.addEventListener('click', () => this.startUnboxing());
+                this.elements.cancelButton.addEventListener('click', () => this.closeModal('confirm'));
+                this.elements.resultButton.addEventListener('click', () => this.closeModal('result'));
+                this.elements.backButton.addEventListener('click', () => window.history.back());
             }
 
             async loadBalance() {
-                const snapshot = await database.ref(`users/${this.userId}/balance`).once('value');
-                this.userBalance = snapshot.val() || 1000;
-                this.updateBalanceDisplay();
+                try {
+                    const snapshot = await database.ref(`users/${this.userId}/balance`).once('value');
+                    this.userBalance = snapshot.val() || 1000;
+                    if (snapshot.val() === null) {
+                        await database.ref(`users/${this.userId}/balance`).set(1000);
+                    }
+                    this.updateBalanceDisplay();
+                } catch (error) {
+                    console.error("Ошибка загрузки баланса:", error);
+                    this.userBalance = 1000;
+                    this.updateBalanceDisplay();
+                }
             }
 
             updateBalanceDisplay() {
@@ -391,22 +446,22 @@
                             ${caseItem.items.map(item => `
                                 <div class="case-item">
                                     <span>${item.value}₽</span>
-                                    <span>${Math.round(item.chance)}%</span>
+                                    <span>${item.chance.toFixed(1)}%</span>
                                 </div>
                             `).join('')}
                         </div>
-                        <button class="open-button" 
-                                data-price="${caseItem.price}" 
-                                ${this.userBalance < caseItem.price ? 'disabled' : ''}>
+                        <button class="open-button" data-case-id="${caseItem.name}" 
+                            ${this.userBalance < caseItem.price ? 'disabled' : ''}>
                             ОТКРЫТЬ
                         </button>
                     </div>
                 `).join('');
 
-                document.querySelectorAll('.open-button').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        if(this.isProcessing) return;
-                        this.currentCase = this.cases.find(c => c.price === +e.target.dataset.price);
+                document.querySelectorAll('.open-button').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        if (this.isProcessing) return;
+                        const caseName = e.target.dataset.caseId;
+                        this.currentCase = this.cases.find(c => c.name === caseName);
                         this.showConfirmModal();
                     });
                 });
@@ -417,65 +472,79 @@
                 this.toggleModal('confirm', true);
             }
 
-            async startUnbox() {
+            async startUnboxing() {
+                if (this.isProcessing) return;
+                
                 this.toggleModal('confirm', false);
                 this.isProcessing = true;
                 
                 // Списание средств
-                await this.updateUserBalance(-this.currentCase.price);
+                await this.updateBalance(-this.currentCase.price);
                 
-                // Выбор приза
+                // Выбор приза (фиксированный, без багов)
                 this.winValue = this.selectPrize();
                 
-                // Анимация
+                // Показываем анимацию с гарантированным выигрышем
                 await this.playUnboxAnimation();
                 
                 // Начисление выигрыша
-                await this.updateUserBalance(this.winValue);
+                await this.updateBalance(this.winValue);
                 
-                // Показ результата
+                // Показываем результат
                 this.showResult();
                 this.isProcessing = false;
             }
 
             selectPrize() {
-                const totalChance = this.currentCase.items.reduce((sum, item) => sum + item.chance, 0);
+                const items = this.currentCase.items;
+                const totalChance = items.reduce((sum, item) => sum + item.chance, 0);
                 const random = Math.random() * totalChance;
                 let current = 0;
                 
-                for(const item of this.currentCase.items) {
+                for (const item of items) {
                     current += item.chance;
-                    if(random <= current) return item.value;
+                    if (random <= current) return item.value;
                 }
-                return this.currentCase.items[0].value;
+                
+                return items[0].value; // fallback
             }
 
-            async updateUserBalance(amount) {
+            async updateBalance(amount) {
                 return new Promise(resolve => {
                     database.ref(`users/${this.userId}/balance`).transaction(balance => {
-                        return (balance || 0) + amount;
-                    }, () => {
-                        this.userBalance += amount;
+                        const newBalance = (balance || 0) + amount;
+                        this.userBalance = newBalance;
                         this.updateBalanceDisplay();
-                        resolve();
-                    });
+                        return newBalance;
+                    }, () => resolve());
                 });
             }
 
             async playUnboxAnimation() {
                 this.toggleModal('unbox', true);
-                const items = Array.from({length: 50}, (_, i) => 
-                    i === 35 ? this.winValue : 
-                    this.currentCase.items[Math.floor(Math.random() * this.currentCase.items.length)].value
-                );
                 
+                const items = [];
+                const prizePosition = 35; // Фиксированная позиция выигрыша
+                
+                // Заполняем массив случайными значениями, кроме позиции выигрыша
+                for (let i = 0; i < 50; i++) {
+                    if (i === prizePosition) {
+                        items.push(this.winValue);
+                    } else {
+                        const randomItem = this.currentCase.items[Math.floor(Math.random() * this.currentCase.items.length)];
+                        items.push(randomItem.value);
+                    }
+                }
+                
+                // Отображаем элементы
                 this.elements.unboxItems.innerHTML = items
                     .map(value => `<div class="unbox-item">${value}₽</div>`)
                     .join('');
                 
+                // Анимация прокрутки
                 await gsap.to(this.elements.unboxItems, {
                     duration: 3,
-                    y: -3400,
+                    y: -100 * prizePosition + 100,
                     ease: "power2.inOut"
                 });
             }
@@ -487,12 +556,8 @@
             }
 
             toggleModal(type, show) {
-                const modals = {
-                    confirm: this.elements.confirmModal,
-                    unbox: this.elements.unboxModal,
-                    result: this.elements.resultModal
-                };
-                modals[type].classList.toggle('active', show);
+                const modal = this.elements[`${type}Modal`];
+                modal.classList.toggle('active', show);
             }
 
             closeModal(type) {
@@ -501,7 +566,7 @@
         }
 
         // Запуск игры
-        window.addEventListener('DOMContentLoaded', () => new CaseGame());
+        document.addEventListener('DOMContentLoaded', () => new CaseGame());
     </script>
 </body>
 </html>
